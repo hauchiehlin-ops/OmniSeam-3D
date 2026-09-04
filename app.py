@@ -40,9 +40,20 @@ demo.app.add_middleware(
 )
 demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
-# 3. Launch via Gradio
+# 3. Hugging Face ZeroGPU Activation Hook
+try:
+    import spaces
+    @spaces.GPU
+    def zerogpu_handler():
+        return "ZeroGPU Active"
+    zerogpu_handler()
+except Exception:
+    pass
+
+# 4. Launch via Gradio
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=7860)
+
 
 
 

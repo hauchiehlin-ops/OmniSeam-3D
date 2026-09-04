@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.27` (2026-09-04) - 新增 `@spaces.GPU` 預熱鉤子相容 ZeroGPU 硬體
+- **問題根因**：
+  - Hugging Face ZeroGPU (zero-a10g) 平台會在啟動階段掃描程式碼中的 `@spaces.GPU` 裝飾器；若未檢測到，會主動以 `No @spaces.GPU function detected during startup` 關閉容器，導致外部請求回報 503 錯誤。
+- **修復方案**：
+  - 在 `app.py` 加入 `@spaces.GPU` 預熱函式，並在 `requirements.txt` 導入 `spaces`，同時相容 ZeroGPU 與純 CPU 環境。
+
 ### `v1.0.26` (2026-09-04) - 鎖定 `starlette<0.36.0` 修復 Gradio TemplateResponse 字典哈希錯誤
 - **問題根因**：
   - Starlette v0.36+ 變更了 `TemplateResponse` 的參數簽名，導致 Gradio 4.44 的內部渲染路由在 Starlette 0.37+ 下觸發 `TypeError: unhashable type: 'dict'` 崩潰。
