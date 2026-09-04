@@ -1,0 +1,34 @@
+{
+  "app_title": "OmniSeam 3D - 通用幾何模型轉換與自動修復系統",
+  "status": {
+    "pending": "任務排隊中...",
+    "analyzing": "正在分析幾何與拓撲結構...",
+    "repairing": "正在自動修復幾何缺陷...",
+    "converting": "正在轉換為目標格式...",
+    "optimizing": "正在進行無損壓縮並生成 WebGL 預覽串流...",
+    "completed": "轉換與幾何修復圓滿完成",
+    "failed": "處理失敗"
+  },
+  "defects": {
+    "open_boundary_loops": "開放邊界孔洞 (Holes)",
+    "non_manifold_edges": "非流形邊 (Non-manifold edges)",
+    "non_manifold_vertices": "非流形頂點 (Non-manifold vertices)",
+    "degenerate_faces": "退化/零面積面 (Degenerate faces)",
+    "duplicate_faces": "重疊重複面 (Duplicate faces)",
+    "unreferenced_vertices": "未引用的孤立頂點 (Unreferenced vertices)",
+    "inverted_normals": "法向量方向不一致/反向 (Inverted normals)"
+  },
+  "suggestions": {
+    "sew_cad": "建議啟用 B-Rep 拓撲縫合以消除曲面接縫間隙。",
+    "fill_holes": "建議啟用自動邊界孔洞三角劃分以建構 100% 封閉實體 (Watertight)。",
+    "fix_non_manifold": "建議修復非流形幾何以避免 3D 列印切片或物理模擬失敗。",
+    "unify_normals": "建議統一曲面法向量朝外。"
+  },
+  "errors": {
+    "unsupported_format": "不支援此上傳檔案格式。",
+    "file_corrupted": "無法解析 3D 檔案，檔案可能已損毀或格式無效。",
+    "conversion_failed": "幾何格式轉換過程中發生錯誤。",
+    "repair_failed": "對該模型拓撲進行自動修復時失敗。",
+    "task_not_found": "找不到指定的任務 ID 或任務已過期。"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "app_title": "OmniSeam 3D - Universal Model Converter & Repair",
+  "status": {
+    "pending": "Task queued...",
+    "analyzing": "Analyzing geometry & topology...",
+    "repairing": "Auto-healing mesh defects...",
+    "converting": "Converting to target format...",
+    "optimizing": "Compressing & generating WebGL preview...",
+    "completed": "Conversion & Repair Completed Successfully",
+    "failed": "Processing Failed"
+  },
+  "defects": {
+    "open_boundary_loops": "Open boundary loops (Holes)",
+    "non_manifold_edges": "Non-manifold edges",
+    "non_manifold_vertices": "Non-manifold vertices",
+    "degenerate_faces": "Degenerate / zero-area faces",
+    "duplicate_faces": "Duplicate faces",
+    "unreferenced_vertices": "Unreferenced loose vertices",
+    "inverted_normals": "Inconsistent / inverted normals"
+  },
+  "suggestions": {
+    "sew_cad": "Apply B-Rep topological sewing to eliminate surface seam gaps.",
+    "fill_holes": "Enable automatic boundary loop triangulation to create a watertight solid.",
+    "fix_non_manifold": "Resolve non-manifold geometry to prevent 3D printing and slicing failures.",
+    "unify_normals": "Reorient inconsistent surface normals outward."
+  },
+  "errors": {
+    "unsupported_format": "The uploaded file format is not supported.",
+    "file_corrupted": "Unable to parse 3D file. The file may be corrupt or invalid.",
+    "conversion_failed": "Error occurred during geometric format conversion.",
+    "repair_failed": "Geometric healing failed on this model topology.",
+    "task_not_found": "Task ID not found or has expired."
+  }
+}
