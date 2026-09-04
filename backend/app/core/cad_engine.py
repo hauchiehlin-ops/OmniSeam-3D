@@ -1,10 +1,12 @@
 import os
+import shutil
 import subprocess
 import tempfile
 import trimesh
 import numpy as np
+from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from backend.app.models.schemas import CADOptions
 
 
@@ -216,21 +218,57 @@ except Exception as e:
         fmt = target_format.lower().lstrip(".")
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # 1. Try FreeCAD headless export
+        # 1. Try Gmsh OpenCASCADE export (highest CAD fidelity & CFD compatibility)
+        if cls._try_gmsh_export(mesh, output_path, fmt):
+            return
+
+        # 2. Try FreeCAD headless export
         if cls._try_freecad_export(mesh, output_path, fmt):
             return
 
-        # 2. Try OpenCASCADE Python export
+        # 3. Try OpenCASCADE Python export
         if cls._try_occt_export(mesh, output_path, fmt):
             return
 
-        # 3. Standard ISO-10303 STEP / IGES export fallback
+        # 4. Standard ISO-10303 STEP / IGES export fallback (pure Python B-Rep generator)
         if fmt in ["step", "stp"]:
             cls._export_step_facets(mesh, output_path)
         elif fmt in ["iges", "igs"]:
             cls._export_iges_facets(mesh, output_path)
         else:
-            mesh.export(str(output_path), file_type="stl")
+            cls._export_step_facets(mesh, output_path)
+
+    @classmethod
+    def _try_gmsh_export(cls, mesh: trimesh.Trimesh, output_path: Path, fmt: str) -> bool:
+        """Exports mesh to standard OpenCASCADE STEP/IGES via Gmsh CLI."""
+        gmsh_bin = shutil.which("gmsh") or ("/opt/homebrew/bin/gmsh" if Path("/opt/homebrew/bin/gmsh").exists() else None)
+        if not gmsh_bin:
+            return False
+
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                tmp_stl = Path(tmpdir) / "input.stl"
+                mesh.export(str(tmp_stl), file_type="stl")
+
+                geo_script = Path(tmpdir) / "convert.geo"
+                geo_content = f"""SetFactory("OpenCASCADE");
+Merge "{str(tmp_stl)}";
+CreateTopology;
+Save "{str(output_path)}";
+"""
+                geo_script.write_text(geo_content, encoding="utf-8")
+
+                result = subprocess.run(
+                    [gmsh_bin, str(geo_script), "-0"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=60
+                )
+                if output_path.exists() and output_path.stat().st_size > 0:
+                    return True
+        except Exception:
+            pass
+        return False
 
     @classmethod
     def _try_freecad_export(cls, mesh: trimesh.Trimesh, output_path: Path, fmt: str) -> bool:
@@ -269,7 +307,7 @@ except Exception:
                     stderr=subprocess.PIPE,
                     timeout=30
                 )
-                if result.returncode == 0 and output_path.exists():
+                if result.returncode == 0 and output_path.exists() and output_path.stat().st_size > 0:
                     return True
         except Exception:
             pass
@@ -315,24 +353,28 @@ except Exception:
 
     @classmethod
     def _export_step_facets(cls, mesh: trimesh.Trimesh, output_path: Path):
-        """Generates standard ISO-10303-21 AP214 faceted boundary representation STEP file."""
+        """Generates standard ISO-10303-21 AP214 faceted boundary representation STEP file with full geometry."""
+        vertices = mesh.vertices
+        faces = mesh.faces
+        now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+
         lines = [
             "ISO-10303-21;",
             "HEADER;",
-            "FILE_DESCRIPTION(('OmniSeam 3D CAD Tessellation Model'),'2;1');",
-            f"FILE_NAME('{output_path.name}','2026-09-04T16:00:00',('OmniSeam Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','FreeCAD / OpenCASCADE','');",
+            "FILE_DESCRIPTION(('OmniSeam 3D Faceted B-Rep Model'),'2;1');",
+            f"FILE_NAME('{output_path.name}','{now_str}',('OmniSeam Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','OmniSeam / OpenCASCADE','');",
             "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
             "ENDSEC;",
             "DATA;",
             "#1=APPLICATION_CONTEXT('automotive design');",
             "#2=APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2000,#1);",
             "#3=PRODUCT_DEFINITION_CONTEXT('part definition',#1,'design');",
-            "#4=PRODUCT('OmniSeam_Model','OmniSeam_Model','',(#3));",
+            "#4=PRODUCT('OmniSeam_Part','OmniSeam_Part','',(#3));",
             "#5=PRODUCT_DEFINITION_FORMATION('','',#4);",
             "#6=PRODUCT_DEFINITION('design','',#5,#3);",
             "#7=PRODUCT_DEFINITION_SHAPE('','',#6);",
             "#8=SHAPE_DEFINITION_REPRESENTATION(#7,#9);",
-            "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10),#11);",
+            "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
             "#10=AXIS2_PLACEMENT_3D('',#12,#13,#14);",
             "#11=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#15)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#16,#17,#18)) REPRESENTATION_CONTEXT('OmniSeam','TOPOLOGY'));",
             "#12=CARTESIAN_POINT('',(0.,0.,0.));",
@@ -341,13 +383,38 @@ except Exception:
             "#15=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-05),#16,'distance_accuracy_value','confusion accuracy');",
             "#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));",
             "#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));",
-            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());",
-            "/* Faceted Solid Model exported by OmniSeam 3D */",
-            "ENDSEC;",
-            "END-ISO-10303-21;"
+            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());"
         ]
+
+        curr_id = 30
+        v_ids = []
+        for v in vertices:
+            lines.append(f"#{curr_id}=CARTESIAN_POINT('',({v[0]:.6f},{v[1]:.6f},{v[2]:.6f}));")
+            v_ids.append(curr_id)
+            curr_id += 1
+
+        face_ids = []
+        for f in faces:
+            p1, p2, p3 = v_ids[f[0]], v_ids[f[1]], v_ids[f[2]]
+            poly_id = curr_id
+            lines.append(f"#{poly_id}=POLY_LOOP('',({p1},{p2},{p3}));")
+            curr_id += 1
+            bound_id = curr_id
+            lines.append(f"#{bound_id}=FACE_OUTER_BOUND('',#{poly_id},.T.);")
+            curr_id += 1
+            face_id = curr_id
+            lines.append(f"#{face_id}=FACE_SURFACE('',((#{bound_id})),#10,.T.);")
+            face_ids.append(f"#{face_id}")
+            curr_id += 1
+
+        face_list_str = ",".join(face_ids)
+        lines.append(f"#21=CLOSED_SHELL('',({face_list_str}));")
+        lines.append("#20=FACETED_BREP('Solid1',#21);")
+        lines.append("ENDSEC;")
+        lines.append("END-ISO-10303-21;")
+
         with open(output_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines))
+            f.write("\n".join(lines) + "\n")
 
     @classmethod
     def _export_iges_facets(cls, mesh: trimesh.Trimesh, output_path: Path):

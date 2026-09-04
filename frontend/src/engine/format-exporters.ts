@@ -17,6 +17,9 @@ export class FormatExporters {
         return this.exportOFF(mesh);
       case '3mf':
         return this.export3MF(mesh);
+      case 'step':
+      case 'stp':
+        return this.exportSTEP(mesh);
       case 'glb':
       case 'gltf':
       default:
@@ -311,5 +314,73 @@ export class FormatExporters {
     glbBytes.set(binBuffer, binHeaderOffset + 8);
 
     return new Blob([glbBuffer], { type: 'model/gltf-binary' });
+  }
+
+  /**
+   * Generates standard ISO-10303-21 AP214 faceted boundary representation STEP Blob.
+   */
+  static exportSTEP(mesh: MeshGeometry): Blob {
+    const { vertices, faces } = mesh;
+    const nowStr = new Date().toISOString().replace(/\.\d+Z$/, '');
+
+    const lines: string[] = [
+      'ISO-10303-21;',
+      'HEADER;',
+      "FILE_DESCRIPTION(('OmniSeam 3D Faceted B-Rep Model'),'2;1');",
+      `FILE_NAME('model.step','${nowStr}',('OmniSeam Web Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','OmniSeam','');`,
+      "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
+      'ENDSEC;',
+      'DATA;',
+      "#1=APPLICATION_CONTEXT('automotive design');",
+      "#2=APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2000,#1);",
+      "#3=PRODUCT_DEFINITION_CONTEXT('part definition',#1,'design');",
+      "#4=PRODUCT('OmniSeam_Part','OmniSeam_Part','',(#3));",
+      "#5=PRODUCT_DEFINITION_FORMATION('','',#4);",
+      "#6=PRODUCT_DEFINITION('design','',#5,#3);",
+      "#7=PRODUCT_DEFINITION_SHAPE('','',#6);",
+      '#8=SHAPE_DEFINITION_REPRESENTATION(#7,#9);',
+      "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
+      "#10=AXIS2_PLACEMENT_3D('',#12,#13,#14);",
+      "#11=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#15)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#16,#17,#18)) REPRESENTATION_CONTEXT('OmniSeam','TOPOLOGY'));",
+      "#12=CARTESIAN_POINT('',(0.,0.,0.));",
+      "#13=DIRECTION('',(0.,0.,1.));",
+      "#14=DIRECTION('',(1.,0.,0.));",
+      "#15=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-05),#16,'distance_accuracy_value','confusion accuracy');",
+      '#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));',
+      '#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));',
+      '#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());',
+    ];
+
+    let currId = 30;
+    const vIds: number[] = [];
+    for (let i = 0; i < vertices.length; i++) {
+      const [x, y, z] = vertices[i];
+      lines.push(`#${currId}=CARTESIAN_POINT('',(${x.toFixed(6)},${y.toFixed(6)},${z.toFixed(6)}));`);
+      vIds.push(currId);
+      currId++;
+    }
+
+    const faceIds: string[] = [];
+    for (let i = 0; i < faces.length; i++) {
+      const [i0, i1, i2] = faces[i];
+      const p1 = vIds[i0];
+      const p2 = vIds[i1];
+      const p3 = vIds[i2];
+      const polyId = currId++;
+      lines.push(`#${polyId}=POLY_LOOP('',(${p1},${p2},${p3}));`);
+      const boundId = currId++;
+      lines.push(`#${boundId}=FACE_OUTER_BOUND('',#${polyId},.T.);`);
+      const faceId = currId++;
+      lines.push(`#${faceId}=FACE_SURFACE('',((#${boundId})),#10,.T.);`);
+      faceIds.push(`#${faceId}`);
+    }
+
+    const faceListStr = faceIds.join(',');
+    lines.push(`#21=CLOSED_SHELL('',(${faceListStr}));`);
+    lines.push("#20=FACETED_BREP('Solid1',#21);");
+    lines.push('ENDSEC;');
+    lines.push('END-ISO-10303-21;');
+
+    return new Blob([lines.join('\n') + '\n'], { type: 'application/step' });
   }
 }

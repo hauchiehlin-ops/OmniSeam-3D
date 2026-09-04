@@ -72,8 +72,7 @@ class ConversionPipelineRouter:
         elif fmt == "dxf":
             mesh.export(str(output_path), file_type="dxf")
         else:
-            # Fallback to GLB
-            mesh.export(str(output_path), file_type="glb")
+            mesh.export(str(output_path), file_type=fmt)
 
 
     @classmethod

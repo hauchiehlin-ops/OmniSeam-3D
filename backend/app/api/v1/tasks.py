@@ -28,11 +28,10 @@ def download_converted_file(task_id: str):
 
     out_file = file_manager.get_output_file_path(task_id, task.target_format)
     if not out_file.exists():
-        # Fallback to preview.glb if custom format wasn't written
-        out_file = file_manager.get_preview_file_path(task_id)
-    
-    if not out_file.exists():
-        raise HTTPException(status_code=404, detail="Output file not found on disk")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Converted file for target format '{task.target_format}' was not found on disk."
+        )
 
     base_name = Path(task.filename).stem
     download_filename = f"{base_name}_polyheal.{task.target_format}"
