@@ -45,6 +45,14 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.22` (2026-09-04) - Hugging Face Spaces 全面切換至工業級 Docker SDK (`sdk: docker`)
+- **問題根因剖析**：
+  - Gradio SDK 是為純 Python 前端元件（如簡易 demo 繪圖）設計，其內建 Node.js SSR 代理、自動線程管理、內部埠位攔截與健康檢查機制，與大型 FastAPI + FreeCAD / OpenCASCADE 幾何引擎頻繁產生衝突（引發 Node 停止、雙重綁定、127.0.0.1 外部拒絕等連鎖問題）。
+- **架構升級方案**：
+  - 全面切換為 Hugging Face 官方推薦的工業級 **Docker SDK (`sdk: docker`, `app_port: 7860`)**。
+  - 在根目錄建立標準 `Dockerfile`，直接以 Debian 為基礎環境安裝原生 FreeCAD 與 OpenCASCADE，並以 Uvicorn 原生掛載 FastAPI (`backend.app.main:app`)。
+  - 徹底跳過 Gradio 的干擾層，實現 100% 乾淨、穩定、高效的原生 CAD 雲端轉譯節點。
+
 ### `v1.0.21` (2026-09-04) - 新增 Python 主進程永久常駐輪詢 (Process Keep-Alive)
 - **問題根因**：
   - Gradio 在非 TTY / 背景 Docker 容器執行環境中，`demo.launch()` 會在非同步啟動後立即釋放主執行緒，導致 Python 腳本直接執行完畢退出容器。
