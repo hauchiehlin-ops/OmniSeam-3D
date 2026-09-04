@@ -238,7 +238,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                   <ul className="text-[11px] text-slate-300 space-y-1 pl-1">
                     <li>• <strong className="text-white">Owner (帳號)</strong>：若無帳號，可使用 Google / GitHub 一秒授權登入。</li>
                     <li>• <strong className="text-white">Space name (名稱)</strong>：可自訂任何名稱或保留預設。</li>
-                    <li>• <strong className="text-white">Space hardware (硬體)</strong>：請點選 <span className="text-emerald-400 font-semibold">ZeroGPU (Free)</span> 或 <span className="text-emerald-400 font-semibold">CPU Basic</span>（均為 100% 免費）。</li>
+                    <li>• <strong className="text-white">Space hardware (硬體)</strong>：請選 <span className="text-emerald-400 font-semibold">CPU Basic (2 vCPU · 16 GB · Free)</span>（100% 免費，專為 CAD 幾何拓撲縫合優化）。</li>
                   </ul>
                 </div>
               </div>

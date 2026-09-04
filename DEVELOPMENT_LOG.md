@@ -45,6 +45,11 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.23` (2026-09-04) - 前端 Space 引導同步優化：鎖定 CPU Basic (16GB RAM · Free)
+- **UI & 說明同步**：
+  - 更新 `BackendSettingsModal.tsx`，明確指引使用者在 Duplicate Space 彈窗選擇 `CPU Basic (2 vCPU · 16 GB · Free)`。
+  - 確保使用者不會誤選與 Docker SDK 互斥的 ZeroGPU，達成 1 鍵直達無錯誤複製。
+
 ### `v1.0.22` (2026-09-04) - Hugging Face Spaces 全面切換至工業級 Docker SDK (`sdk: docker`)
 - **問題根因剖析**：
   - Gradio SDK 是為純 Python 前端元件（如簡易 demo 繪圖）設計，其內建 Node.js SSR 代理、自動線程管理、內部埠位攔截與健康檢查機制，與大型 FastAPI + FreeCAD / OpenCASCADE 幾何引擎頻繁產生衝突（引發 Node 停止、雙重綁定、127.0.0.1 外部拒絕等連鎖問題）。
