@@ -1,0 +1,14 @@
+{
+  "name": "omniseam-3d",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "test": "./scripts/run_tests.sh",
+    "release": "./scripts/bump_and_push.sh",
+    "release:patch": "./scripts/bump_and_push.sh patch",
+    "release:minor": "./scripts/bump_and_push.sh minor",
+    "release:major": "./scripts/bump_and_push.sh major"
+  }
+}

@@ -4,6 +4,7 @@ import { Activity, Zap, Cloud } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import logoImg from '../assets/logo.png';
 import { EngineMode } from '../api/client';
+import { APP_VERSION } from '../version';
 
 interface NavbarProps {
   onOpenAudit?: () => void;
@@ -34,7 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {t('app_title')}
             </h1>
             <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/30 rounded">
-              v1.0 FOSS
+              v{APP_VERSION} FOSS
             </span>
           </div>
           <p className="text-xs text-slate-400 font-normal hidden sm:block">
