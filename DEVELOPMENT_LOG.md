@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.20` (2026-09-04) - 徹底消除 Hugging Face Spaces `[Errno 98]` 雙重 Uvicorn 綁定
+- **問題根因**：
+  - Hugging Face Spaces 在 `sdk: gradio` 模式下，平台啟動器自身已託管並代理 `7860` 埠；如果在 `app.py` 中額外手動呼叫 `uvicorn.run(...)`，會造成兩個 Uvicorn 同時爭搶 `0.0.0.0:7860` 導致 `[Errno 98] address already in use` 錯誤。
+- **修復方案**：
+  - `app.py` 改回將 CORS 與 API 路由掛載至 `demo.app`，並由 `demo.launch(ssr_mode=False)` 由 Gradio 自身原生管理埠位綁定與主程序生命週期，徹底根除雙重綁定與 SSR 異常。
+
 ### `v1.0.18` (2026-09-04) - 改用標準 `gr.mount_gradio_app` 與主進程 Uvicorn 駐留
 - **架構優化**：
   - `app.py` 全面改用 Gradio + FastAPI 官方標準整合架構：`gr.mount_gradio_app(app, demo, path="/")`。
