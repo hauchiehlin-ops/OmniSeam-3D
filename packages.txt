@@ -4,3 +4,5 @@ libglx-mesa0
 libglib2.0-0
 libgomp1
 build-essential
+libredwg-tools
+
