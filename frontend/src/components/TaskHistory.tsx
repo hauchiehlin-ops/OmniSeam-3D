@@ -5,7 +5,9 @@ import {
   Download, 
   Eye, 
   CheckCircle2, 
-  AlertCircle
+  AlertCircle,
+  Trash2,
+  X
 } from 'lucide-react';
 import { TaskResponse } from '../types';
 import { apiClient } from '../api/client';
@@ -13,12 +15,16 @@ import { apiClient } from '../api/client';
 interface TaskHistoryProps {
   tasks: TaskResponse[];
   onSelectPreview: (task: TaskResponse) => void;
+  onDeleteTask?: (taskId: string) => void;
+  onClearAll?: () => void;
   activeTaskId?: string | null;
 }
 
 export const TaskHistory: React.FC<TaskHistoryProps> = ({
   tasks,
   onSelectPreview,
+  onDeleteTask,
+  onClearAll,
   activeTaskId
 }) => {
   const { t } = useTranslation();
@@ -26,13 +32,31 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   if (tasks.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 p-5 bg-dark-surface border border-dark-border rounded-2xl">
-      <div className="flex items-center gap-2 text-slate-100 font-bold text-sm pb-2 border-b border-dark-border">
-        <ListOrdered className="w-4 h-4 text-brand-400" />
-        <span>{t('tasks.title')}</span>
+    <div className="flex flex-col gap-3 p-5 bg-dark-surface border border-dark-border rounded-2xl animate-fade-in">
+      {/* Header with Title and Clear All button */}
+      <div className="flex items-center justify-between pb-2 border-b border-dark-border">
+        <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
+          <ListOrdered className="w-4 h-4 text-brand-400" />
+          <span>{t('tasks.title')}</span>
+          <span className="px-1.5 py-0.5 text-[10px] font-mono rounded-full bg-dark-panel border border-dark-border text-slate-400">
+            {tasks.length}
+          </span>
+        </div>
+
+        {onClearAll && tasks.length > 0 && (
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 transition-all"
+            title={t('tasks.clear_all')}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{t('tasks.clear_all')}</span>
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+      <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
         {tasks.map((task) => {
           const isSelected = task.task_id === activeTaskId;
           const isDone = task.status === 'completed';
@@ -45,7 +69,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           return (
             <div
               key={task.task_id}
-              className={`p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
+              className={`p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all group ${
                 isSelected
                   ? 'bg-brand-500/10 border-brand-500/40 shadow-sm'
                   : 'bg-dark-panel border-dark-border hover:border-slate-600'
@@ -92,6 +116,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
                 {isDone && (
                   <>
                     <button
+                      type="button"
                       onClick={() => onSelectPreview(task)}
                       className="p-2 rounded-lg bg-dark-surface hover:bg-brand-600 text-slate-300 hover:text-white border border-dark-border transition-all"
                       title={t('tasks.load_preview')}
@@ -110,6 +135,18 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
                     </a>
                   </>
                 )}
+
+                {/* Single Task Delete Button */}
+                {onDeleteTask && (
+                  <button
+                    type="button"
+                    onClick={() => onDeleteTask(task.task_id)}
+                    className="p-2 rounded-lg bg-dark-surface hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-dark-border hover:border-rose-500/30 transition-all"
+                    title={t('tasks.delete_task')}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -118,3 +155,4 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
     </div>
   );
 };
+

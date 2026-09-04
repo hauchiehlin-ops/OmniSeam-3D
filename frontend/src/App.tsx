@@ -208,6 +208,22 @@ export const App: React.FC = () => {
     setIsSplitView(true);
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks((prev) => prev.filter((t) => t.task_id !== taskId));
+    if (activeTask?.task_id === taskId) {
+      setActiveTask(null);
+      setIsSplitView(false);
+    }
+  };
+
+  const handleClearAllTasks = () => {
+    if (window.confirm(t('tasks.clear_all_confirm', '確定要清除所有歷史任務紀錄嗎？'))) {
+      setTasks([]);
+      setActiveTask(null);
+      setIsSplitView(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (activePollingRef.current) clearInterval(activePollingRef.current);
@@ -340,6 +356,8 @@ export const App: React.FC = () => {
             <TaskHistory
               tasks={tasks}
               onSelectPreview={handleSelectPreviewTask}
+              onDeleteTask={handleDeleteTask}
+              onClearAll={handleClearAllTasks}
               activeTaskId={activeTask?.task_id}
             />
           </div>

@@ -63,47 +63,89 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     }
   };
 
+  const handlePresetApply = (preset: '3dprint' | 'game' | 'asis') => {
+    if (preset === '3dprint') {
+      onChangeConfig({
+        ...config,
+        auto_fill_holes: true,
+        fix_non_manifold: true,
+        unify_normals: true,
+        remove_degenerate: true,
+        weld_vertices: true,
+      });
+    } else if (preset === 'game') {
+      onChangeConfig({
+        ...config,
+        auto_fill_holes: false,
+        fix_non_manifold: true,
+        unify_normals: true,
+        remove_degenerate: true,
+        weld_vertices: true,
+      });
+    } else if (preset === 'asis') {
+      onChangeConfig({
+        ...config,
+        auto_fill_holes: false,
+        fix_non_manifold: false,
+        unify_normals: false,
+        remove_degenerate: false,
+        weld_vertices: false,
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5 p-5 bg-dark-surface border border-dark-border rounded-2xl">
-      <div className="flex items-center justify-between pb-3 border-b border-dark-border">
-        <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
-          <Settings className="w-4 h-4 text-brand-400" />
-          <span>{t('settings.title')}</span>
+      {/* Header & Engine Mode */}
+      <div className="flex flex-col gap-2 pb-3 border-b border-dark-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
+            <Settings className="w-4 h-4 text-brand-400" />
+            <span>{t('settings.title')}</span>
+          </div>
+
+          {/* Engine Mode selector */}
+          <div className="flex items-center bg-dark-panel p-0.5 rounded-lg border border-dark-border text-xs">
+            <button
+              type="button"
+              onClick={() => onChangeEngineMode('client')}
+              title={t('settings.mode_client_tip')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+                engineMode === 'client'
+                  ? 'bg-amber-500/20 text-amber-300 font-semibold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Zap className="w-3 h-3 text-amber-400" />
+              <span>Pure Client</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleCloudServerClick}
+              title={t('settings.mode_server_tip')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+                engineMode === 'server'
+                  ? 'bg-indigo-500/20 text-indigo-300 font-semibold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Cloud className="w-3 h-3 text-indigo-400" />
+              <span>Cloud Server</span>
+            </button>
+          </div>
         </div>
 
-        {/* Engine Mode selector */}
-        <div className="flex items-center bg-dark-panel p-0.5 rounded-lg border border-dark-border text-xs">
-          <button
-            type="button"
-            onClick={() => onChangeEngineMode('client')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
-              engineMode === 'client'
-                ? 'bg-amber-500/20 text-amber-300 font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Zap className="w-3 h-3 text-amber-400" />
-            <span>Pure Client</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleCloudServerClick}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
-              engineMode === 'server'
-                ? 'bg-indigo-500/20 text-indigo-300 font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Cloud className="w-3 h-3 text-indigo-400" />
-            <span>Cloud Server</span>
-          </button>
-        </div>
+        {/* Engine mode concise hint */}
+        <p className="text-[11px] text-slate-400 leading-relaxed">
+          {engineMode === 'client' ? t('settings.mode_client_tip') : t('settings.mode_server_tip')}
+        </p>
       </div>
 
       {/* Target Export Format */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold text-slate-300">
-          {t('settings.target_format')}
+        <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+          <span>{t('settings.target_format')}</span>
+          <span className="text-[10px] text-slate-400">3D 列印選 STL/3MF · 網頁選 GLB</span>
         </label>
         <select
           value={config.target_format}
@@ -119,57 +161,133 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </select>
       </div>
 
-      {/* Auto-Healing & Mesh Quality */}
+      {/* Smart Presets & Auto-Healing */}
       <div className="flex flex-col gap-3">
-        <span className="text-xs font-semibold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          {t('settings.repair_heading')}
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            {t('settings.repair_heading')}
+          </span>
+          <span className="text-[10px] text-slate-400">依使用情境一鍵切換</span>
+        </div>
 
+        {/* 3 Smart Preset Buttons */}
+        <div className="grid grid-cols-3 gap-1.5">
+          <button
+            type="button"
+            onClick={() => handlePresetApply('3dprint')}
+            disabled={disabled}
+            className={`px-2 py-1.5 rounded-lg border text-left flex flex-col gap-0.5 transition-all ${
+              config.auto_fill_holes && config.fix_non_manifold && config.unify_normals && config.remove_degenerate
+                ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
+                : 'bg-dark-panel border-dark-border text-slate-300 hover:border-slate-500'
+            }`}
+            title={t('settings.preset_3dprint_desc')}
+          >
+            <span className="text-[11px] font-bold truncate">🖨️ 3D 列印 / 製造</span>
+            <span className="text-[9px] text-slate-400 truncate">100% 水密封閉實體</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePresetApply('game')}
+            disabled={disabled}
+            className={`px-2 py-1.5 rounded-lg border text-left flex flex-col gap-0.5 transition-all ${
+              !config.auto_fill_holes && config.fix_non_manifold && config.unify_normals && config.remove_degenerate
+                ? 'bg-indigo-500/15 border-indigo-500/50 text-indigo-300'
+                : 'bg-dark-panel border-dark-border text-slate-300 hover:border-slate-500'
+            }`}
+            title={t('settings.preset_game_desc')}
+          >
+            <span className="text-[11px] font-bold truncate">🎮 遊戲 / 渲染動畫</span>
+            <span className="text-[9px] text-slate-400 truncate">輕量化保留開口</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handlePresetApply('asis')}
+            disabled={disabled}
+            className={`px-2 py-1.5 rounded-lg border text-left flex flex-col gap-0.5 transition-all ${
+              !config.auto_fill_holes && !config.fix_non_manifold && !config.unify_normals && !config.remove_degenerate
+                ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
+                : 'bg-dark-panel border-dark-border text-slate-300 hover:border-slate-500'
+            }`}
+            title={t('settings.preset_asis_desc')}
+          >
+            <span className="text-[11px] font-bold truncate">🔍 原始幾何轉存</span>
+            <span className="text-[9px] text-slate-400 truncate">原樣不改動頂點</span>
+          </button>
+        </div>
+
+        {/* Checkbox Details with Contextual Hints */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <label className="flex items-center gap-2 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-dark-hover cursor-pointer transition-all">
-            <input
-              type="checkbox"
-              checked={config.auto_fill_holes}
-              onChange={(e) => update('auto_fill_holes', e.target.checked)}
-              disabled={disabled}
-              className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
-            />
-            <span className="text-slate-200 font-medium">{t('settings.auto_fill_holes')}</span>
-          </label>
+          {/* 1. Auto Fill Holes */}
+          <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-slate-600 transition-all">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.auto_fill_holes}
+                onChange={(e) => update('auto_fill_holes', e.target.checked)}
+                disabled={disabled}
+                className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
+              />
+              <span className="text-slate-200 font-semibold">{t('settings.auto_fill_holes')}</span>
+            </label>
+            <p className="text-[10px] text-slate-400 leading-tight pl-6">
+              {t('settings.auto_fill_holes_tip')}
+            </p>
+          </div>
 
-          <label className="flex items-center gap-2 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-dark-hover cursor-pointer transition-all">
-            <input
-              type="checkbox"
-              checked={config.fix_non_manifold}
-              onChange={(e) => update('fix_non_manifold', e.target.checked)}
-              disabled={disabled}
-              className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
-            />
-            <span className="text-slate-200 font-medium">{t('settings.fix_non_manifold')}</span>
-          </label>
+          {/* 2. Fix Non-Manifold */}
+          <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-slate-600 transition-all">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.fix_non_manifold}
+                onChange={(e) => update('fix_non_manifold', e.target.checked)}
+                disabled={disabled}
+                className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
+              />
+              <span className="text-slate-200 font-semibold">{t('settings.fix_non_manifold')}</span>
+            </label>
+            <p className="text-[10px] text-slate-400 leading-tight pl-6">
+              {t('settings.fix_non_manifold_tip')}
+            </p>
+          </div>
 
-          <label className="flex items-center gap-2 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-dark-hover cursor-pointer transition-all">
-            <input
-              type="checkbox"
-              checked={config.unify_normals}
-              onChange={(e) => update('unify_normals', e.target.checked)}
-              disabled={disabled}
-              className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
-            />
-            <span className="text-slate-200 font-medium">{t('settings.unify_normals')}</span>
-          </label>
+          {/* 3. Unify Normals */}
+          <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-slate-600 transition-all">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.unify_normals}
+                onChange={(e) => update('unify_normals', e.target.checked)}
+                disabled={disabled}
+                className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
+              />
+              <span className="text-slate-200 font-semibold">{t('settings.unify_normals')}</span>
+            </label>
+            <p className="text-[10px] text-slate-400 leading-tight pl-6">
+              {t('settings.unify_normals_tip')}
+            </p>
+          </div>
 
-          <label className="flex items-center gap-2 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-dark-hover cursor-pointer transition-all">
-            <input
-              type="checkbox"
-              checked={config.remove_degenerate}
-              onChange={(e) => update('remove_degenerate', e.target.checked)}
-              disabled={disabled}
-              className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
-            />
-            <span className="text-slate-200 font-medium">{t('settings.remove_degenerate')}</span>
-          </label>
+          {/* 4. Remove Degenerate */}
+          <div className="flex flex-col gap-1 p-2.5 rounded-xl bg-dark-panel border border-dark-border hover:border-slate-600 transition-all">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.remove_degenerate}
+                onChange={(e) => update('remove_degenerate', e.target.checked)}
+                disabled={disabled}
+                className="rounded bg-dark-surface border-dark-border text-brand-500 focus:ring-brand-500 w-4 h-4"
+              />
+              <span className="text-slate-200 font-semibold">{t('settings.remove_degenerate')}</span>
+            </label>
+            <p className="text-[10px] text-slate-400 leading-tight pl-6">
+              {t('settings.remove_degenerate_tip')}
+            </p>
+          </div>
         </div>
       </div>
 
