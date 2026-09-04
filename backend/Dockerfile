@@ -1,8 +1,9 @@
-# PolyHeal 3D - Backend Dockerfile
+# OmniSeam 3D - Backend Dockerfile (Hugging Face Spaces & Docker compatible)
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    PORT=7860
 
 WORKDIR /app
 
@@ -27,6 +28,6 @@ COPY backend /app/backend
 
 ENV PYTHONPATH=/app
 
-EXPOSE 8000
+EXPOSE 7860 8000
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]

@@ -14,7 +14,7 @@ import {
   Lock
 } from 'lucide-react';
 import { ConversionConfig, TargetFormat } from '../types';
-import { EngineMode } from '../api/client';
+import { EngineMode, apiClient } from '../api/client';
 
 interface SettingsPanelProps {
   config: ConversionConfig;
@@ -25,6 +25,7 @@ interface SettingsPanelProps {
   isProcessing?: boolean;
   engineMode: EngineMode;
   onChangeEngineMode: (mode: EngineMode) => void;
+  onOpenBackendSettings: () => void;
 }
 
 const FORMAT_OPTIONS: { value: TargetFormat; label: string; desc: string }[] = [
@@ -47,11 +48,19 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   isProcessing,
   engineMode,
   onChangeEngineMode,
+  onOpenBackendSettings,
 }) => {
   const { t } = useTranslation();
 
   const update = <K extends keyof ConversionConfig>(key: K, value: ConversionConfig[K]) => {
     onChangeConfig({ ...config, [key]: value });
+  };
+
+  const handleCloudServerClick = () => {
+    onChangeEngineMode('server');
+    if (!apiClient.getStoredBackendUrl()) {
+      onOpenBackendSettings();
+    }
   };
 
   return (
@@ -78,7 +87,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onChangeEngineMode('server')}
+            onClick={handleCloudServerClick}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
               engineMode === 'server'
                 ? 'bg-indigo-500/20 text-indigo-300 font-semibold'

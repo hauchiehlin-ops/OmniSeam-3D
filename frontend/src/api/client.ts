@@ -2,15 +2,91 @@ import axios from 'axios';
 import { ConversionConfig, InspectResponse, TaskResponse } from '../types';
 import { ClientPipeline } from '../engine/client-pipeline';
 
-const API_BASE = '/api/v1';
-
 export type EngineMode = 'client' | 'server';
+
+export interface BackendHealthResponse {
+  status: string;
+  service: string;
+  version: string;
+  uptime_seconds?: number;
+  engine_features?: {
+    freecad_available: boolean;
+    opencascade_available: boolean;
+    trimesh_available: boolean;
+    server_type: string;
+    supported_modes?: string[];
+  };
+  supported_formats: string[];
+}
+
+export interface ConnectionTestResult {
+  ok: boolean;
+  latencyMs: number;
+  data?: BackendHealthResponse;
+  error?: string;
+}
+
+const STORAGE_KEY_BACKEND_URL = 'omniseam_backend_url';
 
 export const apiClient = {
   currentEngineMode: 'client' as EngineMode,
+  customBackendUrl: localStorage.getItem(STORAGE_KEY_BACKEND_URL) || '',
 
   setEngineMode(mode: EngineMode) {
     this.currentEngineMode = mode;
+  },
+
+  getStoredBackendUrl(): string {
+    return this.customBackendUrl;
+  },
+
+  setBackendUrl(url: string) {
+    let clean = url.trim();
+    if (clean.endsWith('/')) {
+      clean = clean.slice(0, -1);
+    }
+    this.customBackendUrl = clean;
+    if (clean) {
+      localStorage.setItem(STORAGE_KEY_BACKEND_URL, clean);
+    } else {
+      localStorage.removeItem(STORAGE_KEY_BACKEND_URL);
+    }
+  },
+
+  getApiBase(): string {
+    if (this.customBackendUrl) {
+      return `${this.customBackendUrl}/api/v1`;
+    }
+    return '/api/v1';
+  },
+
+  async testBackendConnection(targetUrl?: string): Promise<ConnectionTestResult> {
+    let url = (targetUrl !== undefined ? targetUrl : this.customBackendUrl).trim();
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
+    const endpoint = url ? `${url}/api/v1/health` : '/api/v1/health';
+
+    const startTime = performance.now();
+    try {
+      const response = await axios.get<BackendHealthResponse>(endpoint, {
+        timeout: 15000,
+      });
+      const latencyMs = Math.round(performance.now() - startTime);
+      return {
+        ok: response.status === 200 && response.data?.status === 'healthy',
+        latencyMs,
+        data: response.data,
+      };
+    } catch (err: any) {
+      const latencyMs = Math.round(performance.now() - startTime);
+      const msg = err.response?.data?.message || err.message || 'Connection failed';
+      return {
+        ok: false,
+        latencyMs,
+        error: msg,
+      };
+    }
   },
 
   async inspectModel(file: File, lang: string = 'en'): Promise<InspectResponse> {
@@ -27,7 +103,7 @@ export const apiClient = {
     formData.append('file', file);
     formData.append('lang', lang);
 
-    const response = await axios.post<InspectResponse>(`${API_BASE}/inspect`, formData, {
+    const response = await axios.post<InspectResponse>(`${this.getApiBase()}/inspect`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
@@ -63,24 +139,39 @@ export const apiClient = {
     formData.append('compress_gltf', config.compress_gltf.toString());
     formData.append('language', lang);
 
-    const response = await axios.post<TaskResponse>(`${API_BASE}/convert`, formData, {
+    const response = await axios.post<TaskResponse>(`${this.getApiBase()}/convert`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+
+    const task = response.data;
+    if (this.customBackendUrl && task.download_url && !task.download_url.startsWith('http')) {
+      task.download_url = `${this.customBackendUrl}${task.download_url}`;
+    }
+    if (this.customBackendUrl && task.preview_url && !task.preview_url.startsWith('http')) {
+      task.preview_url = `${this.customBackendUrl}${task.preview_url}`;
+    }
+    return task;
   },
 
   async getTaskStatus(taskId: string): Promise<TaskResponse> {
-    const response = await axios.get<TaskResponse>(`${API_BASE}/tasks/${taskId}`);
-    return response.data;
+    const response = await axios.get<TaskResponse>(`${this.getApiBase()}/tasks/${taskId}`);
+    const task = response.data;
+    if (this.customBackendUrl && task.download_url && !task.download_url.startsWith('http')) {
+      task.download_url = `${this.customBackendUrl}${task.download_url}`;
+    }
+    if (this.customBackendUrl && task.preview_url && !task.preview_url.startsWith('http')) {
+      task.preview_url = `${this.customBackendUrl}${task.preview_url}`;
+    }
+    return task;
   },
 
   getDownloadUrl(task: TaskResponse): string {
     if (task.download_url) return task.download_url;
-    return `${API_BASE}/tasks/${task.task_id}/download`;
+    return `${this.getApiBase()}/tasks/${task.task_id}/download`;
   },
 
   getPreviewUrl(taskId: string): string {
-    return `${API_BASE}/tasks/${taskId}/preview`;
+    return `${this.getApiBase()}/tasks/${taskId}/preview`;
   },
 
   async getSampleModel(sampleType: 'broken' | 'bracket'): Promise<{ file: File; name: string }> {
@@ -88,7 +179,7 @@ export const apiClient = {
       if (this.currentEngineMode === 'client') {
         return this.generateLocalSample(sampleType);
       }
-      const response = await axios.get(`${API_BASE}/sample/${sampleType}`, {
+      const response = await axios.get(`${this.getApiBase()}/sample/${sampleType}`, {
         responseType: 'blob',
       });
       const filename = sampleType === 'broken' ? 'defective_sample.stl' : 'watertight_bracket.stl';

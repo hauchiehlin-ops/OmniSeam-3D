@@ -1,25 +1,47 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Activity, Zap, Cloud } from 'lucide-react';
+import { Activity, Zap, Cloud, Settings, Server } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import logoImg from '../assets/logo.png';
-import { EngineMode } from '../api/client';
+import { EngineMode, apiClient } from '../api/client';
 import { APP_VERSION } from '../version';
 
 interface NavbarProps {
   onOpenAudit?: () => void;
   hasAudit?: boolean;
   engineMode: EngineMode;
-  onToggleEngineMode: () => void;
+  onOpenBackendSettings: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAudit,
   hasAudit,
   engineMode,
-  onToggleEngineMode,
+  onOpenBackendSettings,
 }) => {
   const { t } = useTranslation();
+  const backendUrl = apiClient.getStoredBackendUrl();
+
+  const getBackendDisplayName = () => {
+    if (engineMode === 'client') {
+      return '⚡ 100% Pure Client';
+    }
+    if (backendUrl.includes('hf.space')) {
+      return '🚀 HF Space Node (16GB)';
+    }
+    if (backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) {
+      return '💻 Local Docker Node';
+    }
+    if (backendUrl) {
+      try {
+        const parsed = new URL(backendUrl);
+        return `☁️ ${parsed.hostname}`;
+      } catch {
+        return '☁️ Cloud CAD Node';
+      }
+    }
+    return '☁️ Cloud CAD Node';
+  };
 
   return (
     <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between">
@@ -45,27 +67,23 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Engine Mode Toggle Badge */}
+        {/* Engine Node Status Button -> Opens Backend Modal */}
         <button
-          onClick={onToggleEngineMode}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold transition-all duration-200 ${
+          onClick={onOpenBackendSettings}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 group shadow-sm ${
             engineMode === 'client'
               ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-              : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20'
+              : 'bg-indigo-500/15 border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/25 shadow-indigo-500/10'
           }`}
-          title="Click to toggle between 100% In-Browser Local Engine and Backend Cloud Mode"
+          title="Click to configure Dedicated CAD Engine Node (Hugging Face / Local Docker / Client)"
         >
           {engineMode === 'client' ? (
-            <>
-              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span>⚡ 100% Pure Client Engine</span>
-            </>
+            <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
           ) : (
-            <>
-              <Cloud className="w-3.5 h-3.5 text-indigo-400" />
-              <span>☁️ Backend Cloud Mode</span>
-            </>
+            <Cloud className="w-3.5 h-3.5 text-indigo-400" />
           )}
+          <span>{getBackendDisplayName()}</span>
+          <Settings className="w-3 h-3 text-slate-400 group-hover:text-slate-200 group-hover:rotate-45 transition-all" />
         </button>
 
         {hasAudit && (

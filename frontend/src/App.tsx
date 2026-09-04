@@ -11,6 +11,8 @@ import { SettingsPanel } from './components/SettingsPanel';
 import { AuditReport } from './components/AuditReport';
 import { TaskHistory } from './components/TaskHistory';
 import { MeasureTool } from './components/MeasureTool';
+import { BackendSettingsModal } from './components/BackendSettingsModal';
+import { CadUnlockModal } from './components/CadUnlockModal';
 
 import { 
   ConversionConfig, 
@@ -34,11 +36,22 @@ const DEFAULT_CONFIG: ConversionConfig = {
   compress_gltf: true,
 };
 
+const PROPRIETARY_CAD_EXTS = new Set([
+  'sldprt', 'sldasm', 'ipt', 'iam', 'ifc', '3dm', 'catpart', 'catproduct', 'dwg'
+]);
+
 export const App: React.FC = () => {
   const { t, i18n } = useTranslation();
 
   // Engine Mode: 'client' (100% In-Browser) or 'server' (FastAPI Backend)
-  const [engineMode, setEngineMode] = useState<EngineMode>('client');
+  const [engineMode, setEngineMode] = useState<EngineMode>(
+    apiClient.getStoredBackendUrl() ? 'server' : 'client'
+  );
+
+  // Modals
+  const [showBackendModal, setShowBackendModal] = useState(false);
+  const [showCadUnlockModal, setShowCadUnlockModal] = useState(false);
+  const [lockedCadFile, setLockedCadFile] = useState<File | null>(null);
 
   // File and Configuration State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -64,13 +77,12 @@ export const App: React.FC = () => {
 
   const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const handleToggleEngineMode = () => {
-    const nextMode: EngineMode = engineMode === 'client' ? 'server' : 'client';
-    setEngineMode(nextMode);
-    apiClient.setEngineMode(nextMode);
-  };
+  // Sync initial engine mode
+  useEffect(() => {
+    apiClient.setEngineMode(engineMode);
+  }, [engineMode]);
 
-  // Handle File Selection: Auto-Inspect
+  // Handle File Selection: Auto-Inspect & CAD Format Gate
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
     setIsSplitView(false);
@@ -78,6 +90,14 @@ export const App: React.FC = () => {
     setMeasuredDistance(null);
     setMeasureP1(null);
     setMeasureP2(null);
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (PROPRIETARY_CAD_EXTS.has(ext)) {
+      if (engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
+        setLockedCadFile(file);
+        setShowCadUnlockModal(true);
+      }
+    }
 
     try {
       const inspect = await apiClient.inspectModel(file, i18n.language);
@@ -90,6 +110,14 @@ export const App: React.FC = () => {
   // Start Conversion Pipeline
   const handleStartConvert = async () => {
     if (!selectedFile) return;
+
+    const ext = selectedFile.name.split('.').pop()?.toLowerCase() || '';
+    if (PROPRIETARY_CAD_EXTS.has(ext) && engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
+      setLockedCadFile(selectedFile);
+      setShowCadUnlockModal(true);
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -201,7 +229,7 @@ export const App: React.FC = () => {
         onOpenAudit={() => setShowAuditModal(true)} 
         hasAudit={Boolean(activeTask?.report || inspectData)}
         engineMode={engineMode}
-        onToggleEngineMode={handleToggleEngineMode}
+        onOpenBackendSettings={() => setShowBackendModal(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6">
@@ -306,6 +334,7 @@ export const App: React.FC = () => {
                 setEngineMode(m);
                 apiClient.setEngineMode(m);
               }}
+              onOpenBackendSettings={() => setShowBackendModal(true)}
             />
 
             <TaskHistory
@@ -316,6 +345,24 @@ export const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Backend Settings Modal */}
+      <BackendSettingsModal
+        isOpen={showBackendModal}
+        onClose={() => setShowBackendModal(false)}
+        onBackendConnected={(url) => {
+          setEngineMode('server');
+          apiClient.setEngineMode('server');
+        }}
+      />
+
+      {/* Native CAD Unlock Modal */}
+      <CadUnlockModal
+        isOpen={showCadUnlockModal}
+        fileName={lockedCadFile?.name}
+        onClose={() => setShowCadUnlockModal(false)}
+        onOpenBackendSettings={() => setShowBackendModal(true)}
+      />
 
       {/* Audit Modal */}
       {showAuditModal && (
