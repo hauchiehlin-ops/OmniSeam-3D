@@ -137,6 +137,7 @@
     "defects_found_title": "检测到的几何缺陷项目",
     "defects_fixed": "自动修复处理统计",
     "holes_filled": "修补闭合孔洞",
+    "vertices_welded": "共点拓扑焊接/缝合",
     "non_manifold_fixed": "修复非流形边",
     "duplicate_removed": "清理退化/重复面",
     "open_boundary_loops": "开放边缘孔洞环 (Boundary Holes)",

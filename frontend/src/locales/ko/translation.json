@@ -137,6 +137,7 @@
     "defects_found_title": "발견된 지오메트리 결함 항목",
     "defects_fixed": "자동 복구 처리 통계",
     "holes_filled": "메워진 구멍",
+    "vertices_welded": "중복 정점 용접/결합",
     "non_manifold_fixed": "복구된 논매니폴드 엣지",
     "duplicate_removed": "제거된 중복/퇴화 면",
     "open_boundary_loops": "경계 구멍 루프 (Boundary Holes)",

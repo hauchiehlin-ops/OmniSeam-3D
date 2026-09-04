@@ -137,6 +137,7 @@
     "defects_found_title": "検出された幾何学的欠陥",
     "defects_fixed": "自動修復処理結果",
     "holes_filled": "修復・閉合された穴",
+    "vertices_welded": "重複頂点の結合/縫合",
     "non_manifold_fixed": "修復されたノンマニホールドエッジ",
     "duplicate_removed": "削除された重複・縮退面",
     "open_boundary_loops": "境界穴ループ (Boundary Holes)",

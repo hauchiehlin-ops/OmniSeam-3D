@@ -137,6 +137,7 @@
     "defects_found_title": "幾何拓撲缺陷檢測",
     "defects_fixed": "自動修復之缺陷統計",
     "holes_filled": "三角劃分補平孔洞",
+    "vertices_welded": "共點拓撲焊接/縫合",
     "non_manifold_fixed": "修復非流形邊/頂點",
     "duplicate_removed": "消除重複與退化面",
     "open_boundary_loops": "邊界開口孔洞",

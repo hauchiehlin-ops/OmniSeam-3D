@@ -137,6 +137,7 @@
     "defects_found_title": "Defects Found in Geometry",
     "defects_fixed": "Defects Automatically Resolved",
     "holes_filled": "Holes Triangulated",
+    "vertices_welded": "Duplicate Vertices Welded",
     "non_manifold_fixed": "Non-Manifold Edges Resolved",
     "duplicate_removed": "Duplicates Removed",
     "open_boundary_loops": "Boundary Loop Holes",

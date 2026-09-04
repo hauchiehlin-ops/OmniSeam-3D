@@ -137,6 +137,7 @@
     "defects_found_title": "ข้อบกพร่องทางเรขาคณิตที่ตรวจพบ",
     "defects_fixed": "สถิติการซ่อมแซมอัตโนมัติ",
     "holes_filled": "รูที่ได้รับการเติมเต็ม",
+    "vertices_welded": "เชื่อมต่อจุดยอดที่ซ้ำกัน",
     "non_manifold_fixed": "ขอบ Non-Manifold ที่แก้ไขแล้ว",
     "duplicate_removed": "ลบหน้าตัดที่ซ้ำซ้อน/เสื่อมสภาพ",
     "open_boundary_loops": "รูวงรอบขอบเขต (Boundary Holes)",

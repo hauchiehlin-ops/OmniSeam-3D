@@ -218,6 +218,7 @@ export const AuditReport: React.FC<AuditReportProps> = ({
               <div className="bg-dark-panel p-4 rounded-xl border border-emerald-500/20 flex flex-col gap-2">
                 <span className="text-xs font-semibold text-emerald-400">{t('audit.defects_fixed')}</span>
                 <ul className="text-xs text-slate-300 space-y-1">
+                  <li>• {t('audit.vertices_welded')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.vertices_welded || 0}</b></li>
                   <li>• {t('audit.holes_filled')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.holes_filled || 0}</b></li>
                   <li>• {t('audit.non_manifold_fixed')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.non_manifold_fixed || 0}</b></li>
                   <li>• {t('audit.duplicate_removed')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.duplicate_faces_removed || 0}</b></li>
