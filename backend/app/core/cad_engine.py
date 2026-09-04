@@ -70,7 +70,7 @@ class CADEngine:
         if occt_mesh is not None:
             return occt_mesh
 
-        # 3. Direct Trimesh loader with fallback
+        # 3. Direct Trimesh loader
         try:
             loaded = trimesh.load(str(file_path))
             if isinstance(loaded, trimesh.Scene):
@@ -78,11 +78,16 @@ class CADEngine:
             elif isinstance(loaded, trimesh.Trimesh):
                 mesh = loaded
             else:
-                mesh = trimesh.Trimesh()
-            return mesh
-        except Exception as e:
-            # Generate a clean procedural fallback if file was a CAD test dummy
-            return cls._generate_cad_placeholder_mesh(file_path.stem)
+                mesh = None
+            if mesh is not None and len(mesh.vertices) > 0 and len(mesh.faces) > 0:
+                return mesh
+        except Exception:
+            pass
+
+        raise ValueError(
+            f"Unable to parse CAD file '{file_path.name}'. "
+            f"Ensure OpenCASCADE (pythonocc), FreeCAD, or Gmsh is installed and file contains valid CAD geometry."
+        )
 
     @classmethod
     def _try_freecad_tessellation(cls, file_path: Path, options: CADOptions) -> Optional[trimesh.Trimesh]:
@@ -203,14 +208,6 @@ except Exception as e:
         except Exception:
             pass
         return None
-
-    @classmethod
-    def _generate_cad_placeholder_mesh(cls, name: str) -> trimesh.Trimesh:
-        """Procedural CAD-like engineering primitive fallback."""
-        cylinder = trimesh.creation.cylinder(radius=15.0, height=40.0, sections=48)
-        box = trimesh.creation.box(extents=[30.0, 30.0, 10.0])
-        combined = trimesh.util.concatenate([cylinder, box])
-        return combined
 
     @classmethod
     def export_cad_file(cls, mesh: trimesh.Trimesh, output_path: Path, target_format: str):
@@ -383,7 +380,8 @@ except Exception:
             "#15=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-05),#16,'distance_accuracy_value','confusion accuracy');",
             "#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));",
             "#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));",
-            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());"
+            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());",
+            "#19=PLANE('',#10);"
         ]
 
         curr_id = 30
@@ -397,13 +395,13 @@ except Exception:
         for f in faces:
             p1, p2, p3 = v_ids[f[0]], v_ids[f[1]], v_ids[f[2]]
             poly_id = curr_id
-            lines.append(f"#{poly_id}=POLY_LOOP('',({p1},{p2},{p3}));")
+            lines.append(f"#{poly_id}=POLY_LOOP('',(#{p1},#{p2},#{p3}));")
             curr_id += 1
             bound_id = curr_id
             lines.append(f"#{bound_id}=FACE_OUTER_BOUND('',#{poly_id},.T.);")
             curr_id += 1
             face_id = curr_id
-            lines.append(f"#{face_id}=FACE_SURFACE('',((#{bound_id})),#10,.T.);")
+            lines.append(f"#{face_id}=FACE_SURFACE('',(#{bound_id}),#19,.T.);")
             face_ids.append(f"#{face_id}")
             curr_id += 1
 
@@ -418,14 +416,9 @@ except Exception:
 
     @classmethod
     def _export_iges_facets(cls, mesh: trimesh.Trimesh, output_path: Path):
-        """Generates IGES 5.3 interchange file."""
-        lines = [
-            "                                                                        S      1",
-            "1H,,1H;,4HOMNI,8HOMNISEAM,8HOMNISEAM,8HOMNISEAM,32,38,6,308,15,4HOMNI,  G      1",
-            "1.0,1,2HM,1,0.001,15H20260904.160000,0.001,0.,8HOMNISEAM,8HOMNISEAM,11,G      2",
-            "0,15H20260904.160000;                                                   G      3",
-            "S      1G      3D      0P      0                                        T      1"
-        ]
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines))
+        """IGES requires OpenCASCADE, FreeCAD, or Gmsh to generate valid entity records."""
+        raise RuntimeError(
+            "IGES CAD export requires OpenCASCADE (pythonocc), FreeCAD, or Gmsh installed on the server "
+            "to construct valid IGES 5.3 topological entities."
+        )
 

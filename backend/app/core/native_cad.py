@@ -45,8 +45,10 @@ class NativeCADEngine:
         if mesh:
             return mesh
 
-        # Fallback procedural mesh
-        return trimesh.creation.icosphere(subdivisions=3, radius=20.0)
+        raise ValueError(
+            f"Failed to read Rhino 3DM file: '{file_path.name}'. "
+            f"Ensure rhino3dm or FreeCAD is installed and the file contains valid polygon or B-Rep geometry."
+        )
 
     @classmethod
     def load_solidworks(cls, file_path: Path) -> trimesh.Trimesh:
@@ -55,10 +57,10 @@ class NativeCADEngine:
         if mesh:
             return mesh
         
-        # Fallback mechanical part shape
-        flange = trimesh.creation.cylinder(radius=25.0, height=8.0, sections=36)
-        shaft = trimesh.creation.cylinder(radius=10.0, height=35.0, sections=36)
-        return trimesh.util.concatenate([flange, shaft])
+        raise ValueError(
+            f"Failed to read SolidWorks file: '{file_path.name}'. "
+            f"Native SolidWorks files require FreeCAD (freecadcmd) installed on the server for headless translation."
+        )
 
     @classmethod
     def load_inventor(cls, file_path: Path) -> trimesh.Trimesh:
@@ -66,7 +68,11 @@ class NativeCADEngine:
         mesh = cls._freecad_convert(file_path)
         if mesh:
             return mesh
-        return trimesh.creation.box(extents=[30, 20, 15])
+        
+        raise ValueError(
+            f"Failed to read Autodesk Inventor file: '{file_path.name}'. "
+            f"Native Inventor files require FreeCAD (freecadcmd) installed on the server for headless translation."
+        )
 
     @classmethod
     def _freecad_convert(cls, file_path: Path) -> Optional[trimesh.Trimesh]:

@@ -1,5 +1,6 @@
 import { MeshGeometry } from './geometric-kernel';
 import { TargetFormat } from '../types';
+import { ZipPackager, ZipEntry } from './zip-packager';
 
 export class FormatExporters {
   /**
@@ -156,11 +157,11 @@ export class FormatExporters {
   }
 
   /**
-   * Generates basic 3MF model XML representation.
+   * Generates standard OPC compliant 3MF (3D Manufacturing Format) ZIP archive.
    */
   static export3MF(mesh: MeshGeometry): Blob {
     const { vertices, faces } = mesh;
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+    let modelXml = `<?xml version="1.0" encoding="UTF-8"?>
 <model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">
   <resources>
     <object id="1" type="model">
@@ -169,16 +170,16 @@ export class FormatExporters {
 `;
     for (let i = 0; i < vertices.length; i++) {
       const [x, y, z] = vertices[i];
-      xml += `          <vertex x="${x}" y="${y}" z="${z}" />\n`;
+      modelXml += `          <vertex x="${x}" y="${y}" z="${z}" />\n`;
     }
-    xml += `        </vertices>
+    modelXml += `        </vertices>
         <triangles>
 `;
     for (let i = 0; i < faces.length; i++) {
       const [v0, v1, v2] = faces[i];
-      xml += `          <triangle v1="${v0}" v2="${v1}" v3="${v2}" />\n`;
+      modelXml += `          <triangle v1="${v0}" v2="${v1}" v3="${v2}" />\n`;
     }
-    xml += `        </triangles>
+    modelXml += `        </triangles>
       </mesh>
     </object>
   </resources>
@@ -187,7 +188,24 @@ export class FormatExporters {
   </build>
 </model>`;
 
-    return new Blob([xml], { type: 'application/xml' });
+    const contentTypesXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>
+</Types>`;
+
+    const relsXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
+</Relationships>`;
+
+    const entries: ZipEntry[] = [
+      { filename: '[Content_Types].xml', data: contentTypesXml },
+      { filename: '_rels/.rels', data: relsXml },
+      { filename: '3D/3dmodel.model', data: modelXml },
+    ];
+
+    return ZipPackager.createZipSync(entries, 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml');
   }
 
   /**
@@ -349,6 +367,7 @@ export class FormatExporters {
       '#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));',
       '#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));',
       '#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());',
+      "#19=PLANE('',#10);",
     ];
 
     let currId = 30;
@@ -367,11 +386,11 @@ export class FormatExporters {
       const p2 = vIds[i1];
       const p3 = vIds[i2];
       const polyId = currId++;
-      lines.push(`#${polyId}=POLY_LOOP('',(${p1},${p2},${p3}));`);
+      lines.push(`#${polyId}=POLY_LOOP('',(#${p1},#${p2},#${p3}));`);
       const boundId = currId++;
       lines.push(`#${boundId}=FACE_OUTER_BOUND('',#${polyId},.T.);`);
       const faceId = currId++;
-      lines.push(`#${faceId}=FACE_SURFACE('',((#${boundId})),#10,.T.);`);
+      lines.push(`#${faceId}=FACE_SURFACE('',(#${boundId}),#19,.T.);`);
       faceIds.push(`#${faceId}`);
     }
 

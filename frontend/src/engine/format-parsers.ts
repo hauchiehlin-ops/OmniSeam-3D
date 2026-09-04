@@ -177,7 +177,7 @@ export class FormatParsers {
   }
 
   /**
-   * Point cloud parser with 3D faceted hull reconstruction.
+   * Point cloud parser with true 3D convex hull surface reconstruction.
    */
   static parsePointCloud(text: string): MeshGeometry {
     const lines = text.split('\n');
@@ -190,12 +190,138 @@ export class FormatParsers {
       }
     }
 
-    // Connect into surface triangles
-    const faces: number[][] = [];
-    for (let i = 0; i + 2 < vertices.length; i += 3) {
-      faces.push([i, i + 1, i + 2]);
+    if (vertices.length < 4) {
+      return { vertices, faces: [] };
     }
 
+    const faces = this.computeConvexHull3D(vertices);
     return { vertices, faces };
   }
+
+  /**
+   * Computes a 3D Convex Hull triangulated surface for an arbitrary set of 3D points.
+   */
+  private static computeConvexHull3D(pts: number[][]): number[][] {
+    const n = pts.length;
+    if (n < 4) return [];
+
+    // Find 4 non-coplanar points to form an initial tetrahedron
+    let p0 = 0;
+    // Find point with max distance from p0
+    let p1 = 1;
+    let maxDist = 0;
+    for (let i = 1; i < n; i++) {
+      const d = distSq(pts[p0], pts[i]);
+      if (d > maxDist) { maxDist = d; p1 = i; }
+    }
+    if (maxDist < 1e-8) return [];
+
+    // Find p2 maximizing triangle area with p0, p1
+    let p2 = -1;
+    let maxArea = 0;
+    for (let i = 0; i < n; i++) {
+      if (i === p0 || i === p1) continue;
+      const c = cross(sub(pts[p1], pts[p0]), sub(pts[i], pts[p0]));
+      const a = normSq(c);
+      if (a > maxArea) { maxArea = a; p2 = i; }
+    }
+    if (p2 === -1 || maxArea < 1e-8) return [];
+
+    // Find p3 maximizing volume of tetrahedron
+    const normal = cross(sub(pts[p1], pts[p0]), sub(pts[p2], pts[p0]));
+    let p3 = -1;
+    let maxVol = 0;
+    for (let i = 0; i < n; i++) {
+      if (i === p0 || i === p1 || i === p2) continue;
+      const v = Math.abs(dot(normal, sub(pts[i], pts[p0])));
+      if (v > maxVol) { maxVol = v; p3 = i; }
+    }
+    if (p3 === -1 || maxVol < 1e-8) return [];
+
+    // Orient initial 4 faces
+    type Face = [number, number, number];
+    let faces: Face[] = [];
+    const addInitialFace = (a: number, b: number, c: number, oppositePt: number[]) => {
+      const fn = cross(sub(pts[b], pts[a]), sub(pts[c], pts[a]));
+      if (dot(fn, sub(oppositePt, pts[a])) > 0) {
+        faces.push([a, c, b]); // flip normal
+      } else {
+        faces.push([a, b, c]);
+      }
+    };
+
+    addInitialFace(p0, p1, p2, pts[p3]);
+    addInitialFace(p0, p1, p3, pts[p2]);
+    addInitialFace(p0, p2, p3, pts[p1]);
+    addInitialFace(p1, p2, p3, pts[p0]);
+
+    // Incremental hull: add remaining points
+    for (let i = 0; i < n; i++) {
+      if (i === p0 || i === p1 || i === p2 || i === p3) continue;
+      const pt = pts[i];
+
+      const visible: boolean[] = [];
+      let anyVisible = false;
+      for (let f = 0; f < faces.length; f++) {
+        const [a, b, c] = faces[f];
+        const fn = cross(sub(pts[b], pts[a]), sub(pts[c], pts[a]));
+        const isVis = dot(fn, sub(pt, pts[a])) > 1e-7;
+        visible.push(isVis);
+        if (isVis) anyVisible = true;
+      }
+
+      if (!anyVisible) continue; // Inside hull
+
+      // Find horizon edges
+      const edgeCount = new Map<string, { u: number; v: number; count: number }>();
+      for (let f = 0; f < faces.length; f++) {
+        if (!visible[f]) continue;
+        const [a, b, c] = faces[f];
+        const edges = [[a, b], [b, c], [c, a]];
+        for (const [u, v] of edges) {
+          const key = u < v ? `${u}_${v}` : `${v}_${u}`;
+          const cur = edgeCount.get(key);
+          if (cur) {
+            cur.count++;
+          } else {
+            edgeCount.set(key, { u, v, count: 1 });
+          }
+        }
+      }
+
+      // Retain only non-visible faces
+      faces = faces.filter((_, idx) => !visible[idx]);
+
+      // Connect horizon edges to new point i
+      for (const edge of edgeCount.values()) {
+        if (edge.count === 1) {
+          // Find orientation matching the deleted visible face
+          faces.push([edge.u, edge.v, i]);
+        }
+      }
+    }
+
+    return faces;
+  }
+}
+
+function sub(a: number[], b: number[]): number[] {
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+function dot(a: number[], b: number[]): number {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+function cross(a: number[], b: number[]): number[] {
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+}
+function normSq(a: number[]): number {
+  return a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+}
+function distSq(a: number[], b: number[]): number {
+  const dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
+  return dx * dx + dy * dy + dz * dz;
 }

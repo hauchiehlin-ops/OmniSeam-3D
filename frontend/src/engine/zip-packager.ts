@@ -31,9 +31,9 @@ export class ZipPackager {
   }
 
   /**
-   * Bundles an array of files into a standard downloadable .zip Blob.
+   * Bundles an array of files into a standard downloadable .zip Blob synchronously.
    */
-  static async createZip(entries: ZipEntry[]): Promise<Blob> {
+  static createZipSync(entries: ZipEntry[], mimeType: string = 'application/zip'): Blob {
     const localHeaders: Uint8Array[] = [];
     const centralHeaders: Uint8Array[] = [];
     let offset = 0;
@@ -126,6 +126,13 @@ export class ZipPackager {
     ev.setUint16(20, 0, true);          // Comment length
 
     const parts = [...localHeaders, ...centralHeaders, eocd];
-    return new Blob(parts as unknown as BlobPart[], { type: 'application/zip' });
+    return new Blob(parts as unknown as BlobPart[], { type: mimeType });
+  }
+
+  /**
+   * Bundles an array of files into a standard downloadable .zip Blob.
+   */
+  static async createZip(entries: ZipEntry[], mimeType: string = 'application/zip'): Promise<Blob> {
+    return this.createZipSync(entries, mimeType);
   }
 }

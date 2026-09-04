@@ -34,11 +34,10 @@ class DCCEngine:
                 return loaded
             elif hasattr(loaded, "vertices") and hasattr(loaded, "faces"):
                 return trimesh.Trimesh(vertices=loaded.vertices, faces=loaded.faces)
-        except Exception:
-            pass
-
-        # Fallback procedural mesh
-        return trimesh.creation.box(extents=[20, 20, 20])
+        raise ValueError(
+            f"Failed to load 3D mesh from file: '{file_path.name}'. "
+            f"The format may be unsupported, require Blender (for FBX/Blend/USD), or the file may be corrupted."
+        )
 
     @classmethod
     def _blender_headless_convert(cls, file_path: Path) -> Optional[trimesh.Trimesh]:

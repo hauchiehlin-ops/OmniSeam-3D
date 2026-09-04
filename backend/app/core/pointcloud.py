@@ -15,8 +15,10 @@ class PointCloudEngine:
         points = cls._extract_points(file_path, ext)
         
         if points is None or len(points) < 4:
-            # Fallback sphere if empty point cloud
-            return trimesh.creation.icosphere(subdivisions=2, radius=10.0)
+            raise ValueError(
+                f"Point cloud in '{file_path.name}' contains fewer than 4 valid points; "
+                f"a 3D surface cannot be triangulated."
+            )
 
         # 1. Try Open3D Poisson Reconstruction if installed
         mesh = cls._try_open3d_poisson(points)
@@ -32,8 +34,10 @@ class PointCloudEngine:
         except Exception:
             pass
 
-        # 3. Simple bounding box fallback
-        return trimesh.creation.box(extents=[20, 20, 20])
+        raise ValueError(
+            f"Failed to reconstruct 3D surface from point cloud '{file_path.name}'. "
+            f"Ensure Open3D or scipy is installed and the point cloud represents a reconstructable 3D shape."
+        )
 
     @classmethod
     def _extract_points(cls, file_path: Path, ext: str) -> Optional[np.ndarray]:

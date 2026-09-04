@@ -48,11 +48,10 @@ class BIMEngine:
         except Exception:
             pass
 
-        # Fallback building geometry
-        base = trimesh.creation.box(extents=[50, 50, 30])
-        roof = trimesh.creation.cone(radius=35, height=20)
-        roof.apply_translation([0, 0, 25])
-        return trimesh.util.concatenate([base, roof])
+        raise ValueError(
+            f"Failed to read IFC model: '{file_path.name}'. "
+            f"Ensure IfcOpenShell is installed and the file contains valid 3D geometric representations."
+        )
 
     @classmethod
     def load_dxf(cls, file_path: Path) -> trimesh.Trimesh:
@@ -132,14 +131,19 @@ except Exception:
         # Fallback standard trimesh loader
         try:
             loaded = trimesh.load(str(file_path))
-            if isinstance(loaded, trimesh.Trimesh):
+            if isinstance(loaded, trimesh.Trimesh) and len(loaded.vertices) > 0 and len(loaded.faces) > 0:
                 return loaded
             elif isinstance(loaded, trimesh.Scene):
-                return trimesh.util.concatenate(loaded.dump())
+                mesh = trimesh.util.concatenate(loaded.dump())
+                if len(mesh.vertices) > 0 and len(mesh.faces) > 0:
+                    return mesh
         except Exception:
             pass
 
-        return trimesh.creation.box(extents=[40, 40, 2])
+        raise ValueError(
+            f"No visible 3D geometry could be extracted from DXF/DWG file: '{file_path.name}'. "
+            f"Ensure ezdxf or LibreDWG/FreeCAD is installed and the drawing contains 3D entities (3DFACE, LINE, POLYLINE, etc.)."
+        )
 
     @classmethod
     def _parse_dxf_entities(cls, dxf_path: Path) -> Optional[trimesh.Trimesh]:

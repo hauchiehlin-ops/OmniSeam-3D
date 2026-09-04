@@ -12,11 +12,24 @@ def test_cad_options_defaults():
     assert options.sewing_tolerance == 0.001
 
 
-def test_cad_engine_placeholder_generation():
-    dummy_path = Path("/tmp/sample_engine.step")
+def test_cad_engine_invalid_file_raises():
+    dummy_path = Path("/tmp/nonexistent_sample_engine.step")
     options = CADOptions(linear_deflection=0.005)
-    mesh = CADEngine.load_cad_file(dummy_path, options)
+    with pytest.raises(ValueError, match="Unable to parse CAD file"):
+        CADEngine.load_cad_file(dummy_path, options)
+
+
+def test_cad_engine_step_export_structure(tmp_path):
+    import trimesh
+    box = trimesh.creation.box(extents=[10, 10, 10])
+    out_step = tmp_path / "test_out.step"
+    CADEngine._export_step_facets(box, out_step)
     
-    assert mesh is not None
-    assert len(mesh.vertices) > 0
-    assert len(mesh.faces) > 0
+    assert out_step.exists()
+    content = out_step.read_text(encoding="utf-8")
+    assert "ISO-10303-21;" in content
+    assert "#19=PLANE('',#10);" in content
+    assert "POLY_LOOP('',(#" in content
+    assert "FACE_SURFACE('',(#" in content
+    assert ",#19,.T.);" in content
+    assert "#20=FACETED_BREP('Solid1',#21);" in content

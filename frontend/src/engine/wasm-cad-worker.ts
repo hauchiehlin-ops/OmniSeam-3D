@@ -22,66 +22,84 @@ export interface CadWorkerResponse {
 
 export class WasmCadWorkerClient {
   /**
-   * Parses STEP / IGES file client-side off-thread with fallback procedural discretization.
+   * Parses STEP file client-side off-thread by extracting real Cartesian points and Poly loops.
    */
   static async parseCadFile(
     file: File, 
-    linearDeflection: number = 0.005, 
-    angularDeflection: number = 0.1
+    _linearDeflection: number = 0.005, 
+    _angularDeflection: number = 0.1
   ): Promise<MeshGeometry> {
     const buffer = await file.arrayBuffer();
-    const text = new TextDecoder().decode(buffer.slice(0, 10000));
+    const text = new TextDecoder().decode(buffer);
     
     // Check if valid STEP / IGES file signature
     const isStep = text.includes('ISO-10303-21') || text.includes('FILE_SCHEMA');
     const isIges = text.includes('S      1') || text.includes('G      1') || file.name.endsWith('.igs') || file.name.endsWith('.iges');
 
-    if (isStep || isIges) {
-      // Fast client-side engineering procedural CAD boundary reconstruction
-      return this.synthesizeProceduralCadGeometry(file.name);
+    if (isStep) {
+      const mesh = this.parseStepFacetedBRep(text);
+      if (mesh.vertices.length > 0 && mesh.faces.length > 0) {
+        return mesh;
+      }
+      throw new Error('Parametric NURBS / B-Spline STEP files require backend OpenCASCADE tessellation. Please enable backend pipeline.');
     }
 
-    throw new Error('Unsupported CAD format signature');
+    if (isIges) {
+      throw new Error('IGES CAD models require OpenCASCADE tessellation engine. Please submit for backend conversion.');
+    }
+
+    throw new Error('Unsupported CAD format signature: expected ISO-10303-21 STEP or IGES 5.3.');
   }
 
-  private static synthesizeProceduralCadGeometry(name: string): MeshGeometry {
+  /**
+   * Real in-browser STEP ISO-10303-21 Faceted B-Rep parser.
+   */
+  private static parseStepFacetedBRep(text: string): MeshGeometry {
+    const pointMap = new Map<number, number>(); // STEP entity id -> vertex array index
     const vertices: number[][] = [];
     const faces: number[][] = [];
 
-    // Construct high-precision industrial B-Rep cylinder & flange
-    const segments = 64;
-    const radius = 20;
-    const height = 40;
+    // 1. Parse CARTESIAN_POINT entities: #30=CARTESIAN_POINT('',(0.000000,0.000000,0.000000));
+    const pointRegex = /#(\d+)\s*=\s*CARTESIAN_POINT\s*\(\s*'(?:[^']*)'\s*,\s*\(\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*\)\s*\)\s*;/g;
+    let match: RegExpExecArray | null;
 
-    // Center bottom and top vertices
-    const bottomCenterIdx = 0;
-    const topCenterIdx = 1;
-    vertices.push([0, -height / 2, 0]);
-    vertices.push([0, height / 2, 0]);
-
-    // Bottom and top rings
-    for (let i = 0; i < segments; i++) {
-      const theta = (i / segments) * Math.PI * 2;
-      const x = Math.cos(theta) * radius;
-      const z = Math.sin(theta) * radius;
-      vertices.push([x, -height / 2, z]); // idx: 2 + i * 2
-      vertices.push([x, height / 2, z]);  // idx: 2 + i * 2 + 1
+    while ((match = pointRegex.exec(text)) !== null) {
+      const id = parseInt(match[1], 10);
+      const x = parseFloat(match[2]);
+      const y = parseFloat(match[3]);
+      const z = parseFloat(match[4]);
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+        pointMap.set(id, vertices.length);
+        vertices.push([x, y, z]);
+      }
     }
 
-    for (let i = 0; i < segments; i++) {
-      const next = (i + 1) % segments;
-      const b1 = 2 + i * 2;
-      const t1 = 2 + i * 2 + 1;
-      const b2 = 2 + next * 2;
-      const t2 = 2 + next * 2 + 1;
+    // 2. Parse POLY_LOOP entities: #31=POLY_LOOP('',(#30,#31,#32));
+    const loopRegex = /#\d+\s*=\s*POLY_LOOP\s*\(\s*'(?:[^']*)'\s*,\s*\(\s*([^)]+)\s*\)\s*\)\s*;/g;
 
-      // Bottom disc fan
-      faces.push([bottomCenterIdx, b2, b1]);
-      // Top disc fan
-      faces.push([topCenterIdx, t1, t2]);
-      // Side quad (2 triangles)
-      faces.push([b1, t1, b2]);
-      faces.push([b2, t1, t2]);
+    while ((match = loopRegex.exec(text)) !== null) {
+      const refsStr = match[1];
+      const refs = refsStr.split(',').map(s => {
+        const cleaned = s.trim().replace(/^#/, '');
+        return parseInt(cleaned, 10);
+      }).filter(n => !isNaN(n));
+
+      const vIndices: number[] = [];
+      for (const ref of refs) {
+        const vIdx = pointMap.get(ref);
+        if (vIdx !== undefined) {
+          vIndices.push(vIdx);
+        }
+      }
+
+      if (vIndices.length === 3) {
+        faces.push([vIndices[0], vIndices[1], vIndices[2]]);
+      } else if (vIndices.length > 3) {
+        // Fan triangulation for polygons
+        for (let j = 1; j < vIndices.length - 1; j++) {
+          faces.push([vIndices[0], vIndices[j], vIndices[j + 1]]);
+        }
+      }
     }
 
     return { vertices, faces };
