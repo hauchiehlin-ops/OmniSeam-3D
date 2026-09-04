@@ -13,6 +13,8 @@
 </p>
 
 > **OmniSeam 3D** is an open-source, industrial-grade 3D model universal converter and autonomous geometric defect repair engine. It bridges CAD, Mesh, BIM/AEC, and Point Clouds with automated B-Rep topology sewing, hole filling, non-manifold resolution, and glTF optimization at **$0 licensing cost (100% FOSS)**.
+> 
+> 📖 **開發歷程與架構知識庫**：請參閱 [DEVELOPMENT_LOG.md](./DEVELOPMENT_LOG.md) 以獲取完整的版本演進、避坑指南與決策架構。
 
 ---
 
