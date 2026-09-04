@@ -5,9 +5,7 @@ import {
   Download, 
   Eye, 
   CheckCircle2, 
-  Clock, 
-  AlertCircle,
-  FileCheck
+  AlertCircle
 } from 'lucide-react';
 import { TaskResponse } from '../types';
 import { apiClient } from '../api/client';
@@ -39,6 +37,10 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           const isSelected = task.task_id === activeTaskId;
           const isDone = task.status === 'completed';
           const isFailed = task.status === 'failed';
+
+          const baseName = task.filename.substring(0, task.filename.lastIndexOf('.')) || task.filename;
+          const downloadFilename = `${baseName}_omniseam.${task.target_format}`;
+          const downloadHref = apiClient.getDownloadUrl(task);
 
           return (
             <div
@@ -98,8 +100,8 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
                     </button>
 
                     <a
-                      href={apiClient.getDownloadUrl(task.task_id)}
-                      download
+                      href={downloadHref}
+                      download={downloadFilename}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all"
                       title={t('tasks.download')}
                     >

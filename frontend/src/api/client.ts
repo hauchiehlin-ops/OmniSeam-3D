@@ -18,7 +18,7 @@ export const apiClient = {
       try {
         return await ClientPipeline.inspectModel(file, lang);
       } catch (err) {
-        console.warn("Client-side inspect failed, attempting backend fallback:", err);
+        console.warn("Client-side inspect fallback:", err);
       }
     }
 
@@ -74,8 +74,9 @@ export const apiClient = {
     return response.data;
   },
 
-  getDownloadUrl(taskId: string): string {
-    return `${API_BASE}/tasks/${taskId}/download`;
+  getDownloadUrl(task: TaskResponse): string {
+    if (task.download_url) return task.download_url;
+    return `${API_BASE}/tasks/${task.task_id}/download`;
   },
 
   getPreviewUrl(taskId: string): string {
@@ -84,6 +85,9 @@ export const apiClient = {
 
   async getSampleModel(sampleType: 'broken' | 'bracket'): Promise<{ file: File; name: string }> {
     try {
+      if (this.currentEngineMode === 'client') {
+        return this.generateLocalSample(sampleType);
+      }
       const response = await axios.get(`${API_BASE}/sample/${sampleType}`, {
         responseType: 'blob',
       });
@@ -91,33 +95,25 @@ export const apiClient = {
       const file = new File([response.data], filename, { type: 'model/stl' });
       return { file, name: filename };
     } catch {
-      // Local fallback synthetic sample generator
       return this.generateLocalSample(sampleType);
     }
   },
 
   generateLocalSample(sampleType: 'broken' | 'bracket'): { file: File; name: string } {
     if (sampleType === 'broken') {
-      // Create simple STL with hole (an open triangular prism without top cap)
       let stl = "solid defective_mesh\n";
-      // Bottom face
       stl += "  facet normal 0 0 -1\n    outer loop\n      vertex 0 0 0\n      vertex 30 0 0\n      vertex 15 25 0\n    endloop\n  endfacet\n";
-      // Side 1
       stl += "  facet normal 0 -1 0\n    outer loop\n      vertex 0 0 0\n      vertex 30 0 0\n      vertex 0 0 20\n    endloop\n  endfacet\n";
       stl += "  facet normal 0 -1 0\n    outer loop\n      vertex 30 0 0\n      vertex 30 0 20\n      vertex 0 0 20\n    endloop\n  endfacet\n";
-      // Side 2
       stl += "  facet normal 1 1 0\n    outer loop\n      vertex 30 0 0\n      vertex 15 25 0\n      vertex 30 0 20\n    endloop\n  endfacet\n";
       stl += "  facet normal 1 1 0\n    outer loop\n      vertex 15 25 0\n      vertex 15 25 20\n      vertex 30 0 20\n    endloop\n  endfacet\n";
-      // Side 3
       stl += "  facet normal -1 1 0\n    outer loop\n      vertex 15 25 0\n      vertex 0 0 0\n      vertex 15 25 20\n    endloop\n  endfacet\n";
       stl += "  facet normal -1 1 0\n    outer loop\n      vertex 0 0 0\n      vertex 0 0 20\n      vertex 15 25 20\n    endloop\n  endfacet\n";
-      // Top face is INTENTIONALLY OMITTED to create a boundary hole defect!
       stl += "endsolid defective_mesh\n";
 
       const file = new File([stl], "defective_sample.stl", { type: 'model/stl' });
       return { file, name: "defective_sample.stl" };
     } else {
-      // Watertight box STL
       let stl = "solid watertight_bracket\n";
       const addQuad = (p0: string, p1: string, p2: string, p3: string, n: string) => {
         stl += `  facet normal ${n}\n    outer loop\n      vertex ${p0}\n      vertex ${p1}\n      vertex ${p2}\n    endloop\n  endfacet\n`;
