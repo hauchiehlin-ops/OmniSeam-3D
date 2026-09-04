@@ -45,6 +45,14 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.16` (2026-09-04) - 官方公共節點全面自動備援與一般使用者 0 設定體驗定案
+- **架構原則確認**：
+  - **99% 一般大眾**：完全「零設定、零註冊、即開即用」。打開 `https://omniseam-3d.vercel.app` 即可直接使用純前端高速轉譯（STL, OBJ, 3MF, STEP, PLY, GLB）；若上傳 SolidWorks/Inventor，亦可直接一鍵使用官方預設雲端節點（`https://hauchieh-omniseam-engine.hf.space`）。
+  - **進階/企業用戶**：保留「專屬節點設定 (BYON)」與「本地 Docker」選項，供需要完全隔離算力與極致隱私的大型企業或研究機構使用。
+- **改進項目**：
+  - `frontend/src/api/client.ts`：導出並設置 `OFFICIAL_PUBLIC_BACKEND_URL` 作為預設後端服務端 fallback，確保任何環境下皆能無縫呼叫。
+  - `frontend/src/components/CadUnlockModal.tsx`：專有 CAD 彈窗加入「⚡ 一鍵使用官方節點轉譯 (免設定 · 即開即用)」首選按鈕，簡化操作路徑至 1 鍵直達。
+
 ### `v1.0.15` (2026-09-04) - 修復 Hugging Face Spaces Errno 98 埠位重複綁定
 - **問題根因**：
   - Hugging Face Spaces Gradio SDK 啟動器內部會自動接管網路連接埠，若 `app.py` 中額外呼叫 `uvicorn.run(...)` 會導致重複綁定 `0.0.0.0:7860` 出現 `[Errno 98] address already in use` 錯誤。

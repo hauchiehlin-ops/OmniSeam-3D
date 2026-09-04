@@ -54,6 +54,7 @@ export function normalizeBackendUrl(rawUrl: string): string {
   return clean;
 }
 
+export const OFFICIAL_PUBLIC_BACKEND_URL = 'https://hauchieh-omniseam-engine.hf.space';
 const STORAGE_KEY_BACKEND_URL = 'omniseam_backend_url';
 
 export const apiClient = {
@@ -82,7 +83,8 @@ export const apiClient = {
     if (this.customBackendUrl) {
       return `${this.customBackendUrl}/api/v1`;
     }
-    return '/api/v1';
+    // Fallback to official public backend node when backend API is requested
+    return `${OFFICIAL_PUBLIC_BACKEND_URL}/api/v1`;
   },
 
   async testBackendConnection(targetUrl?: string): Promise<ConnectionTestResult> {
