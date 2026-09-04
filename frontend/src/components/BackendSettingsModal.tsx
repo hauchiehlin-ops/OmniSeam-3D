@@ -108,7 +108,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-dark-surface border border-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-3xl bg-dark-surface border border-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border bg-dark-panel/60">
           <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-dark-border bg-dark-panel/40 px-6 pt-2">
+        <div className="flex flex-wrap border-b border-dark-border bg-dark-panel/40 px-4 sm:px-6 pt-2 gap-1">
           <button
             onClick={() => setActiveTab('hf')}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${

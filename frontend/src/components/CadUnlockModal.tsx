@@ -66,10 +66,10 @@ export const CadUnlockModal: React.FC<CadUnlockModalProps> = ({
         <div className="p-6 space-y-4">
           <div className="text-xs text-slate-300 leading-relaxed space-y-2">
             <p>
-              {t('cad_unlock.desc_1')}
+              {t('cad_unlock.detected_msg', { ext })}
             </p>
             <p className="text-slate-400">
-              {t('cad_unlock.desc_2')}
+              {t('cad_unlock.choose_action')}
             </p>
           </div>
 

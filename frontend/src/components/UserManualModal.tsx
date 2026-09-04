@@ -44,7 +44,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-      <div className="bg-dark-surface border border-dark-border rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-dark-surface border border-dark-border rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-dark-border flex items-center justify-between bg-dark-surface/95 backdrop-blur-md">
           <div className="flex items-center gap-3">
@@ -69,11 +69,11 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           </button>
         </div>
 
-        {/* Navigation Tabs - Responsive scrollable without clipping */}
-        <div className="flex flex-wrap sm:flex-nowrap border-b border-dark-border bg-dark-panel/60 px-3 sm:px-6 overflow-x-auto gap-1.5 sm:gap-2 py-2.5 scrollbar-thin scrollbar-thumb-slate-700">
+        {/* Navigation Tabs - Responsive flex-wrap without clipping */}
+        <div className="flex flex-wrap items-center border-b border-dark-border bg-dark-panel/60 px-4 sm:px-6 gap-1.5 sm:gap-2 py-2.5">
           <button
             onClick={() => setActiveTab('quickstart')}
-            className={`flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeTab === 'quickstart'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
@@ -85,7 +85,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('viewport')}
-            className={`flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeTab === 'viewport'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
@@ -97,7 +97,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('engine')}
-            className={`flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeTab === 'engine'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
@@ -109,7 +109,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('slicer')}
-            className={`flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeTab === 'slicer'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
@@ -121,7 +121,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('commands')}
-            className={`flex items-center shrink-0 gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               activeTab === 'commands'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
