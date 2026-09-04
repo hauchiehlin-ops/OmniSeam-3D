@@ -69,66 +69,71 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           </button>
         </div>
 
-        {/* Navigation Tabs - Responsive flex-wrap without clipping */}
-        <div className="flex flex-wrap items-center border-b border-dark-border bg-dark-panel/60 px-4 sm:px-6 gap-1.5 sm:gap-2 py-2.5">
+        {/* Navigation Tabs - 5 equal columns on desktop, 100% visible across all languages */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 border-b border-dark-border bg-dark-panel/60 p-2 sm:p-3 gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveTab('quickstart')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'quickstart'
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
             }`}
+            title={t('manual.tab_quickstart')}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('manual.tab_quickstart')}</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{t('manual.tab_quickstart')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('viewport')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'viewport'
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
             }`}
+            title={t('manual.tab_viewport')}
           >
-            <MousePointer className="w-3.5 h-3.5" />
-            <span>{t('manual.tab_viewport')}</span>
+            <MousePointer className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{t('manual.tab_viewport')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('engine')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'engine'
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
             }`}
+            title={t('manual.tab_engine')}
           >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>{t('manual.tab_engine')}</span>
+            <Cpu className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{t('manual.tab_engine')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('slicer')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'slicer'
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
             }`}
+            title={t('manual.tab_slicer')}
           >
-            <Printer className="w-3.5 h-3.5" />
-            <span>{t('manual.tab_slicer')}</span>
+            <Printer className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{t('manual.tab_slicer')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('commands')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'commands'
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
             }`}
+            title={t('manual.tab_commands')}
           >
-            <Terminal className="w-3.5 h-3.5" />
-            <span>{t('manual.tab_commands')}</span>
+            <Terminal className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{t('manual.tab_commands')}</span>
           </button>
         </div>
 
