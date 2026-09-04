@@ -11,6 +11,8 @@ interface NavbarProps {
   hasAudit?: boolean;
   engineMode: EngineMode;
   onOpenBackendSettings: () => void;
+  onOpenManual: () => void;
+  onOpenPrivacy: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -18,6 +20,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   hasAudit,
   engineMode,
   onOpenBackendSettings,
+  onOpenManual,
+  onOpenPrivacy,
 }) => {
   const { t } = useTranslation();
   const backendUrl = apiClient.getStoredBackendUrl();
@@ -48,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
 
   return (
-    <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between">
+    <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <img
           src={logoImg}
@@ -70,7 +74,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* User Manual Button */}
+        <button
+          onClick={onOpenManual}
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-panel border border-dark-border text-slate-300 hover:text-white hover:border-slate-500 text-xs font-medium transition-all shadow-sm active:scale-95"
+          title={t('manual.nav_btn')}
+        >
+          <span>📖</span>
+          <span>{t('manual.nav_btn')}</span>
+        </button>
+
+        {/* Privacy Policy Button */}
+        <button
+          onClick={onOpenPrivacy}
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-panel border border-dark-border text-slate-300 hover:text-white hover:border-slate-500 text-xs font-medium transition-all shadow-sm active:scale-95"
+          title={t('privacy.nav_btn')}
+        >
+          <span className="text-emerald-400">🛡️</span>
+          <span>{t('privacy.nav_btn')}</span>
+        </button>
+
         {/* Engine Node Status Button -> Opens Backend Modal */}
         <button
           onClick={onOpenBackendSettings}
@@ -86,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <Cloud className="w-3.5 h-3.5 text-indigo-400" />
           )}
-          <span>{getBackendDisplayName()}</span>
+          <span className="hidden sm:inline">{getBackendDisplayName()}</span>
           <Settings className="w-3 h-3 text-slate-400 group-hover:text-slate-200 group-hover:rotate-45 transition-all" />
         </button>
 
@@ -96,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600/20 border border-brand-500/40 text-brand-300 text-xs font-medium hover:bg-brand-600/30 transition-all"
           >
             <Activity className="w-3.5 h-3.5 text-brand-400" />
-            <span>{t('audit.title')}</span>
+            <span className="hidden sm:inline">{t('audit.title')}</span>
           </button>
         )}
 

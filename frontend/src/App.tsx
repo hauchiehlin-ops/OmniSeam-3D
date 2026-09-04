@@ -14,6 +14,9 @@ import { MeasureTool } from './components/MeasureTool';
 import { BackendSettingsModal } from './components/BackendSettingsModal';
 import { CadUnlockModal } from './components/CadUnlockModal';
 import { PublicLimitModal } from './components/PublicLimitModal';
+import { UserManualModal } from './components/UserManualModal';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
+import { Footer } from './components/Footer';
 
 import { 
   ConversionConfig, 
@@ -56,6 +59,8 @@ export const App: React.FC = () => {
   const [lockedCadFile, setLockedCadFile] = useState<File | null>(null);
   const [showPublicLimitModal, setShowPublicLimitModal] = useState(false);
   const [publicLimitFile, setPublicLimitFile] = useState<File | null>(null);
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
   // File and Configuration State
@@ -353,6 +358,8 @@ export const App: React.FC = () => {
         hasAudit={Boolean(activeTask?.report || inspectData)}
         engineMode={engineMode}
         onOpenBackendSettings={() => setShowBackendModal(true)}
+        onOpenManual={() => setShowManualModal(true)}
+        onOpenPrivacy={() => setShowPrivacyModal(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6">
@@ -481,6 +488,26 @@ export const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer 
+        onOpenManual={() => setShowManualModal(true)}
+        onOpenPrivacy={() => setShowPrivacyModal(true)}
+        onOpenBackendSettings={() => setShowBackendModal(true)}
+      />
+
+      {/* User Manual Modal */}
+      <UserManualModal
+        isOpen={showManualModal}
+        onClose={() => setShowManualModal(false)}
+        onOpenBackendSettings={() => setShowBackendModal(true)}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
 
       {/* Backend Settings Modal */}
       <BackendSettingsModal

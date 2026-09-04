@@ -276,6 +276,46 @@
     "duplicate_btn": "🚀 1-Click Duplicate Personal 16GB Space (Free)",
     "settings_btn": "Engine Settings / Enter Private URL",
     "close": "Close"
+  },
+  "manual": {
+    "nav_btn": "User Manual",
+    "title": "OmniSeam 3D Official User & Operations Manual",
+    "subtitle": "Step-by-Step Guide · 3D Viewport Controls & Self-Hosting Instructions",
+    "tab_quickstart": "🚀 Quick Start (3 Steps)",
+    "tab_viewport": "🖱️ 3D Viewport & Tools",
+    "tab_engine": "⚙️ Dual Engine Architecture",
+    "tab_slicer": "🖨️ 3D Print Watertight Guide",
+    "tab_commands": "💻 Deployment Commands",
+    "step1_title": "1. Drag & Drop 3D File",
+    "step1_desc": "Supports STEP, IGES, SolidWorks, STL, OBJ, 3MF, IFC, DXF and more. Automatic topology inspection runs instantly.",
+    "step2_title": "2. Select Scenario Preset",
+    "step2_desc": "1-click switch between 3D Print, Game Asset, or Raw Passthrough mode. Fine-tune tolerances via advanced settings.",
+    "step3_title": "3. Convert & Inspect in 3D",
+    "step3_desc": "Automated hole-filling and format conversion completes in seconds. Explore Dual Split View, Deviation Heatmap, and download assets.",
+    "presets_guide_title": "Scenario Preset Configuration Profiles",
+    "supported_formats_tag": "Supported Formats"
+  },
+  "privacy": {
+    "nav_btn": "Privacy & Security",
+    "title": "Privacy Policy & Data Security Statement",
+    "subtitle": "Enterprise Confidentiality · 100% Client-Side Offline · Zero Data Retention",
+    "banner_title": "100% Absolute Confidentiality Guarantee for your 3D CAD Files",
+    "banner_desc": "3D models represent your most critical intellectual property. OmniSeam 3D is architected around Pure Client offline execution and isolated private compute spaces to ensure zero data leakage.",
+    "pillar1_title": "100% Pure Client Offline Compute",
+    "pillar1_desc": "Standard meshes and CAD files process entirely inside your browser via WebAssembly. 0% network file transfer.",
+    "pillar2_title": "Zero Telemetry & Zero Tracking",
+    "pillar2_desc": "We never log or transmit model filenames, dimensions, vertices, or geometric metadata.",
+    "pillar3_title": "Isolated Dedicated Spaces",
+    "pillar3_desc": "Dedicated nodes on Hugging Face Spaces or local Docker run in isolated sandboxes with ephemeral storage.",
+    "pillar4_title": "100% Open-Source Transparency",
+    "pillar4_desc": "The complete codebase is publicly open on GitHub under MIT/Apache-2.0. No hidden backdoors or vendor lock-in.",
+    "lifecycle_title": "Data Processing Lifecycle",
+    "table_stage": "Lifecycle Stage",
+    "table_client_mode": "Pure Client Mode",
+    "table_dedicated_node": "Dedicated Space Node",
+    "stage_upload": "File Transfer",
+    "stage_processing": "Geometric Healing",
+    "stage_retention": "Storage & Retention"
   }
 }
 

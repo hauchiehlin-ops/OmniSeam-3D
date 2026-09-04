@@ -276,6 +276,46 @@
     "duplicate_btn": "🚀 一鍵 Duplicate 複製個人專屬 16GB 節點 (10秒完成)",
     "settings_btn": "前往節點設定 / 填寫專屬網址",
     "close": "關閉"
+  },
+  "manual": {
+    "nav_btn": "操作說明手冊",
+    "title": "OmniSeam 3D 官方完整操作說明手冊",
+    "subtitle": "零基礎 · 手把手實戰教學 · 3D 工具操作與指令程序指南",
+    "tab_quickstart": "🚀 快速上手 (3步驟)",
+    "tab_viewport": "🖱️ 3D 視角與工具",
+    "tab_engine": "⚙️ 雙核心算力架構",
+    "tab_slicer": "🖨️ 3D 列印水密指南",
+    "tab_commands": "💻 私有化部署指令",
+    "step1_title": "1. 拖放或點選 3D 檔案",
+    "step1_desc": "支援 STEP, IGES, SolidWorks, STL, OBJ, 3MF, IFC, DXF 等多種格式。系統將即刻進行全自動拓撲掃描。",
+    "step2_title": "2. 選擇情境預設組態",
+    "step2_desc": "一鍵切換【🖨️ 3D 列印/製造】、【🎮 遊戲/渲染】或【🔍 原始轉存】，亦可展開進階參數自訂細部容差。",
+    "step3_title": "3. 點擊轉換並檢視對比",
+    "step3_desc": "極速完成破面修復與格式輸出，可開啟【雙分屏對比】、【🔥 熱力圖】並即時下載轉換結果或體檢報告。",
+    "presets_guide_title": "3 大智慧情境預設模式指南",
+    "supported_formats_tag": "支援格式矩陣"
+  },
+  "privacy": {
+    "nav_btn": "隱私權與安全條款",
+    "title": "隱私權政策與資料安全聲明",
+    "subtitle": "企業級資料機密防護 · 100% 本機端離線隔離 · 零資料留存",
+    "banner_title": "我們對您的 3D 圖紙機密性做出 100% 安全承諾",
+    "banner_desc": "3D 模型是企業最核心的商業機密與智慧財產權。OmniSeam 3D 採用純前端離線與完全隔離的私有算力架構，確保您的模型資料絕對安全，不被任何人窺探或濫用。",
+    "pillar1_title": "100% 純前端離線運算",
+    "pillar1_desc": "通用網格與 CAD 轉換於您的本機瀏覽器內透過 WebAssembly 執行，檔案 0% 離開電腦。",
+    "pillar2_title": "無遙測、無日誌追蹤",
+    "pillar2_desc": "絕不蒐集您的 3D 模型檔名、尺寸、頂點數據或內部幾何特徵，無任何商業遙測行為。",
+    "pillar3_title": "私有節點完全隔離",
+    "pillar3_desc": "在 Hugging Face 或本地 Docker 建立的專屬節點 100% 獨立，運算完畢即刻清除快取。",
+    "pillar4_title": "100% 開源自由透明",
+    "pillar4_desc": "全專案程式碼完全公開開源，零後門、無原廠專有授權綁定與無隱藏連線。",
+    "lifecycle_title": "資料處理生命週期 (Data Lifecycle)",
+    "table_stage": "生命週期階段",
+    "table_client_mode": "純前端離線模式 (Pure Client)",
+    "table_dedicated_node": "專屬私有節點 (Dedicated Node)",
+    "stage_upload": "檔案讀取 / 傳輸",
+    "stage_processing": "幾何運算與修復",
+    "stage_retention": "檔案儲存與留存"
   }
 }
 
