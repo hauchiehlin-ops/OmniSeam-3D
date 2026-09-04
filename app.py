@@ -24,7 +24,28 @@ except Exception:
     def zerogpu_event():
         return "CPU Ready"
 
-# 2. Build Gradio UI
+# 2. Create FastAPI Application
+app = FastAPI(
+    title="OmniSeam 3D Dedicated Engine Node",
+    description="Dedicated CAD & Mesh Auto-Healing REST API Node for OmniSeam 3D",
+    version="1.0.36",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# 3. Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 4. Mount REST API Router (/api/v1)
+app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
+# 5. Build Gradio UI
 with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     gr.Markdown("""
     # 💎 OmniSeam 3D - Dedicated Engine Node
@@ -33,6 +54,7 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     ### 📊 System Status
     - **Engine**: FastAPI + FreeCAD + OpenCASCADE + Trimesh + LibreDWG
     - **Hardware Tier**: 16 GB RAM · 2 vCPU (ZeroGPU / CPU Basic Compatible)
+    - **REST API Swagger**: [Click to view /docs](/docs)
     - **Health Check Endpoint**: [Click to check /api/v1/health](/api/v1/health)
     
     ### 🔗 How to Connect to OmniSeam 3D
@@ -44,19 +66,13 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     dummy_btn = gr.Button("GPU Warmup", visible=False)
     dummy_btn.click(fn=zerogpu_event)
 
-# 3. Mount CORS & REST API Router (/api/v1) directly onto Gradio's FastAPI App
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+# 6. Mount Gradio UI onto FastAPI root path
+app = gr.mount_gradio_app(app, demo, path="/")
 
-# 4. Launch Server with Gradio Queue (Required for ZeroGPU and HF Spaces)
+# 7. Launch Server
 if __name__ == "__main__":
-    demo.queue().launch(server_name="0.0.0.0", server_port=7860)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
 
 
 
