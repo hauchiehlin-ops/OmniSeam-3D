@@ -44,4 +44,7 @@ app.add_middleware(
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
-    demo.launch()
+    try:
+        demo.launch(server_name="0.0.0.0", server_port=7860, ssr_mode=False)
+    except TypeError:
+        demo.launch(server_name="0.0.0.0", server_port=7860)

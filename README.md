@@ -1,3 +1,15 @@
+---
+title: OmniSeam 3D Engine
+emoji: 💎
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Universal 3D Model Converter & Auto-Healing Engine (OmniSeam 3D)
 
 <p align="center">

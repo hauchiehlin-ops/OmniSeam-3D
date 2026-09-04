@@ -45,6 +45,14 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.17` (2026-09-04) - 解決 Hugging Face Spaces "Stopping Node.js server" 異常退出
+- **問題根因**：
+  - Gradio 4.40+ 預設嘗試啟用 Node.js SSR（伺服器渲染）模式，將 Node 代理運行在 `7860` 埠並轉發至 Python `7861`。由於容器環境未配置 SSR 前端資源，導致 Node.js 啟動失敗並印出 `Stopping Node.js server...` 後整個容器退出產生 Runtime Error。
+  - 倉庫根目錄缺少 `requirements.txt` 與 YAML 前置元數據。
+- **修復方案**：
+  - `app.py`：在 `demo.launch()` 顯式加入 `ssr_mode=False` 與 `server_name="0.0.0.0", server_port=7860`，停用 Node.js SSR 代理，直接以純 Python ASGI 在 7860 埠提供穩定服務。
+  - 根目錄新增 `requirements.txt` 與在 `README.md` 開頭補齊 Hugging Face Spaces Gradio SDK 元數據。
+
 ### `v1.0.16` (2026-09-04) - 官方公共節點全面自動備援與一般使用者 0 設定體驗定案
 - **架構原則確認**：
   - **99% 一般大眾**：完全「零設定、零註冊、即開即用」。打開 `https://omniseam-3d.vercel.app` 即可直接使用純前端高速轉譯（STL, OBJ, 3MF, STEP, PLY, GLB）；若上傳 SolidWorks/Inventor，亦可直接一鍵使用官方預設雲端節點（`https://hauchieh-omniseam-engine.hf.space`）。
