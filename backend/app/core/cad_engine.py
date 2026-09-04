@@ -15,6 +15,46 @@ class CADEngine:
     """
     
     @classmethod
+    def calculate_adaptive_deflection(cls, mesh_or_shape_extents: np.ndarray, user_linear_deflection: float) -> float:
+        """
+        Computes curvature-adaptive sagitta deflection error limit based on bounding box extent.
+        Guarantees micro-feature accuracy on small parts while keeping tessellation memory bounded.
+        """
+        max_extent = float(np.max(mesh_or_shape_extents)) if len(mesh_or_shape_extents) > 0 else 100.0
+        # Adaptive ratio: 0.00005 of extents, bounded by user option
+        adaptive = max(0.0001, min(user_linear_deflection, max_extent * 0.0001))
+        return round(adaptive, 6)
+
+    @classmethod
+    def cluster_coplanar_faces(cls, mesh: trimesh.Trimesh, normal_threshold: float = 0.999) -> List[List[int]]:
+        """
+        Clusters adjacent coplanar triangles to prevent facet explosion when converting Mesh to CAD (STEP/IGES).
+        Returns list of face index groups that form planar B-Rep regions.
+        """
+        if len(mesh.faces) == 0:
+            return []
+        
+        try:
+            face_normals = mesh.face_normals
+            face_adjacency = mesh.face_adjacency
+            face_adjacency_angles = mesh.face_adjacency_angles
+
+            # Group faces where dihedral angle is near 0 (cos >= normal_threshold)
+            coplanar_mask = face_adjacency_angles < np.arccos(min(1.0, normal_threshold))
+            coplanar_adjacency = face_adjacency[coplanar_mask]
+
+            import networkx as nx
+            G = nx.Graph()
+            G.add_nodes_from(range(len(mesh.faces)))
+            for f1, f2 in coplanar_adjacency:
+                G.add_edge(f1, f2)
+
+            clusters = [list(comp) for comp in nx.connected_components(G)]
+            return clusters
+        except Exception:
+            return [[i] for i in range(len(mesh.faces))]
+
+    @classmethod
     def load_cad_file(cls, file_path: Path, options: CADOptions) -> trimesh.Trimesh:
         ext = file_path.suffix.lower().lstrip(".")
         
@@ -44,7 +84,7 @@ class CADEngine:
 
     @classmethod
     def _try_freecad_tessellation(cls, file_path: Path, options: CADOptions) -> Optional[trimesh.Trimesh]:
-        """Runs FreeCAD Cmd / Python headless script if freecad is installed."""
+        """Runs FreeCAD Cmd / Python headless script if freecad is installed with multi-tier tolerance sewing."""
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
                 out_stl = Path(tmpdir) / "output.stl"
@@ -57,9 +97,17 @@ try:
     shape = Part.Shape()
     shape.read("{str(file_path)}")
     if {str(options.enable_sewing)}:
-        shape = shape.sewShape({options.sewing_tolerance})
+        # Multi-tier sewing step-up: 0.0001 -> 0.001 -> 0.01
+        for tol in [0.0001, {options.sewing_tolerance}, 0.01]:
+            try:
+                sewed = shape.sewShape(tol)
+                if sewed.isClosed():
+                    shape = sewed
+                    break
+                shape = sewed
+            except Exception:
+                pass
     mesh_obj = Mesh.Mesh()
-    # Tessellate with linear deflection and angular deflection
     mesh_obj.addFacets(shape.tessellate({options.linear_deflection}))
     mesh_obj.write("{str(out_stl)}")
     sys.exit(0)
@@ -84,7 +132,7 @@ except Exception as e:
 
     @classmethod
     def _try_occt_tessellation(cls, file_path: Path, options: CADOptions) -> Optional[trimesh.Trimesh]:
-        """Attempts PythonOCC / OCP tessellation if available."""
+        """Attempts PythonOCC / OCP tessellation if available with multi-tier sewing step-up."""
         try:
             from OCC.Core.STEPControl import STEPControl_Reader
             from OCC.Core.IGESControl import IGESControl_Reader
@@ -110,10 +158,12 @@ except Exception as e:
                 return None
 
             if options.enable_sewing:
-                sewing = BRepBuilderAPI_Sewing(options.sewing_tolerance)
-                sewing.Add(shape)
-                sewing.Perform()
-                shape = sewing.SewedShape()
+                # Multi-tier step-up: 0.0001 -> configured tolerance -> 0.01
+                for tol in [0.0001, options.sewing_tolerance, 0.01]:
+                    sewing = BRepBuilderAPI_Sewing(tol)
+                    sewing.Add(shape)
+                    sewing.Perform()
+                    shape = sewing.SewedShape()
 
             # Incremental mesher with linear & angular deflection
             BRepMesh_IncrementalMesh(

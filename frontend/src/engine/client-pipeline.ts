@@ -44,6 +44,17 @@ export class ClientPipeline {
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase() || 'mesh';
+    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(mesh);
+    const assemblyTree = {
+      root: {
+        id: 'root',
+        name: file.name,
+        children: [{ id: 'part_1', name: file.name, visible: true, part_count: 1 }],
+        visible: true,
+        part_count: 1,
+      },
+      total_parts: 1,
+    };
 
     return {
       filename: file.name,
@@ -53,6 +64,8 @@ export class ClientPipeline {
       defects,
       is_watertight: metrics.is_watertight,
       health_score: score,
+      slicer_readiness: slicerInfo,
+      assembly_tree: assemblyTree,
       suggested_actions: suggestions,
     };
   }
@@ -132,6 +145,18 @@ export class ClientPipeline {
     const statusEn = `Repaired ${defectsFixed.holes_filled || 0} holes. Watertight: ${repairedMetrics.is_watertight ? 'Yes' : 'No'}. (100% Client-side)`;
     const statusZh = `已修復 ${defectsFixed.holes_filled || 0} 個孔洞。封閉實體：${repairedMetrics.is_watertight ? '是 (Watertight)' : '否'}。(100% 本機端)`;
 
+    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(repairedMesh);
+    const assemblyTree = {
+      root: {
+        id: 'root',
+        name: file.name,
+        children: [{ id: 'part_1', name: file.name, visible: true, part_count: 1 }],
+        visible: true,
+        part_count: 1,
+      },
+      total_parts: 1,
+    };
+
     const report: HealthAuditReport = {
       task_id: taskId,
       filename: file.name,
@@ -142,6 +167,8 @@ export class ClientPipeline {
       watertight_achieved: repairedMetrics.is_watertight,
       volume_delta_percent: volDelta,
       max_surface_deviation_mm: maxDeviationMm,
+      slicer_readiness: slicerInfo,
+      assembly_tree: assemblyTree,
       process_duration_seconds: durationSeconds,
       status_summary_en: statusEn,
       status_summary_zh_TW: statusZh,

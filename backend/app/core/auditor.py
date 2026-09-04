@@ -197,11 +197,70 @@ class ModelAuditor:
         return suggestions
 
     @classmethod
+    def analyze_slicer_readiness(cls, mesh: trimesh.Trimesh, overhang_threshold_deg: float = 45.0) -> Any:
+        """
+        Analyzes whether the 3D model is ready for 3D slicing (FDM / SLA).
+        Calculates overhang surface area (normal angle > 45° with Z-down),
+        bed contact surface, and estimated support structure volume.
+        """
+        from backend.app.models.schemas import SlicerReadiness
+        if len(mesh.faces) == 0:
+            return SlicerReadiness(is_print_ready=False, warnings=["Empty mesh"])
+
+        is_watertight = bool(mesh.is_watertight)
+        warnings: List[str] = []
+        if not is_watertight:
+            warnings.append("Non-watertight mesh may result in slicing voids or missing layers.")
+
+        # Downward direction in 3D printer bed coordinate (Z-down or Y-down standard)
+        # Standard: Z is up, downward is [0, 0, -1]
+        down_vector = np.array([0.0, 0.0, -1.0])
+        face_normals = mesh.face_normals
+        face_areas = mesh.area_faces
+
+        # Dot product with down vector: cos(theta) = dot(normal, [0,0,-1])
+        # If normal points straight down [0,0,-1], dot = 1.0 (overhang angle = 0 relative to bed, 90° steep)
+        # Critical overhang threshold: angle with horizontal bed < 45° => dot > cos(radians(45)) = ~0.707
+        cos_threshold = np.cos(np.radians(overhang_threshold_deg))
+        overhang_mask = np.dot(face_normals, down_vector) > cos_threshold
+
+        overhang_faces_count = int(np.sum(overhang_mask))
+        overhang_area_mm2 = float(np.sum(face_areas[overhang_mask])) if overhang_faces_count > 0 else 0.0
+
+        # Estimate support volume: area * average drop distance to min Z
+        min_z = float(mesh.bounds[0][2]) if mesh.bounds is not None else 0.0
+        face_centers_z = mesh.triangles_center[:, 2]
+        drop_distances = np.maximum(0.0, face_centers_z[overhang_mask] - min_z) if overhang_faces_count > 0 else np.array([0.0])
+        est_support_vol_mm3 = float(np.sum(face_areas[overhang_mask] * drop_distances * 0.35)) if overhang_faces_count > 0 else 0.0
+        est_support_vol_cm3 = round(est_support_vol_mm3 / 1000.0, 2)
+
+        # Bed contact area (faces pointing nearly straight down at min_z)
+        bed_mask = (np.dot(face_normals, down_vector) > 0.99) & (np.abs(face_centers_z - min_z) < 0.1)
+        bed_contact_area_mm2 = float(np.sum(face_areas[bed_mask])) if np.sum(bed_mask) > 0 else 0.0
+
+        if overhang_faces_count > len(mesh.faces) * 0.4:
+            warnings.append("Significant overhang area detected (>40% of faces). Consider re-orienting model or enabling tree supports.")
+
+        is_print_ready = is_watertight and (len(warnings) == 0)
+
+        return SlicerReadiness(
+            is_print_ready=is_print_ready,
+            overhang_area_mm2=round(overhang_area_mm2, 2),
+            overhang_faces_count=overhang_faces_count,
+            estimated_support_volume_cm3=est_support_vol_cm3,
+            bed_contact_area_mm2=round(bed_contact_area_mm2, 2),
+            warnings=warnings
+        )
+
+    @classmethod
     def audit_mesh(cls, mesh: trimesh.Trimesh, filename: str = "", file_size: int = 0, lang: str = "en") -> InspectResponse:
+        from backend.app.core.assembly_tree import AssemblyTreeBuilder
         metrics = cls.compute_metrics(mesh)
         defects = cls.detect_defects(mesh)
         health_score = cls.calculate_health_score(metrics, defects)
         suggestions = cls.generate_suggestions(defects, metrics.is_watertight, lang)
+        slicer_info = cls.analyze_slicer_readiness(mesh)
+        assembly_tree = AssemblyTreeBuilder.build_from_mesh_or_scene(mesh, root_name=filename or "Model")
         
         ext = filename.split(".")[-1].lower() if "." in filename else "mesh"
         return InspectResponse(
@@ -212,5 +271,7 @@ class ModelAuditor:
             defects=defects,
             is_watertight=metrics.is_watertight,
             health_score=health_score,
+            slicer_readiness=slicer_info,
+            assembly_tree=assembly_tree,
             suggested_actions=suggestions
         )

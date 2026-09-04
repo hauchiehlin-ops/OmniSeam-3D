@@ -226,6 +226,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           >
             {t('viewer.mode_xray')}
           </button>
+          <button
+            type="button"
+            onClick={() => onChangeDisplayMode('heatmap')}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              displayMode === 'heatmap' ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm' : 'text-amber-300/90 hover:text-amber-200 hover:bg-dark-hover'
+            }`}
+            title={t('viewer.mode_heatmap')}
+          >
+            <span>🔥</span>
+            <span>{t('viewer.mode_heatmap')}</span>
+          </button>
         </div>
 
         {/* Right: Section Plane, Measure Tool, Camera Reset */}

@@ -40,6 +40,30 @@ export interface GeometricDefectInfo {
   non_manifold_points: [number, number, number][];
 }
 
+export interface AssemblyNode {
+  id: string;
+  name: string;
+  color?: [number, number, number, number]; // RGBA [0-1]
+  matrix?: number[]; // 4x4 matrix
+  children?: AssemblyNode[];
+  visible: boolean;
+  part_count: number;
+}
+
+export interface AssemblyTree {
+  root: AssemblyNode;
+  total_parts: number;
+}
+
+export interface SlicerReadiness {
+  is_print_ready: boolean;
+  overhang_area_mm2: number;
+  overhang_faces_count: number;
+  estimated_support_volume_cm3: number;
+  bed_contact_area_mm2: number;
+  warnings: string[];
+}
+
 export interface HealthAuditReport {
   task_id: string;
   filename: string;
@@ -50,6 +74,8 @@ export interface HealthAuditReport {
   watertight_achieved: boolean;
   volume_delta_percent: number;
   max_surface_deviation_mm: number;
+  slicer_readiness?: SlicerReadiness;
+  assembly_tree?: AssemblyTree;
   process_duration_seconds: number;
   status_summary_en: string;
   status_summary_zh_TW: string;
@@ -83,6 +109,8 @@ export interface InspectResponse {
   defects: GeometricDefectInfo;
   is_watertight: boolean;
   health_score: number;
+  slicer_readiness?: SlicerReadiness;
+  assembly_tree?: AssemblyTree;
   suggested_actions: Array<{ action: string; label: string }>;
 }
 
@@ -116,4 +144,5 @@ export interface ConversionConfig {
   compress_gltf: boolean;
 }
 
-export type DisplayMode = 'shaded' | 'wireframe' | 'normals' | 'xray';
+export type DisplayMode = 'shaded' | 'wireframe' | 'normals' | 'xray' | 'heatmap';
+

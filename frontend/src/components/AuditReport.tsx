@@ -226,6 +226,64 @@ export const AuditReport: React.FC<AuditReportProps> = ({
               </div>
             )}
           </div>
+
+          {/* Slicer Readiness Checklist */}
+          {((report?.slicer_readiness) || (inspectData?.slicer_readiness)) && (
+            <div className="bg-dark-panel p-4 rounded-xl border border-dark-border flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-brand-400" />
+                  <span className="text-xs font-semibold text-slate-200">
+                    {t('audit.slicer_checklist_title')}
+                  </span>
+                </div>
+                {((report?.slicer_readiness?.is_print_ready) ?? (inspectData?.slicer_readiness?.is_print_ready)) ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
+                    {t('audit.print_ready_badge')}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                    {t('audit.print_support_needed')}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="p-2 rounded-lg bg-dark-surface/60 border border-dark-border/40">
+                  <span className="text-[10px] text-slate-400 block">{t('audit.overhang_faces')}</span>
+                  <span className="font-mono font-semibold text-slate-200">
+                    {(report?.slicer_readiness?.overhang_faces_count ?? inspectData?.slicer_readiness?.overhang_faces_count ?? 0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-surface/60 border border-dark-border/40">
+                  <span className="text-[10px] text-slate-400 block">{t('audit.overhang_area')}</span>
+                  <span className="font-mono font-semibold text-slate-200">
+                    {(report?.slicer_readiness?.overhang_area_mm2 ?? inspectData?.slicer_readiness?.overhang_area_mm2 ?? 0).toFixed(1)} mm²
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-surface/60 border border-dark-border/40">
+                  <span className="text-[10px] text-slate-400 block">{t('audit.est_support_vol')}</span>
+                  <span className="font-mono font-semibold text-slate-200">
+                    {(report?.slicer_readiness?.estimated_support_volume_cm3 ?? inspectData?.slicer_readiness?.estimated_support_volume_cm3 ?? 0).toFixed(2)} cm³
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-dark-surface/60 border border-dark-border/40">
+                  <span className="text-[10px] text-slate-400 block">{t('audit.bed_contact')}</span>
+                  <span className="font-mono font-semibold text-slate-200">
+                    {(report?.slicer_readiness?.bed_contact_area_mm2 ?? inspectData?.slicer_readiness?.bed_contact_area_mm2 ?? 0).toFixed(1)} mm²
+                  </span>
+                </div>
+              </div>
+
+              {((report?.slicer_readiness?.warnings?.length ?? inspectData?.slicer_readiness?.warnings?.length ?? 0) > 0) && (
+                <div className="text-[11px] text-amber-300/90 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+                  {(report?.slicer_readiness?.warnings ?? inspectData?.slicer_readiness?.warnings ?? []).map((w, idx) => (
+                    <p key={idx}>⚠️ {w}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

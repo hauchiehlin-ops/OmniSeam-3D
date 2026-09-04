@@ -136,6 +136,10 @@ class ConversionPipelineRouter:
             status_en = f"Repaired {defects_fixed.get('holes_filled', 0)} holes. Watertight: {'Yes' if repaired_metrics.is_watertight else 'No'}."
             status_zh = f"已修復 {defects_fixed.get('holes_filled', 0)} 個孔洞。封閉實體：{'是 (Watertight)' if repaired_metrics.is_watertight else '否'}。"
 
+            from backend.app.core.assembly_tree import AssemblyTreeBuilder
+            slicer_info = ModelAuditor.analyze_slicer_readiness(repaired_mesh)
+            assembly_tree = AssemblyTreeBuilder.build_from_mesh_or_scene(repaired_mesh, root_name=input_path.name)
+
             report = HealthAuditReport(
                 task_id=task_id,
                 filename=input_path.name,
@@ -146,6 +150,8 @@ class ConversionPipelineRouter:
                 watertight_achieved=repaired_metrics.is_watertight,
                 volume_delta_percent=vol_delta,
                 max_surface_deviation_mm=max_deviation,
+                slicer_readiness=slicer_info,
+                assembly_tree=assembly_tree,
                 process_duration_seconds=duration,
                 status_summary_en=status_en,
                 status_summary_zh_TW=status_zh,

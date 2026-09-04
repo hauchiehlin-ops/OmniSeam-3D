@@ -95,6 +95,30 @@ class GeometricDefectInfo(BaseModel):
     non_manifold_points: List[List[float]] = Field(default_factory=list, description="Coordinates of non-manifold vertices for 3D visualization")
 
 
+class AssemblyNode(BaseModel):
+    id: str
+    name: str
+    color: Optional[List[float]] = None  # RGBA [0-1]
+    matrix: Optional[List[float]] = None  # 4x4 transform
+    children: List['AssemblyNode'] = Field(default_factory=list)
+    visible: bool = True
+    part_count: int = 1
+
+
+class AssemblyTree(BaseModel):
+    root: AssemblyNode
+    total_parts: int = 1
+
+
+class SlicerReadiness(BaseModel):
+    is_print_ready: bool = True
+    overhang_area_mm2: float = 0.0
+    overhang_faces_count: int = 0
+    estimated_support_volume_cm3: float = 0.0
+    bed_contact_area_mm2: float = 0.0
+    warnings: List[str] = Field(default_factory=list)
+
+
 class HealthAuditReport(BaseModel):
     task_id: str
     filename: str
@@ -105,6 +129,8 @@ class HealthAuditReport(BaseModel):
     watertight_achieved: bool = False
     volume_delta_percent: float = 0.0
     max_surface_deviation_mm: float = 0.0
+    slicer_readiness: Optional[SlicerReadiness] = None
+    assembly_tree: Optional[AssemblyTree] = None
     process_duration_seconds: float = 0.0
     status_summary_en: str = ""
     status_summary_zh_TW: str = ""
@@ -134,4 +160,7 @@ class InspectResponse(BaseModel):
     defects: GeometricDefectInfo
     is_watertight: bool
     health_score: int = Field(..., ge=0, le=100, description="Overall mesh quality score 0-100")
+    slicer_readiness: Optional[SlicerReadiness] = None
+    assembly_tree: Optional[AssemblyTree] = None
     suggested_actions: List[Dict[str, str]]
+

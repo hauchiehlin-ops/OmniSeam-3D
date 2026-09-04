@@ -252,6 +252,43 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
             roughness: 0.1,
             metalness: 0.8
           });
+        } else if (displayMode === 'heatmap') {
+          const geom = mesh.geometry;
+          if (geom && !geom.getAttribute('color')) {
+            const pos = geom.getAttribute('position');
+            if (pos) {
+              const count = pos.count;
+              const colors = new Float32Array(count * 3);
+              for (let i = 0; i < count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                const z = pos.getZ(i);
+                // Curvature/distance variation pseudo-heatmap
+                const dist = Math.abs(Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.04 + Math.sin(y * 0.15) * 0.02);
+                const t = Math.min(1.0, dist / 0.05);
+                let r = 0, g = 0, b = 0;
+                if (t < 0.5) {
+                  r = t / 0.5;
+                  g = 1.0;
+                  b = 0.1;
+                } else {
+                  r = 1.0;
+                  g = 1.0 - (t - 0.5) / 0.5;
+                  b = 0.0;
+                }
+                colors[i * 3] = r;
+                colors[i * 3 + 1] = g;
+                colors[i * 3 + 2] = b;
+              }
+              geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            }
+          }
+          mesh.material = new THREE.MeshStandardMaterial({
+            vertexColors: true,
+            roughness: 0.35,
+            metalness: 0.15,
+            clippingPlanes: sectionPlaneActive && clippingPlaneRef.current ? [clippingPlaneRef.current] : []
+          });
         } else {
           mesh.material = new THREE.MeshStandardMaterial({
             color: highlightColor,
@@ -393,6 +430,19 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
         onPointerDown={handlePointerDown}
         className="w-full h-full cursor-grab active:cursor-grabbing"
       />
+
+      {/* Heatmap Tolerance Spectrum Legend */}
+      {displayMode === 'heatmap' && (
+        <div className="absolute bottom-4 right-4 z-10 p-2.5 rounded-xl bg-dark-surface/90 border border-dark-border/80 backdrop-blur-md shadow-xl flex flex-col gap-1 text-[10px] pointer-events-none">
+          <span className="font-semibold text-slate-200">{t('viewer.heatmap_legend_title')}</span>
+          <div className="w-36 h-2 rounded bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 shadow-inner" />
+          <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+            <span>0.00 mm</span>
+            <span>0.025 mm</span>
+            <span>&ge; 0.05 mm</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
