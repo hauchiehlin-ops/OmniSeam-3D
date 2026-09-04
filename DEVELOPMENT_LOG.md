@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.25` (2026-09-04) - 鎖定 `huggingface_hub<0.25.0` 修復 Gradio HfFolder 導入錯誤
+- **問題根因**：
+  - 新版 `huggingface_hub` (v1.0.0+) 廢棄並移除了 `HfFolder` 類別，導致 Gradio 4.44 的 OAuth / Hub 內部組件在 `import gradio` 時觸發 `ImportError: cannot import name 'HfFolder' from 'huggingface_hub'` 致命錯誤。
+- **修復方案**：
+  - 在 `requirements.txt` 與 `backend/requirements.txt` 中加入 `huggingface_hub<0.25.0`，確保與 Gradio 4.44 完全相容。
+
 ### `v1.0.24` (2026-09-04) - 定案 Hugging Face 100% 免費 Gradio SDK (CPU Basic 16GB)
 - **平台策略確認**：
   - Hugging Face 近期針對免費帳號將網頁新建「Docker SDK」標記為付費 (Paid)，而 **「Gradio SDK」為 100% 永久免費且標配 16 GB RAM**。
