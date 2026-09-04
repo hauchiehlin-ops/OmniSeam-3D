@@ -45,6 +45,15 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.8` (2026-09-04) - 透明背景高對比 Icon 視覺升級
+- **Icon 背景去背與主體凸顯**：
+  - 應用程式圖標（`frontend/src/assets/logo.png`, `frontend/public/logo.png`, `frontend/public/favicon.png`, `frontend/public/favicon.ico`）全面更新為 **100% 純透明背景（RGBA 864x864）**。
+  - 移除舊版灰色實心背景，完美突顯「左側電光藍發光拓撲網格線框 + 縫合節點 + 右側高光鈦金屬多面體」核心水晶實體。
+  - 導覽列（Navbar）更新為 `drop-shadow-[0_0_12px_rgba(56,189,248,0.35)]` 發光立體效果，大幅提升在暗色 UI 與瀏覽器標籤頁上的辨識度。
+
+### `v1.0.7` (2026-09-04) - 建立全方位開發日誌與知識庫
+- **新增 `DEVELOPMENT_LOG.md`**：建立專案專屬永久開發知識庫，收錄架構圖、雙引擎分工、踩坑指南與版本歷程。
+
 ### `v1.0.6` (2026-09-04) - Hugging Face 專屬轉譯節點與原生 CAD 解鎖
 - **新增 `BackendSettingsModal.tsx`**：
   - 🚀 **Hugging Face Spaces 分頁**：提供一鍵直達申請頁面、4 步驟配置引導（Docker Blank SDK、16GB 免費規格）、URL 輸入框與「⚡ 測試連線」功能（即時回報延遲 ms、FreeCAD/OpenCASCADE 支援度與冷啟動喚醒提示）。

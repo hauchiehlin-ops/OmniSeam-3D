@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <img
           src={logoImg}
           alt="OmniSeam 3D Logo"
-          className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-brand-500/20 ring-1 ring-brand-400/30"
+          className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.35)] hover:scale-105 transition-transform duration-200"
         />
         <div>
           <div className="flex items-center gap-2">
