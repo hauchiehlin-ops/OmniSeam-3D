@@ -246,6 +246,15 @@ graph TD
   ```
   該腳本會自動完成：版本升級 -> Pytest 測試 -> Vite 打包 -> Git 提交 -> Git 打 Tag -> 推送遠端。
 
+### 3.5 Gradio SDK 與 FastAPI 路由整合守則 (gr.mount_gradio_app)
+- **問題根因**：若使用 `demo = gr.Blocks()` 並嘗試以 `demo.app.include_router(...)` 掛載 FastAPI 路由，Gradio 在啟動伺服器時會覆寫或未註冊該路由表，導致訪問 `/api/v1/health` 或 `/docs` 時回傳 `404 Not Found`。
+- **標準解法**：
+  1. 建立標準 FastAPI 實例：`app = FastAPI(...)` 並掛載 CORS 與 `api_v1_router`。
+  2. 建立 Gradio UI：`with gr.Blocks() as demo: ...`。
+  3. 使用 Gradio 官方掛載函式：`app = gr.mount_gradio_app(app, demo, path="/")`。
+  4. 啟動進入點：`uvicorn.run(app, host="0.0.0.0", port=7860)`。
+  如此一來，Gradio Web UI（位於 `/`）與 FastAPI REST API（位於 `/api/v1/...`、`/docs`）可完美共存且保證 100% 路由有效。
+
 ---
 
 ## 📋 4. 目錄結構速查表 (Directory Map)
