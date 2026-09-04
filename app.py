@@ -43,7 +43,13 @@ demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 # 3. Launch via Gradio without duplicate uvicorn binding and without Node SSR
 if __name__ == "__main__":
     try:
-        demo.launch(ssr_mode=False)
+        demo.launch(ssr_mode=False, prevent_thread_lock=False)
     except TypeError:
         demo.launch()
+    
+    # Keep main thread permanently alive in container environments
+    import time
+    while True:
+        time.sleep(3600)
+
 

@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.21` (2026-09-04) - 新增 Python 主進程永久常駐輪詢 (Process Keep-Alive)
+- **問題根因**：
+  - Gradio 在非 TTY / 背景 Docker 容器執行環境中，`demo.launch()` 會在非同步啟動後立即釋放主執行緒，導致 Python 腳本直接執行完畢退出容器。
+- **修復方案**：
+  - 在 `app.py` 啟動後加入 `while True: time.sleep(3600)` 永久保活循環，確保容器主進程持續活躍，讓 Gradio 與 FastAPI 永久穩定對外監聽。
+
 ### `v1.0.20` (2026-09-04) - 徹底消除 Hugging Face Spaces `[Errno 98]` 雙重 Uvicorn 綁定
 - **問題根因**：
   - Hugging Face Spaces 在 `sdk: gradio` 模式下，平台啟動器自身已託管並代理 `7860` 埠；如果在 `app.py` 中額外手動呼叫 `uvicorn.run(...)`，會造成兩個 Uvicorn 同時爭搶 `0.0.0.0:7860` 導致 `[Errno 98] address already in use` 錯誤。
