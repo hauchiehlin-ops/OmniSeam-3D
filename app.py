@@ -7,12 +7,34 @@ current_dir = Path(__file__).resolve().parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
-from backend.app.config import settings
-from backend.app.api.v1.router import api_v1_router
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
+import uvicorn
 
-# Build Gradio UI block
+from backend.app.config import settings
+from backend.app.api.v1.router import api_v1_router
+
+# 1. Create FastAPI application
+app = FastAPI(
+    title="OmniSeam 3D Engine",
+    version=settings.VERSION,
+    description="Dedicated 3D CAD & Mesh Repair Engine Node",
+)
+
+# 2. Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. Mount REST API v1 Router
+app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
+# 4. Build Gradio UI
 with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     gr.Markdown("""
     # 💎 OmniSeam 3D - Dedicated Engine Node
@@ -30,21 +52,9 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     3. Click **Engine Node** in the top navigation bar, paste this URL, and click **⚡ Test & Connect**!
     """)
 
-# Mount CORS and API Router directly to Gradio's internal FastAPI app
-app = demo.app
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+# 5. Canonical Gradio + FastAPI mount
+app = gr.mount_gradio_app(app, demo, path="/")
 
 if __name__ == "__main__":
-    try:
-        demo.launch(server_name="0.0.0.0", server_port=7860, ssr_mode=False)
-    except TypeError:
-        demo.launch(server_name="0.0.0.0", server_port=7860)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+

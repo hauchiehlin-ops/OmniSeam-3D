@@ -45,6 +45,11 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.18` (2026-09-04) - 改用標準 `gr.mount_gradio_app` 與主進程 Uvicorn 駐留
+- **架構優化**：
+  - `app.py` 全面改用 Gradio + FastAPI 官方標準整合架構：`gr.mount_gradio_app(app, demo, path="/")`。
+  - 由 `uvicorn.run(app, host="0.0.0.0", port=7860)` 作為 Python 主進程持續駐留監聽，徹底杜絕子執行緒提早結束或 Node.js 代理衝突導致的 Hugging Face 靜態健康檢查失敗。
+
 ### `v1.0.17` (2026-09-04) - 解決 Hugging Face Spaces "Stopping Node.js server" 異常退出
 - **問題根因**：
   - Gradio 4.40+ 預設嘗試啟用 Node.js SSR（伺服器渲染）模式，將 Node 代理運行在 `7860` 埠並轉發至 Python `7861`。由於容器環境未配置 SSR 前端資源，導致 Node.js 啟動失敗並印出 `Stopping Node.js server...` 後整個容器退出產生 Runtime Error。
