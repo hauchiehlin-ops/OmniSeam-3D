@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -38,6 +39,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   badge,
   badgeColor = 'indigo'
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -67,7 +69,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
     camera.position.set(50, 50, 80);
     cameraRef.current = camera;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.localClippingEnabled = true;
@@ -381,7 +383,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
       {isLoading && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-dark-bg/60 backdrop-blur-sm">
           <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
-          <p className="text-xs text-slate-300 font-medium">Streaming 3D Geometry...</p>
+          <p className="text-xs text-slate-300 font-medium">{t('viewer.streaming')}</p>
         </div>
       )}
 

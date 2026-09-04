@@ -32,34 +32,34 @@ interface SettingsPanelProps {
 interface FormatOption {
   value: TargetFormat;
   label: string;
-  desc: string;
+  descKey: string;
 }
 
-const FORMAT_GROUPS: { groupName: string; options: FormatOption[] }[] = [
+const getFormatGroups = (t: (key: string) => string): { groupName: string; options: { value: TargetFormat; label: string; desc: string }[] }[] => [
   {
-    groupName: '📐 工業 CAD / B-Rep 實體交換',
+    groupName: t('settings.format_group_cad'),
     options: [
-      { value: 'step', label: 'STEP (.step / .stp)', desc: 'ISO 10303 工業標準實體交換 (SolidWorks/Fusion/Inventor)' },
-      { value: 'iges', label: 'IGES (.iges / .igs)', desc: '傳統 CAD 幾何曲面交換格式' },
-      { value: 'brep', label: 'BREP (.brep)', desc: 'OpenCASCADE 原生邊界幾何實體' },
-      { value: 'dxf', label: 'DXF (.dxf)', desc: 'AutoCAD 2D/3D 工程圖紙交換' },
+      { value: 'step', label: 'STEP (.step / .stp)', desc: t('settings.fmt_step_desc') },
+      { value: 'iges', label: 'IGES (.iges / .igs)', desc: t('settings.fmt_iges_desc') },
+      { value: 'brep', label: 'BREP (.brep)', desc: t('settings.fmt_brep_desc') },
+      { value: 'dxf', label: 'DXF (.dxf)', desc: t('settings.fmt_dxf_desc') },
     ]
   },
   {
-    groupName: '🌐 WebGL & 3D 網頁資產',
+    groupName: t('settings.format_group_web'),
     options: [
-      { value: 'glb', label: 'GLB (Binary glTF)', desc: '網頁/WebGL/AR 預覽首選 (體積小、載入快)' },
-      { value: 'gltf', label: 'glTF (JSON + Bin)', desc: 'Khronos 開放標準 3D 格式' },
+      { value: 'glb', label: 'GLB (Binary glTF)', desc: t('settings.fmt_glb_desc') },
+      { value: 'gltf', label: 'glTF (JSON + Bin)', desc: t('settings.fmt_gltf_desc') },
     ]
   },
   {
-    groupName: '🖨️ 3D 列印與網格製造 (Mesh)',
+    groupName: t('settings.format_group_mesh'),
     options: [
-      { value: '3mf', label: '3MF (3D Manufacturing)', desc: '現代高精度 3D 列印首選 (含色彩與結構)' },
-      { value: 'stl', label: 'STL (Stereolithography)', desc: '傳統 3D 列印三角網格標準' },
-      { value: 'obj', label: 'OBJ (Wavefront)', desc: '通用網格與 DCC 動畫軟體' },
-      { value: 'ply', label: 'PLY (Polygon File)', desc: '3D 掃描與點雲面片格式' },
-      { value: 'off', label: 'OFF (Object File)', desc: '計算幾何與學術格式' },
+      { value: '3mf', label: '3MF (3D Manufacturing)', desc: t('settings.fmt_3mf_desc') },
+      { value: 'stl', label: 'STL (Stereolithography)', desc: t('settings.fmt_stl_desc') },
+      { value: 'obj', label: 'OBJ (Wavefront)', desc: t('settings.fmt_obj_desc') },
+      { value: 'ply', label: 'PLY (Polygon File)', desc: t('settings.fmt_ply_desc') },
+      { value: 'off', label: 'OFF (Object File)', desc: t('settings.fmt_off_desc') },
     ]
   }
 ];
@@ -79,6 +79,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
 
   const { t } = useTranslation();
+  const formatGroups = getFormatGroups(t);
 
   const update = <K extends keyof ConversionConfig>(key: K, value: ConversionConfig[K]) => {
     onChangeConfig({ ...config, [key]: value });
@@ -169,7 +170,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <span className="p-1 rounded bg-indigo-500/20 text-indigo-300 shrink-0 mt-0.5">💡</span>
             <div className="space-y-0.5">
               <div className="font-semibold text-indigo-200">
-                AI 智慧模式推薦：已配置【{autoEngineNotice.mode === 'server' ? '☁️ 雲端算力節點 (Cloud Server)' : '⚡ 純前端模式 (Pure Client)'}】
+                {t('settings.auto_engine_title', { 
+                  mode: autoEngineNotice.mode === 'server' ? t('settings.auto_engine_mode_server') : t('settings.auto_engine_mode_client') 
+                })}
               </div>
               <p className="text-[11px] text-slate-400">
                 {autoEngineNotice.reason}
@@ -188,7 +191,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <div className="flex flex-col gap-2">
         <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
           <span>{t('settings.target_format')}</span>
-          <span className="text-[10px] text-brand-400 font-medium">支援雙向互轉 (含 STEP / IGES / 3MF)</span>
+          <span className="text-[10px] text-brand-400 font-medium">{t('settings.target_format_hint')}</span>
         </label>
         <select
           value={config.target_format}
@@ -196,7 +199,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           disabled={disabled}
           className="w-full bg-dark-panel border border-dark-border rounded-xl px-3 py-2 text-xs font-medium text-slate-100 focus:outline-none focus:border-brand-500 transition-all cursor-pointer"
         >
-          {FORMAT_GROUPS.map((group) => (
+          {formatGroups.map((group) => (
             <optgroup key={group.groupName} label={group.groupName} className="bg-dark-panel text-slate-400 font-bold">
               {group.options.map((fmt) => (
                 <option key={fmt.value} value={fmt.value} className="bg-dark-surface text-slate-100 font-normal">
@@ -216,7 +219,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <ShieldCheck className="w-3.5 h-3.5" />
             {t('settings.repair_heading')}
           </span>
-          <span className="text-[10px] text-slate-400">依使用情境一鍵切換</span>
+          <span className="text-[10px] text-slate-400">{t('settings.preset_hint')}</span>
         </div>
 
         {/* 3 Smart Preset Buttons */}
@@ -232,8 +235,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             }`}
             title={t('settings.preset_3dprint_desc')}
           >
-            <span className="text-[11px] font-bold truncate">🖨️ 3D 列印 / 製造</span>
-            <span className="text-[9px] text-slate-400 truncate">100% 水密封閉實體</span>
+            <span className="text-[11px] font-bold truncate">{t('settings.preset_3dprint_btn_title')}</span>
+            <span className="text-[9px] text-slate-400 truncate">{t('settings.preset_3dprint_btn_sub')}</span>
           </button>
 
           <button
@@ -247,8 +250,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             }`}
             title={t('settings.preset_game_desc')}
           >
-            <span className="text-[11px] font-bold truncate">🎮 遊戲 / 渲染動畫</span>
-            <span className="text-[9px] text-slate-400 truncate">輕量化保留開口</span>
+            <span className="text-[11px] font-bold truncate">{t('settings.preset_game_btn_title')}</span>
+            <span className="text-[9px] text-slate-400 truncate">{t('settings.preset_game_btn_sub')}</span>
           </button>
 
           <button
@@ -262,8 +265,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             }`}
             title={t('settings.preset_asis_desc')}
           >
-            <span className="text-[11px] font-bold truncate">🔍 原始幾何轉存</span>
-            <span className="text-[9px] text-slate-400 truncate">原樣不改動頂點</span>
+            <span className="text-[11px] font-bold truncate">{t('settings.preset_asis_btn_title')}</span>
+            <span className="text-[9px] text-slate-400 truncate">{t('settings.preset_asis_btn_sub')}</span>
           </button>
         </div>
 
@@ -398,7 +401,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           {isProcessing ? (
             <>
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Processing...</span>
+              <span>{t('settings.processing')}</span>
             </>
           ) : (
             <>
@@ -423,7 +426,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {engineMode === 'client' && (
         <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-400/80 bg-amber-500/5 p-2 rounded-lg border border-amber-500/20">
           <Lock className="w-3 h-3" />
-          <span>100% Client-Side Mode: Your 3D models never leave your computer.</span>
+          <span>{t('settings.privacy_guarantee')}</span>
         </div>
       )}
     </div>

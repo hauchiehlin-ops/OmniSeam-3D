@@ -87,6 +87,8 @@ export const App: React.FC = () => {
     apiClient.setEngineMode(engineMode);
   }, [engineMode]);
 
+  const projectFileInputRef = useRef<HTMLInputElement>(null);
+
   // Handle File Selection: Auto Engine Routing & Auto-Inspect
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
@@ -104,7 +106,7 @@ export const App: React.FC = () => {
       apiClient.setEngineMode('server');
       setAutoEngineNotice({
         mode: 'server',
-        reason: `檢測到原廠專有 CAD / BIM 格式 (.${ext})，已自動為您配置【雲端算力節點】進行精確 B-Rep 幾何拓撲縫合。`
+        reason: t('settings.auto_engine_cad_prop_reason', { ext })
       });
       if (!apiClient.getStoredBackendUrl()) {
         setLockedCadFile(file);
@@ -116,14 +118,14 @@ export const App: React.FC = () => {
         apiClient.setEngineMode('server');
         setAutoEngineNotice({
           mode: 'server',
-          reason: `檢測到工業 CAD 格式 (.${ext})，已自動配置【雲端專屬節點】以確保最高幾何精度與曲面離散化。`
+          reason: t('settings.auto_engine_cad_std_server_reason', { ext })
         });
       } else {
         setEngineMode('client');
         apiClient.setEngineMode('client');
         setAutoEngineNotice({
           mode: 'client',
-          reason: `檢測到 CAD 格式 (.${ext})，已配置【純前端離線模式】於瀏覽器內部極速運算。`
+          reason: t('settings.auto_engine_cad_std_client_reason', { ext })
         });
       }
     } else {
@@ -132,7 +134,7 @@ export const App: React.FC = () => {
       apiClient.setEngineMode('client');
       setAutoEngineNotice({
         mode: 'client',
-        reason: `檢測為通用網格格式 (.${ext})，已自動套用【純前端離線模式】，100% 本機極速運算，隱私零洩漏且零伺服器等待。`
+        reason: t('settings.auto_engine_mesh_reason', { ext })
       });
     }
 
@@ -148,6 +150,47 @@ export const App: React.FC = () => {
       setInspectData(inspect);
     } catch (err) {
       console.warn("Auto-inspect fallback:", err);
+    }
+  };
+
+  // Project Lifecycle Handlers
+  const handleNewProject = () => {
+    projectFileInputRef.current?.click();
+  };
+
+  const handleCloseProject = () => {
+    if (selectedFile || tasks.length > 0) {
+      if (window.confirm(t('project.close_confirm'))) {
+        setSelectedFile(null);
+        setTasks([]);
+        setActiveTask(null);
+        setInspectData(null);
+        setIsSplitView(false);
+        setMeasuredDistance(null);
+        setMeasureP1(null);
+        setMeasureP2(null);
+        setAutoEngineNotice(null);
+      }
+    }
+  };
+
+  const handleExportSnapshot = () => {
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      const baseName = selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'model';
+      a.download = `OmniSeam_Snapshot_${baseName}_${Date.now()}.png`;
+      a.href = dataUrl;
+      a.click();
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.8 },
+      });
+    } catch (err) {
+      console.error("Snapshot error:", err);
     }
   };
 
@@ -269,7 +312,7 @@ export const App: React.FC = () => {
   };
 
   const handleClearAllTasks = () => {
-    if (window.confirm(t('tasks.clear_all_confirm', '確定要清除所有歷史任務紀錄嗎？'))) {
+    if (window.confirm(t('tasks.clear_all_confirm'))) {
       setTasks([]);
       setActiveTask(null);
       setIsSplitView(false);
@@ -293,6 +336,18 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-slate-100 selection:bg-brand-500 selection:text-white">
+      {/* Hidden file input for Project actions */}
+      <input
+        ref={projectFileInputRef}
+        type="file"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+          }
+        }}
+      />
+
       <Navbar 
         onOpenAudit={() => setShowAuditModal(true)} 
         hasAudit={Boolean(activeTask?.report || inspectData)}
@@ -319,6 +374,15 @@ export const App: React.FC = () => {
           {/* Left Column: 3D Viewport & Toolbar (7 Cols) */}
           <div className="lg:col-span-7 flex flex-col gap-4">
             <Toolbar
+              onNewProject={handleNewProject}
+              onCloseProject={handleCloseProject}
+              onExportSnapshot={handleExportSnapshot}
+              selectedFileName={selectedFile?.name}
+              fileSizeBytes={selectedFile?.size}
+              vertexCount={inspectData?.metrics.vertices_count}
+              faceCount={inspectData?.metrics.faces_count}
+              isWatertight={inspectData?.is_watertight}
+
               isSplitView={isSplitView}
               onToggleSplitView={() => setIsSplitView(!isSplitView)}
               displayMode={displayMode}

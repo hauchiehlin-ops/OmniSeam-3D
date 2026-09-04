@@ -140,10 +140,10 @@ export const AuditReport: React.FC<AuditReportProps> = ({
               <table className="w-full text-xs text-left">
                 <thead className="bg-dark-surface/50 text-slate-400 border-b border-dark-border">
                   <tr>
-                    <th className="px-4 py-2.5 font-medium">Metric</th>
-                    <th className="px-4 py-2.5 font-medium">Original</th>
-                    {repairedMetrics && <th className="px-4 py-2.5 font-medium text-emerald-400">Repaired</th>}
-                    {repairedMetrics && <th className="px-4 py-2.5 font-medium">Delta</th>}
+                    <th className="px-4 py-2.5 font-medium">{t('audit.metric_col')}</th>
+                    <th className="px-4 py-2.5 font-medium">{t('audit.original_col')}</th>
+                    {repairedMetrics && <th className="px-4 py-2.5 font-medium text-emerald-400">{t('audit.repaired_col')}</th>}
+                    {repairedMetrics && <th className="px-4 py-2.5 font-medium">{t('audit.delta_col')}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-border text-slate-200">
@@ -205,12 +205,12 @@ export const AuditReport: React.FC<AuditReportProps> = ({
           {/* Defects & Repairs Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-dark-panel p-4 rounded-xl border border-dark-border flex flex-col gap-2">
-              <span className="text-xs font-semibold text-rose-400">Defects Found in Geometry</span>
+              <span className="text-xs font-semibold text-rose-400">{t('audit.defects_found_title')}</span>
               <ul className="text-xs text-slate-300 space-y-1">
-                <li>• Boundary Loop Holes: <b className="text-white font-mono">{defects.open_boundary_loops}</b></li>
-                <li>• Non-manifold Edges: <b className="text-white font-mono">{defects.non_manifold_edges}</b></li>
-                <li>• Degenerate / Zero Faces: <b className="text-white font-mono">{defects.degenerate_faces}</b></li>
-                <li>• Duplicate Faces: <b className="text-white font-mono">{defects.duplicate_faces}</b></li>
+                <li>• {t('audit.open_boundary_loops')}: <b className="text-white font-mono">{defects.open_boundary_loops}</b></li>
+                <li>• {t('audit.non_manifold_edges')}: <b className="text-white font-mono">{defects.non_manifold_edges}</b></li>
+                <li>• {t('audit.degenerate_faces')}: <b className="text-white font-mono">{defects.degenerate_faces}</b></li>
+                <li>• {t('audit.duplicate_faces')}: <b className="text-white font-mono">{defects.duplicate_faces}</b></li>
               </ul>
             </div>
 
@@ -218,10 +218,10 @@ export const AuditReport: React.FC<AuditReportProps> = ({
               <div className="bg-dark-panel p-4 rounded-xl border border-emerald-500/20 flex flex-col gap-2">
                 <span className="text-xs font-semibold text-emerald-400">{t('audit.defects_fixed')}</span>
                 <ul className="text-xs text-slate-300 space-y-1">
-                  <li>• Holes Triangulated: <b className="text-emerald-300 font-mono">{report.defects_fixed.holes_filled || 0}</b></li>
-                  <li>• Non-manifold Resolved: <b className="text-emerald-300 font-mono">{report.defects_fixed.non_manifold_fixed || 0}</b></li>
-                  <li>• Duplicate Faces Removed: <b className="text-emerald-300 font-mono">{report.defects_fixed.duplicate_faces_removed || 0}</b></li>
-                  <li>• Max Deviation: <b className="text-emerald-300 font-mono">{report.max_surface_deviation_mm} mm</b></li>
+                  <li>• {t('audit.holes_filled')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.holes_filled || 0}</b></li>
+                  <li>• {t('audit.non_manifold_fixed')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.non_manifold_fixed || 0}</b></li>
+                  <li>• {t('audit.duplicate_removed')}: <b className="text-emerald-300 font-mono">{report.defects_fixed.duplicate_faces_removed || 0}</b></li>
+                  <li>• {t('audit.max_deviation')}: <b className="text-emerald-300 font-mono">{report.max_surface_deviation_mm} mm</b></li>
                 </ul>
               </div>
             )}

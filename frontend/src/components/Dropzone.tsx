@@ -86,7 +86,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         </h3>
         <p className="text-xs text-slate-400 max-w-sm mb-3">
           {selectedFile
-            ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready for processing`
+            ? t('dropzone.ready_for_processing', { size: (selectedFile.size / (1024 * 1024)).toFixed(2) })
             : t('dropzone.subtitle')}
         </p>
 
@@ -110,7 +110,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             {t('dropzone.sample_models')}
           </span>
-          <span className="text-[11px] text-slate-500">點擊即刻載入測試</span>
+          <span className="text-[11px] text-slate-500">{t('dropzone.click_to_load_test')}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
