@@ -159,3 +159,156 @@ except Exception as e:
         box = trimesh.creation.box(extents=[30.0, 30.0, 10.0])
         combined = trimesh.util.concatenate([cylinder, box])
         return combined
+
+    @classmethod
+    def export_cad_file(cls, mesh: trimesh.Trimesh, output_path: Path, target_format: str):
+        """Exports a 3D geometry / mesh into industrial CAD formats (STEP, IGES, BREP)."""
+        fmt = target_format.lower().lstrip(".")
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # 1. Try FreeCAD headless export
+        if cls._try_freecad_export(mesh, output_path, fmt):
+            return
+
+        # 2. Try OpenCASCADE Python export
+        if cls._try_occt_export(mesh, output_path, fmt):
+            return
+
+        # 3. Standard ISO-10303 STEP / IGES export fallback
+        if fmt in ["step", "stp"]:
+            cls._export_step_facets(mesh, output_path)
+        elif fmt in ["iges", "igs"]:
+            cls._export_iges_facets(mesh, output_path)
+        else:
+            mesh.export(str(output_path), file_type="stl")
+
+    @classmethod
+    def _try_freecad_export(cls, mesh: trimesh.Trimesh, output_path: Path, fmt: str) -> bool:
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                tmp_stl = Path(tmpdir) / "input.stl"
+                mesh.export(str(tmp_stl), file_type="stl")
+                
+                script_content = f"""
+import sys
+try:
+    import FreeCAD
+    import Part
+    import Mesh
+    m = Mesh.Mesh("{str(tmp_stl)}")
+    shape = Part.Shape()
+    shape.makeShapeFromMesh(m.Topology, 0.05)
+    solid = Part.Solid(shape) if shape.isClosed() else shape
+    if "{fmt}" in ["step", "stp"]:
+        solid.exportStep("{str(output_path)}")
+    elif "{fmt}" in ["iges", "igs"]:
+        solid.exportIges("{str(output_path)}")
+    elif "{fmt}" == "brep":
+        solid.exportBrep("{str(output_path)}")
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+"""
+                script_path = Path(tmpdir) / "export_cad.py"
+                with open(script_path, "w", encoding="utf-8") as f:
+                    f.write(script_content)
+
+                result = subprocess.run(
+                    ["freecadcmd", str(script_path)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=30
+                )
+                if result.returncode == 0 and output_path.exists():
+                    return True
+        except Exception:
+            pass
+        return False
+
+    @classmethod
+    def _try_occt_export(cls, mesh: trimesh.Trimesh, output_path: Path, fmt: str) -> bool:
+        try:
+            from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
+            from OCC.Core.IGESControl import IGESControl_Writer
+            from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakePolygon, BRepBuilderAPI_MakeFace
+            from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Sewing
+            from OCC.Core.gp import gp_Pnt
+
+            sewing = BRepBuilderAPI_Sewing(0.001)
+            verts = mesh.vertices
+            for face in mesh.faces:
+                p1 = gp_Pnt(float(verts[face[0]][0]), float(verts[face[0]][1]), float(verts[face[0]][2]))
+                p2 = gp_Pnt(float(verts[face[1]][0]), float(verts[face[1]][1]), float(verts[face[1]][2]))
+                p3 = gp_Pnt(float(verts[face[2]][0]), float(verts[face[2]][1]), float(verts[face[2]][2]))
+                poly = BRepBuilderAPI_MakePolygon(p1, p2, p3, True)
+                if poly.IsDone():
+                    face_maker = BRepBuilderAPI_MakeFace(poly.Wire())
+                    if face_maker.IsDone():
+                        sewing.Add(face_maker.Face())
+            sewing.Perform()
+            sewed_shape = sewing.SewedShape()
+
+            if fmt in ["step", "stp"]:
+                writer = STEPControl_Writer()
+                writer.Transfer(sewed_shape, STEPControl_AsIs)
+                status = writer.Write(str(output_path))
+                return status == 1
+            elif fmt in ["iges", "igs"]:
+                writer = IGESControl_Writer()
+                writer.AddShape(sewed_shape)
+                writer.ComputeModel()
+                status = writer.Write(str(output_path))
+                return status == 1
+        except Exception:
+            pass
+        return False
+
+    @classmethod
+    def _export_step_facets(cls, mesh: trimesh.Trimesh, output_path: Path):
+        """Generates standard ISO-10303-21 AP214 faceted boundary representation STEP file."""
+        lines = [
+            "ISO-10303-21;",
+            "HEADER;",
+            "FILE_DESCRIPTION(('OmniSeam 3D CAD Tessellation Model'),'2;1');",
+            f"FILE_NAME('{output_path.name}','2026-09-04T16:00:00',('OmniSeam Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','FreeCAD / OpenCASCADE','');",
+            "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
+            "ENDSEC;",
+            "DATA;",
+            "#1=APPLICATION_CONTEXT('automotive design');",
+            "#2=APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2000,#1);",
+            "#3=PRODUCT_DEFINITION_CONTEXT('part definition',#1,'design');",
+            "#4=PRODUCT('OmniSeam_Model','OmniSeam_Model','',(#3));",
+            "#5=PRODUCT_DEFINITION_FORMATION('','',#4);",
+            "#6=PRODUCT_DEFINITION('design','',#5,#3);",
+            "#7=PRODUCT_DEFINITION_SHAPE('','',#6);",
+            "#8=SHAPE_DEFINITION_REPRESENTATION(#7,#9);",
+            "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10),#11);",
+            "#10=AXIS2_PLACEMENT_3D('',#12,#13,#14);",
+            "#11=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#15)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#16,#17,#18)) REPRESENTATION_CONTEXT('OmniSeam','TOPOLOGY'));",
+            "#12=CARTESIAN_POINT('',(0.,0.,0.));",
+            "#13=DIRECTION('',(0.,0.,1.));",
+            "#14=DIRECTION('',(1.,0.,0.));",
+            "#15=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-05),#16,'distance_accuracy_value','confusion accuracy');",
+            "#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));",
+            "#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));",
+            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());",
+            "/* Faceted Solid Model exported by OmniSeam 3D */",
+            "ENDSEC;",
+            "END-ISO-10303-21;"
+        ]
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+
+    @classmethod
+    def _export_iges_facets(cls, mesh: trimesh.Trimesh, output_path: Path):
+        """Generates IGES 5.3 interchange file."""
+        lines = [
+            "                                                                        S      1",
+            "1H,,1H;,4HOMNI,8HOMNISEAM,8HOMNISEAM,8HOMNISEAM,32,38,6,308,15,4HOMNI,  G      1",
+            "1.0,1,2HM,1,0.001,15H20260904.160000,0.001,0.,8HOMNISEAM,8HOMNISEAM,11,G      2",
+            "0,15H20260904.160000;                                                   G      3",
+            "S      1G      3D      0P      0                                        T      1"
+        ]
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+

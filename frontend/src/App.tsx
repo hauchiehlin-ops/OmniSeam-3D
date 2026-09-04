@@ -56,6 +56,7 @@ export const App: React.FC = () => {
   const [lockedCadFile, setLockedCadFile] = useState<File | null>(null);
   const [showPublicLimitModal, setShowPublicLimitModal] = useState(false);
   const [publicLimitFile, setPublicLimitFile] = useState<File | null>(null);
+  const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
   // File and Configuration State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -86,7 +87,7 @@ export const App: React.FC = () => {
     apiClient.setEngineMode(engineMode);
   }, [engineMode]);
 
-  // Handle File Selection: Auto-Inspect & CAD Format Gate
+  // Handle File Selection: Auto Engine Routing & Auto-Inspect
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
     setIsSplitView(false);
@@ -96,11 +97,43 @@ export const App: React.FC = () => {
     setMeasureP2(null);
 
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
+
+    // Smart Auto Engine Mode Decision
     if (PROPRIETARY_CAD_EXTS.has(ext)) {
-      if (engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
+      setEngineMode('server');
+      apiClient.setEngineMode('server');
+      setAutoEngineNotice({
+        mode: 'server',
+        reason: `檢測到原廠專有 CAD / BIM 格式 (.${ext})，已自動為您配置【雲端算力節點】進行精確 B-Rep 幾何拓撲縫合。`
+      });
+      if (!apiClient.getStoredBackendUrl()) {
         setLockedCadFile(file);
         setShowCadUnlockModal(true);
       }
+    } else if (['step', 'stp', 'iges', 'igs', 'brep', 'dxf'].includes(ext)) {
+      if (apiClient.getStoredBackendUrl()) {
+        setEngineMode('server');
+        apiClient.setEngineMode('server');
+        setAutoEngineNotice({
+          mode: 'server',
+          reason: `檢測到工業 CAD 格式 (.${ext})，已自動配置【雲端專屬節點】以確保最高幾何精度與曲面離散化。`
+        });
+      } else {
+        setEngineMode('client');
+        apiClient.setEngineMode('client');
+        setAutoEngineNotice({
+          mode: 'client',
+          reason: `檢測到 CAD 格式 (.${ext})，已配置【純前端離線模式】於瀏覽器內部極速運算。`
+        });
+      }
+    } else {
+      // Standard Mesh (STL, OBJ, 3MF, PLY, OFF, GLB) -> Pure Client
+      setEngineMode('client');
+      apiClient.setEngineMode('client');
+      setAutoEngineNotice({
+        mode: 'client',
+        reason: `檢測為通用網格格式 (.${ext})，已自動套用【純前端離線模式】，100% 本機極速運算，隱私零洩漏且零伺服器等待。`
+      });
     }
 
     // Public demo node large file guardrail check
@@ -108,6 +141,7 @@ export const App: React.FC = () => {
       setPublicLimitFile(file);
       setShowPublicLimitModal(true);
     }
+
 
     try {
       const inspect = await apiClient.inspectModel(file, i18n.language);
@@ -364,12 +398,14 @@ export const App: React.FC = () => {
               disabled={!selectedFile}
               isProcessing={isProcessing}
               engineMode={engineMode}
+              autoEngineNotice={autoEngineNotice}
               onChangeEngineMode={(m) => {
                 setEngineMode(m);
                 apiClient.setEngineMode(m);
               }}
               onOpenBackendSettings={() => setShowBackendModal(true)}
             />
+
 
             <TaskHistory
               tasks={tasks}

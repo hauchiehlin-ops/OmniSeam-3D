@@ -13,8 +13,12 @@ class TargetFormat(str, Enum):
     THREE_MF = "3mf"
     OFF = "off"
     STEP = "step"
+    STP = "stp"
     IGES = "iges"
+    IGS = "igs"
+    BREP = "brep"
     DXF = "dxf"
+
 
 
 class TaskStatus(str, Enum):

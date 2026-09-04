@@ -1,4 +1,5 @@
-export type TargetFormat = 'glb' | 'gltf' | 'stl' | 'obj' | 'ply' | '3mf' | 'off' | 'dxf';
+export type TargetFormat = 'glb' | 'gltf' | 'stl' | 'obj' | 'ply' | '3mf' | 'off' | 'dxf' | 'step' | 'stp' | 'iges' | 'igs' | 'brep';
+
 
 export type TaskStatus = 
   | 'pending'

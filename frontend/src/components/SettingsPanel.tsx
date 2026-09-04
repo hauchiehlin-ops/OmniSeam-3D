@@ -26,18 +26,44 @@ interface SettingsPanelProps {
   engineMode: EngineMode;
   onChangeEngineMode: (mode: EngineMode) => void;
   onOpenBackendSettings: () => void;
+  autoEngineNotice?: { mode: EngineMode; reason: string } | null;
 }
 
-const FORMAT_OPTIONS: { value: TargetFormat; label: string; desc: string }[] = [
-  { value: 'glb', label: 'GLB (Binary glTF)', desc: 'Optimized for WebGL & 3D Web apps' },
-  { value: 'gltf', label: 'glTF (JSON + Bin)', desc: 'Standard Khronos 3D asset' },
-  { value: 'stl', label: 'STL (Stereolithography)', desc: '3D Printing & additive manufacturing' },
-  { value: 'obj', label: 'OBJ (Wavefront)', desc: 'Universal mesh & DCC format' },
-  { value: '3mf', label: '3MF (3D Manufacturing)', desc: 'Modern high-precision 3D print format' },
-  { value: 'ply', label: 'PLY (Polygon File)', desc: 'Scanned mesh & point data' },
-  { value: 'off', label: 'OFF (Object File Format)', desc: 'Computational geometry format' },
-  { value: 'dxf', label: 'DXF (AutoCAD)', desc: '2D/3D CAD interchange' },
+interface FormatOption {
+  value: TargetFormat;
+  label: string;
+  desc: string;
+}
+
+const FORMAT_GROUPS: { groupName: string; options: FormatOption[] }[] = [
+  {
+    groupName: '📐 工業 CAD / B-Rep 實體交換',
+    options: [
+      { value: 'step', label: 'STEP (.step / .stp)', desc: 'ISO 10303 工業標準實體交換 (SolidWorks/Fusion/Inventor)' },
+      { value: 'iges', label: 'IGES (.iges / .igs)', desc: '傳統 CAD 幾何曲面交換格式' },
+      { value: 'brep', label: 'BREP (.brep)', desc: 'OpenCASCADE 原生邊界幾何實體' },
+      { value: 'dxf', label: 'DXF (.dxf)', desc: 'AutoCAD 2D/3D 工程圖紙交換' },
+    ]
+  },
+  {
+    groupName: '🌐 WebGL & 3D 網頁資產',
+    options: [
+      { value: 'glb', label: 'GLB (Binary glTF)', desc: '網頁/WebGL/AR 預覽首選 (體積小、載入快)' },
+      { value: 'gltf', label: 'glTF (JSON + Bin)', desc: 'Khronos 開放標準 3D 格式' },
+    ]
+  },
+  {
+    groupName: '🖨️ 3D 列印與網格製造 (Mesh)',
+    options: [
+      { value: '3mf', label: '3MF (3D Manufacturing)', desc: '現代高精度 3D 列印首選 (含色彩與結構)' },
+      { value: 'stl', label: 'STL (Stereolithography)', desc: '傳統 3D 列印三角網格標準' },
+      { value: 'obj', label: 'OBJ (Wavefront)', desc: '通用網格與 DCC 動畫軟體' },
+      { value: 'ply', label: 'PLY (Polygon File)', desc: '3D 掃描與點雲面片格式' },
+      { value: 'off', label: 'OFF (Object File)', desc: '計算幾何與學術格式' },
+    ]
+  }
 ];
+
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   config,
@@ -49,7 +75,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   engineMode,
   onChangeEngineMode,
   onOpenBackendSettings,
+  autoEngineNotice,
 }) => {
+
   const { t } = useTranslation();
 
   const update = <K extends keyof ConversionConfig>(key: K, value: ConversionConfig[K]) => {
@@ -135,6 +163,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </div>
         </div>
 
+        {/* Auto Engine Notice Banner */}
+        {autoEngineNotice && (
+          <div className="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-2 text-xs">
+            <span className="p-1 rounded bg-indigo-500/20 text-indigo-300 shrink-0 mt-0.5">💡</span>
+            <div className="space-y-0.5">
+              <div className="font-semibold text-indigo-200">
+                AI 智慧模式推薦：已配置【{autoEngineNotice.mode === 'server' ? '☁️ 雲端算力節點 (Cloud Server)' : '⚡ 純前端模式 (Pure Client)'}】
+              </div>
+              <p className="text-[11px] text-slate-400">
+                {autoEngineNotice.reason}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Engine mode concise hint */}
         <p className="text-[11px] text-slate-400 leading-relaxed">
           {engineMode === 'client' ? t('settings.mode_client_tip') : t('settings.mode_server_tip')}
@@ -145,7 +188,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <div className="flex flex-col gap-2">
         <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
           <span>{t('settings.target_format')}</span>
-          <span className="text-[10px] text-slate-400">3D 列印選 STL/3MF · 網頁選 GLB</span>
+          <span className="text-[10px] text-brand-400 font-medium">支援雙向互轉 (含 STEP / IGES / 3MF)</span>
         </label>
         <select
           value={config.target_format}
@@ -153,13 +196,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           disabled={disabled}
           className="w-full bg-dark-panel border border-dark-border rounded-xl px-3 py-2 text-xs font-medium text-slate-100 focus:outline-none focus:border-brand-500 transition-all cursor-pointer"
         >
-          {FORMAT_OPTIONS.map((fmt) => (
-            <option key={fmt.value} value={fmt.value} className="bg-dark-panel text-slate-100">
-              {fmt.label} - {fmt.desc}
-            </option>
+          {FORMAT_GROUPS.map((group) => (
+            <optgroup key={group.groupName} label={group.groupName} className="bg-dark-panel text-slate-400 font-bold">
+              {group.options.map((fmt) => (
+                <option key={fmt.value} value={fmt.value} className="bg-dark-surface text-slate-100 font-normal">
+                  {fmt.label} — {fmt.desc}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>
+
 
       {/* Smart Presets & Auto-Healing */}
       <div className="flex flex-col gap-3">

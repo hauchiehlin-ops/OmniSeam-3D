@@ -63,7 +63,9 @@ class ConversionPipelineRouter:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         fmt = target_format.value.lower()
         
-        if fmt in ["glb", "gltf"]:
+        if fmt in ["step", "stp", "iges", "igs", "brep"]:
+            CADEngine.export_cad_file(mesh, output_path, fmt)
+        elif fmt in ["glb", "gltf"]:
             MeshOptimizer.export_glb(mesh, output_path, compress=True)
         elif fmt in ["stl", "obj", "ply", "off", "3mf"]:
             mesh.export(str(output_path), file_type=fmt)
@@ -72,6 +74,7 @@ class ConversionPipelineRouter:
         else:
             # Fallback to GLB
             mesh.export(str(output_path), file_type="glb")
+
 
     @classmethod
     def process_task(cls, task_id: str, input_path: Path, params: ConversionParams) -> TaskResponse:
