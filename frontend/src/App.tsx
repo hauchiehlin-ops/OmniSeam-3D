@@ -13,6 +13,7 @@ import { TaskHistory } from './components/TaskHistory';
 import { MeasureTool } from './components/MeasureTool';
 import { BackendSettingsModal } from './components/BackendSettingsModal';
 import { CadUnlockModal } from './components/CadUnlockModal';
+import { PublicLimitModal } from './components/PublicLimitModal';
 
 import { 
   ConversionConfig, 
@@ -20,7 +21,8 @@ import {
   InspectResponse, 
   TaskResponse 
 } from './types';
-import { apiClient, EngineMode } from './api/client';
+import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES } from './api/client';
+
 
 const DEFAULT_CONFIG: ConversionConfig = {
   target_format: 'glb',
@@ -52,6 +54,8 @@ export const App: React.FC = () => {
   const [showBackendModal, setShowBackendModal] = useState(false);
   const [showCadUnlockModal, setShowCadUnlockModal] = useState(false);
   const [lockedCadFile, setLockedCadFile] = useState<File | null>(null);
+  const [showPublicLimitModal, setShowPublicLimitModal] = useState(false);
+  const [publicLimitFile, setPublicLimitFile] = useState<File | null>(null);
 
   // File and Configuration State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -99,6 +103,12 @@ export const App: React.FC = () => {
       }
     }
 
+    // Public demo node large file guardrail check
+    if (engineMode === 'server' && apiClient.isPublicDemoNode() && file.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
+      setPublicLimitFile(file);
+      setShowPublicLimitModal(true);
+    }
+
     try {
       const inspect = await apiClient.inspectModel(file, i18n.language);
       setInspectData(inspect);
@@ -117,6 +127,14 @@ export const App: React.FC = () => {
       setShowCadUnlockModal(true);
       return;
     }
+
+    // Fair usage public demo node guardrail check
+    if (engineMode === 'server' && apiClient.isPublicDemoNode() && selectedFile.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
+      setPublicLimitFile(selectedFile);
+      setShowPublicLimitModal(true);
+      return;
+    }
+
 
     setIsProcessing(true);
 
@@ -382,6 +400,15 @@ export const App: React.FC = () => {
         onOpenBackendSettings={() => setShowBackendModal(true)}
       />
 
+      {/* Public Demo Node File Limit Guardrail Modal */}
+      <PublicLimitModal
+        isOpen={showPublicLimitModal}
+        fileSizeMb={publicLimitFile ? publicLimitFile.size / (1024 * 1024) : 0}
+        fileName={publicLimitFile?.name}
+        onClose={() => setShowPublicLimitModal(false)}
+        onOpenSettings={() => setShowBackendModal(true)}
+      />
+
       {/* Audit Modal */}
       {showAuditModal && (
         <AuditReport
@@ -393,3 +420,4 @@ export const App: React.FC = () => {
     </div>
   );
 };
+

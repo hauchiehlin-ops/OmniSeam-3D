@@ -24,24 +24,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const getBackendDisplayName = () => {
     if (engineMode === 'client') {
-      return '⚡ 100% Pure Client';
+      return t('navbar.node_client', '⚡ 純前端模式 (離線)');
+    }
+    if (apiClient.isPublicDemoNode(backendUrl)) {
+      return t('navbar.node_public_demo', '⚡ 官方公共節點 (限25MB)');
     }
     if (backendUrl.includes('hf.space')) {
-      return '🚀 HF Space Node (16GB)';
+      return t('navbar.node_dedicated_hf', '💎 專屬 16GB 節點 (獨享)');
     }
     if (backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) {
-      return '💻 Local Docker Node';
+      return t('navbar.node_local_docker', '💻 本機 Docker 節點');
     }
     if (backendUrl) {
       try {
         const parsed = new URL(backendUrl);
-        return `☁️ ${parsed.hostname}`;
+        return `💎 專屬節點 (${parsed.hostname})`;
       } catch {
-        return '☁️ Cloud CAD Node';
+        return t('navbar.node_custom', '💎 專屬 CAD 節點');
       }
     }
-    return '☁️ Cloud CAD Node';
+    return t('navbar.node_public_demo', '⚡ 官方公共節點 (限25MB)');
   };
+
 
   return (
     <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between">

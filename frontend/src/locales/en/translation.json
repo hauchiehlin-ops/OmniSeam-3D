@@ -150,8 +150,21 @@
     "opt1_title": "Option A: Connect Free Hugging Face Dedicated Space",
     "opt1_desc": "Launch your own FreeCAD/OpenCASCADE node on Hugging Face Spaces (16GB RAM · Free) in 1 minute to unlock full cloud translation.",
     "opt2_title": "Option B: Export as STEP / STL / OBJ in your CAD software",
-    "opt2_desc": "If you prefer 100% offline in-browser processing with zero server dependencies, export your CAD file as STEP, STL, OBJ, or 3MF before uploading.",
     "cancel": "Got it",
     "go_connect": "Configure Engine Node"
+  },
+  "navbar": {
+    "node_client": "⚡ Pure Client (Offline)",
+    "node_public_demo": "⚡ Public Demo (25MB Max)",
+    "node_dedicated_hf": "💎 Dedicated 16GB (Private)",
+    "node_local_docker": "💻 Local Docker Node",
+    "node_custom": "💎 Dedicated CAD Node"
+  },
+  "public_limit": {
+    "title": "File Exceeds Public Demo Node Limit",
+    "duplicate_btn": "🚀 1-Click Duplicate Personal 16GB Space (Free)",
+    "settings_btn": "Engine Settings / Enter Private URL",
+    "close": "Close"
   }
 }
+

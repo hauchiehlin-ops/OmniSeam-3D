@@ -177,28 +177,31 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
           {activeTab === 'hf' && (
             <div className="space-y-4">
               {/* Option A: Fast Public Demo Node */}
-              <div className="p-3.5 rounded-xl bg-dark-panel border border-dark-border flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                      <span>{t('backend_modal.public_node_title', '不想註冊帳號？一鍵使用官方公共轉譯節點')}</span>
-                      <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">免註冊 · 即開即用</span>
+              <div className="p-3.5 rounded-xl bg-dark-panel border border-dark-border space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
+                      <Zap className="w-4 h-4" />
                     </div>
-                    <p className="text-[11px] text-slate-400">
-                      {t('backend_modal.public_node_desc', '無需任何帳號或設定，一鍵直接連線官方展示節點開始轉換模型。')}
-                    </p>
+                    <div>
+                      <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
+                        <span>{t('backend_modal.public_node_title', '⚡ 官方公共展示節點')}</span>
+                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20 font-medium">免註冊 · 即開即用</span>
+                        <span className="text-[10px] text-amber-300 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">單檔限 25MB · 共用算力</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        {t('backend_modal.public_node_desc', '無需任何帳號或設定，一鍵直接連線官方展示節點進行輕量體驗（適合快速測試小檔案）。')}
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleUseOfficialDemo}
+                    className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-lg transition-all shrink-0"
+                  >
+                    {t('backend_modal.use_public_btn', '⚡ 一鍵連線')}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleUseOfficialDemo}
-                  className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-lg transition-all shrink-0"
-                >
-                  {t('backend_modal.use_public_btn', '⚡ 一鍵使用')}
-                </button>
               </div>
 
               {/* Option B: 1-Click Duplicate Personal Free 16GB Node */}
@@ -206,15 +209,15 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-indigo-400" />
-                    <span>{t('backend_modal.hf_duplicate_heading', '建立個人專屬 16GB 私有節點 (不限速 · 隱私獨立)')}</span>
+                    <span>{t('backend_modal.hf_duplicate_heading', '💎 建立個人專屬 16GB 私有節點 (推薦 · 100% 免費)')}</span>
                   </span>
                   <span className="text-[10px] text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 font-semibold">
-                    16 GB RAM · $0/月
+                    16 GB RAM 獨享 · 支援 500MB 大檔
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  {t('backend_modal.hf_duplicate_desc', '在 Hugging Face 建立屬於您自己的專屬算力空間，完全無需手動上傳檔案。')}
+                  {t('backend_modal.hf_duplicate_desc', '在 Hugging Face 免費建立屬於您自己的獨立 Space，完全無需手動上傳程式碼，享有 100% 獨立隱私與無限速轉譯。')}
                 </p>
 
                 <div className="pt-1">
@@ -224,7 +227,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                     rel="noreferrer"
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all group"
                   >
-                    <span>{t('backend_modal.hf_duplicate_btn', '🚀 點此一鍵 Duplicate 複製專屬節點')}</span>
+                    <span>{t('backend_modal.hf_duplicate_btn', '🚀 點此一鍵 Duplicate 複製專屬節點 (10秒完成)')}</span>
                     <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
                 </div>
@@ -233,15 +236,61 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                 <div className="p-3 bg-dark-bg/80 border border-indigo-500/20 rounded-lg text-xs space-y-1.5">
                   <div className="text-[11px] font-bold text-indigo-300 flex items-center gap-1">
                     <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>{t('backend_modal.fields_guide_title', 'Hugging Face 彈窗填寫指引：')}</span>
+                    <span>{t('backend_modal.fields_guide_title', 'Hugging Face 彈窗填寫指引（完全免費）：')}</span>
                   </div>
                   <ul className="text-[11px] text-slate-300 space-y-1 pl-1">
-                    <li>• <strong className="text-white">Owner (帳號)</strong>：若無帳號，可使用 Google / GitHub 一秒授權登入。</li>
-                    <li>• <strong className="text-white">Space name (名稱)</strong>：可自訂任何名稱或保留預設。</li>
+                    <li>• <strong className="text-white">Owner (帳號)</strong>：點擊後會自動帶入您的 Hugging Face 帳號（若無帳號可用 Google 快速授權登入）。</li>
                     <li>• <strong className="text-white">Space hardware (硬體)</strong>：請選 <span className="text-emerald-400 font-semibold">CPU Basic (2 vCPU · 16 GB · Free)</span>（100% 免費，專為 CAD 幾何拓撲縫合優化）。</li>
                   </ul>
                 </div>
               </div>
+
+              {/* Quick Spec Comparison Table */}
+              <div className="p-3.5 rounded-xl bg-dark-panel/60 border border-dark-border text-xs space-y-2">
+                <div className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-brand-400" />
+                  <span>節點規格與適用場景比較表</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[11px] text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-dark-border text-slate-400">
+                        <th className="py-1.5 pr-2 font-medium">項目</th>
+                        <th className="py-1.5 px-2 font-medium text-emerald-400">⚡ 官方公共展示節點</th>
+                        <th className="py-1.5 pl-2 font-medium text-indigo-300">💎 個人專屬私有節點 (推薦)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-border/50 text-slate-300">
+                      <tr>
+                        <td className="py-1.5 pr-2 text-slate-400">適用情境</td>
+                        <td className="py-1.5 px-2">免註冊快速嘗鮮、輕量體驗</td>
+                        <td className="py-1.5 pl-2 text-indigo-200 font-medium">專業工程、大型 CAD 裝配體、高隱私</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 pr-2 text-slate-400">單檔大小上限</td>
+                        <td className="py-1.5 px-2 text-amber-300 font-medium">限制 25 MB</td>
+                        <td className="py-1.5 pl-2 text-emerald-400 font-medium">支援高達 500 MB</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 pr-2 text-slate-400">算力與速度</td>
+                        <td className="py-1.5 px-2">多人共用 16GB（尖峰時段需排隊）</td>
+                        <td className="py-1.5 pl-2 text-emerald-400 font-medium">100% 獨享 16GB RAM（零排隊極速）</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 pr-2 text-slate-400">資料隱私</td>
+                        <td className="py-1.5 px-2">公共展示環境（定期清理暫存）</td>
+                        <td className="py-1.5 pl-2 text-emerald-400 font-medium">100% 獨立私有空間（他人無法存取）</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1.5 pr-2 text-slate-400">使用費用</td>
+                        <td className="py-1.5 px-2 text-emerald-400 font-medium">100% 免費</td>
+                        <td className="py-1.5 pl-2 text-emerald-400 font-medium">100% 免費（HF 官方贊助算力）</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
 
               {/* URL Input & Connection test */}
               <div className="space-y-2">

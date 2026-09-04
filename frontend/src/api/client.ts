@@ -55,11 +55,25 @@ export function normalizeBackendUrl(rawUrl: string): string {
 }
 
 export const OFFICIAL_PUBLIC_BACKEND_URL = 'https://hauchieh-omniseam-engine.hf.space';
+export const OFFICIAL_DUPLICATE_URL = "https://huggingface.co/spaces/hauchieh/omniseam-engine?duplicate=true";
+export const PUBLIC_DEMO_MAX_SIZE_MB = 25;
+export const PUBLIC_DEMO_MAX_SIZE_BYTES = PUBLIC_DEMO_MAX_SIZE_MB * 1024 * 1024;
+export const DEDICATED_MAX_SIZE_MB = 500;
+export const DEDICATED_MAX_SIZE_BYTES = DEDICATED_MAX_SIZE_MB * 1024 * 1024;
+
 const STORAGE_KEY_BACKEND_URL = 'omniseam_backend_url';
 
 export const apiClient = {
   currentEngineMode: 'client' as EngineMode,
   customBackendUrl: localStorage.getItem(STORAGE_KEY_BACKEND_URL) || '',
+
+  isPublicDemoNode(url?: string): boolean {
+    const target = url !== undefined ? url : this.customBackendUrl;
+    if (!target) return true; // Default fallback to public demo node
+    const clean = normalizeBackendUrl(target);
+    return clean.includes('hauchieh-omniseam-engine.hf.space') || clean.includes('spaces/hauchieh/omniseam-engine');
+  },
+
 
   setEngineMode(mode: EngineMode) {
     this.currentEngineMode = mode;

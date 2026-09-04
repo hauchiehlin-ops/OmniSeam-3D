@@ -25,9 +25,12 @@ def health_check():
             "freecad_available": has_freecad,
             "opencascade_available": True,
             "trimesh_available": True,
-            "server_type": "FastAPI Dedicated CAD Node",
+            "server_type": "Official Public Demo Node" if settings.IS_PUBLIC_DEMO_NODE else "FastAPI Dedicated CAD Node",
+            "is_public_demo": settings.IS_PUBLIC_DEMO_NODE,
+            "max_upload_size_mb": settings.PUBLIC_NODE_MAX_FILE_SIZE_MB if settings.IS_PUBLIC_DEMO_NODE else settings.MAX_UPLOAD_SIZE_MB,
             "supported_modes": ["CAD B-Rep", "Mesh Auto-Healing", "Point Cloud Reconstruction", "BIM IFC"]
         },
+
         "supported_formats": [
             "step", "stp", "iges", "igs", "brep",
             "sldprt", "sldasm", "3dm", "ipt", "iam",

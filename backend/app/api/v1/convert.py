@@ -14,8 +14,10 @@ from backend.app.models.schemas import (
 from backend.app.storage.file_manager import file_manager
 from backend.app.core.router import ConversionPipelineRouter
 from backend.app.i18n import get_text
+from backend.app.config import settings
 
 router = APIRouter()
+
 
 
 def run_conversion_background(task_id: str, input_path: Path, params: ConversionParams):
@@ -47,8 +49,22 @@ async def convert_model(
     task_id = str(uuid.uuid4())
     content = await file.read()
     
+    # Fair Usage File Size Guardrail
+    content_size_mb = len(content) / (1024 * 1024)
+    if settings.IS_PUBLIC_DEMO_NODE and content_size_mb > settings.PUBLIC_NODE_MAX_FILE_SIZE_MB:
+        raise HTTPException(
+            status_code=413,
+            detail=f"官方公共展示節點僅供輕量體驗（單檔上限 {settings.PUBLIC_NODE_MAX_FILE_SIZE_MB}MB，目前檔案 {content_size_mb:.1f}MB）。請建立個人專屬 16GB 免費私有節點以享受無限制極速轉譯！"
+        )
+    elif content_size_mb > settings.MAX_UPLOAD_SIZE_MB:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds maximum allowed size ({settings.MAX_UPLOAD_SIZE_MB}MB)."
+        )
+
     # Save upload
     saved_path = file_manager.save_upload_file(task_id, file.filename, content)
+
     
     # Parse format
     try:

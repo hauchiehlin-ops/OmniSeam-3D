@@ -6,12 +6,16 @@ from typing import List
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OmniSeam 3D - Universal Model Converter & Auto-Healing Engine"
     API_V1_STR: str = "/api/v1"
-    VERSION: str = "1.1.0"
+    VERSION: str = "1.1.1"
     
-    # Storage settings
+    # Storage & Fair Usage Guardrails
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "/tmp/omniseam/uploads")
     PROCESSED_DIR: str = os.getenv("PROCESSED_DIR", "/tmp/omniseam/processed")
     MAX_UPLOAD_SIZE_MB: int = int(os.getenv("MAX_UPLOAD_SIZE_MB", "500"))
+    PUBLIC_NODE_MAX_FILE_SIZE_MB: int = int(os.getenv("PUBLIC_NODE_MAX_FILE_SIZE_MB", "25"))
+    IS_PUBLIC_DEMO_NODE: bool = os.getenv("IS_PUBLIC_DEMO_NODE", "false").lower() in ["true", "1", "yes"]
+    MAX_CONCURRENT_CONVERSIONS: int = int(os.getenv("MAX_CONCURRENT_CONVERSIONS", "2" if os.getenv("IS_PUBLIC_DEMO_NODE", "false").lower() in ["true", "1", "yes"] else "4"))
+
     
     # CORS
     ALLOWED_ORIGINS: List[str] = [
