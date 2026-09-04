@@ -38,7 +38,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               <h2 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
                 <span>{t('privacy.title')}</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  100% Privacy Guard
+                  {t('privacy.guard_badge')}
                 </span>
               </h2>
               <p className="text-xs text-slate-400">{t('privacy.subtitle')}</p>
@@ -126,18 +126,18 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 <tbody className="divide-y divide-dark-border text-slate-300">
                   <tr>
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_upload')}</td>
-                    <td className="px-3 py-2 text-emerald-400">0% 網路傳輸 (純本機記憶體)</td>
-                    <td className="px-3 py-2 text-indigo-300">HTTPS 加密傳輸至私人 Space</td>
+                    <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_upload_client')}</td>
+                    <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_upload_server')}</td>
                   </tr>
                   <tr>
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_processing')}</td>
-                    <td className="px-3 py-2 text-emerald-400">WebAssembly / Web Worker</td>
-                    <td className="px-3 py-2 text-indigo-300">獨立 16GB RAM 臨時沙箱</td>
+                    <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_proc_client')}</td>
+                    <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_proc_server')}</td>
                   </tr>
                   <tr>
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_retention')}</td>
-                    <td className="px-3 py-2 text-emerald-400">關閉分頁立即銷毀 (零留存)</td>
-                    <td className="px-3 py-2 text-indigo-300">轉譯後即刻銷毀 (Ephemeral Temp)</td>
+                    <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_ret_client')}</td>
+                    <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_ret_server')}</td>
                   </tr>
                 </tbody>
               </table>
@@ -151,7 +151,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-500/20 transition-all"
           >
-            {t('audit.close')}
+            {t('privacy.close')}
           </button>
         </div>
       </div>

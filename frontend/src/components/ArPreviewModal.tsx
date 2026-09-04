@@ -109,14 +109,14 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
                   <span className="text-base">🍎</span>
                   <div>
                     <b className="text-slate-200 block">iOS Quick Look</b>
-                    <span className="text-slate-400 text-[10px]">Safari 原生 AR 投影</span>
+                    <span className="text-slate-400 text-[10px]">{t('ar.ios_desc')}</span>
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-dark-panel border border-dark-border flex items-center gap-2">
                   <span className="text-base">🤖</span>
                   <div>
                     <b className="text-slate-200 block">Android Scene Viewer</b>
-                    <span className="text-slate-400 text-[10px]">Google ARCore 1:1 實境</span>
+                    <span className="text-slate-400 text-[10px]">{t('ar.android_desc')}</span>
                   </div>
                 </div>
               </div>
