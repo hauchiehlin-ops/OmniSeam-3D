@@ -18,6 +18,9 @@
 
 ## 🌟 Key Features
 
+* **Dual-Engine Architecture**:
+  * **⚡ 100% Pure Client-Side Local Engine**: Operates entirely in-browser with zero server cost, zero upload latency, and 100% data privacy.
+  * **☁️ Cloud Backend Engine**: FastAPI + OCCT + FreeCAD Headless for heavy native CAD and BIM assemblies.
 * **Multi-Domain Format Matrix**:
   * **CAD / B-Rep**: STEP (`.step`, `.stp`), IGES (`.iges`, `.igs`), OpenCASCADE BREP (`.brep`).
   * **Native Mechanical CAD**: SolidWorks (`.sldprt`, `.sldasm`), Rhino (`.3dm`), Autodesk Inventor (`.ipt`, `.iam`).
@@ -45,8 +48,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/barretlin/3DModelConverter.git
-cd 3DModelConverter
+git clone https://github.com/hauchiehlin-ops/OmniSeam-3D.git
+cd OmniSeam-3D
 
 # Start all services (Backend + Web UI)
 docker-compose up -d --build
@@ -61,7 +64,16 @@ Access the services:
 
 ## 🛠️ Local Development Setup
 
-### 1. Backend (FastAPI + Python 3.11+)
+### 1. Frontend (React 18 + Vite + TailwindCSS + Three.js)
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Open http://localhost:5173
+```
+
+### 2. Backend (FastAPI + Python 3.11+)
 
 ```bash
 # Set up virtual environment
@@ -75,36 +87,18 @@ pip install -r backend/requirements.txt
 uvicorn backend.app.main:app --reload --port 8000
 ```
 
-### 2. Frontend (React 18 + Vite + TailwindCSS + Three.js)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Visit [http://localhost:5173](http://localhost:5173) in your browser.
-
 ---
 
-## 🧪 Automated Testing
+## 🔄 Automated Version Bump & Release Workflow
 
-Run the end-to-end geometry and API verification test suite:
+Every time you make modifications to the application, run the automated release script to bump the version (defaults to `patch`), execute full verification tests, create a git release commit & tag, and push to GitHub:
 
 ```bash
-source .venv/bin/activate
-PYTHONPATH=. pytest backend/tests -v
+# Automatic patch release (e.g. 1.0.1 -> 1.0.2)
+./scripts/bump_and_push.sh "Your commit message"
+
+# Or specifying bump level:
+./scripts/bump_and_push.sh patch "Fix hole triangulation edge case"
+./scripts/bump_and_push.sh minor "Add new CAD translation feature"
+./scripts/bump_and_push.sh major "Release OmniSeam 3D v2.0"
 ```
-
----
-
-## 📡 RESTful API Overview
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/convert` | Upload 3D file and trigger conversion/healing pipeline |
-| `POST` | `/api/v1/inspect` | Perform geometric defect audit without converting |
-| `GET` | `/api/v1/tasks/{task_id}` | Retrieve task progress, status, and health audit report |
-| `GET` | `/api/v1/tasks/{task_id}/download` | Download converted target model file |
-| `GET` | `/api/v1/tasks/{task_id}/preview` | Stream optimized WebGL binary `.glb` for viewport |
-| `GET` | `/api/v1/health` | Service liveness and supported formats check |
