@@ -45,6 +45,11 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.24` (2026-09-04) - 定案 Hugging Face 100% 免費 Gradio SDK (CPU Basic 16GB)
+- **平台策略確認**：
+  - Hugging Face 近期針對免費帳號將網頁新建「Docker SDK」標記為付費 (Paid)，而 **「Gradio SDK」為 100% 永久免費且標配 16 GB RAM**。
+  - 因此官方專屬節點與 Duplicate 模板一律定案為 **`sdk: gradio` + `packages.txt` (Debian 原生 FreeCAD) + `app.py` (FastAPI 內嵌掛載)**，為所有使用者提供 100% 零門檻、零費用的專屬算力。
+
 ### `v1.0.23` (2026-09-04) - 前端 Space 引導同步優化：鎖定 CPU Basic (16GB RAM · Free)
 - **UI & 說明同步**：
   - 更新 `BackendSettingsModal.tsx`，明確指引使用者在 Duplicate Space 彈窗選擇 `CPU Basic (2 vCPU · 16 GB · Free)`。
