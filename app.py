@@ -7,12 +7,35 @@ current_dir = Path(__file__).resolve().parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import gradio as gr
+import uvicorn
 from backend.app.config import settings
 from backend.app.api.v1.router import api_v1_router
 
-# 1. Build Gradio UI
+# 1. Create FastAPI Application
+app = FastAPI(
+    title="OmniSeam 3D Dedicated Engine Node",
+    description="Dedicated CAD & Mesh Auto-Healing REST API Node for OmniSeam 3D",
+    version="1.0.33",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# 2. Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. Mount REST API Router (/api/v1)
+app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+
+# 4. Build Gradio UI
 with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     gr.Markdown("""
     # 💎 OmniSeam 3D - Dedicated Engine Node
@@ -41,19 +64,13 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     except Exception:
         pass
 
-# 2. Mount CORS Middleware & REST API Router onto Gradio Application
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+# 5. Mount Gradio UI onto FastAPI root path
+app = gr.mount_gradio_app(app, demo, path="/")
 
-# 3. Launch via Gradio Server Loop (Keeps container process alive)
+# 6. Launch Server
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
 
 
 
