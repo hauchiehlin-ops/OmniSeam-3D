@@ -45,6 +45,14 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.26` (2026-09-04) - 鎖定 `starlette<0.36.0` 修復 Gradio TemplateResponse 字典哈希錯誤
+- **問題根因**：
+  - Starlette v0.36+ 變更了 `TemplateResponse` 的參數簽名，導致 Gradio 4.44 的內部渲染路由在 Starlette 0.37+ 下觸發 `TypeError: unhashable type: 'dict'` 崩潰。
+  - `app.py` 中 `demo.launch()` 未顯式指定 `server_name="0.0.0.0"`，觸發 `ValueError: When localhost is not accessible...`。
+- **修復方案**：
+  - 在 `requirements.txt` 中鎖定 `starlette<0.36.0` 與 `fastapi>=0.100.0,<0.109.0`，完全相容 Gradio 4.44。
+  - `app.py` 顯式配置 `demo.launch(server_name="0.0.0.0", server_port=7860)`。
+
 ### `v1.0.25` (2026-09-04) - 鎖定 `huggingface_hub<0.25.0` 修復 Gradio HfFolder 導入錯誤
 - **問題根因**：
   - 新版 `huggingface_hub` (v1.0.0+) 廢棄並移除了 `HfFolder` 類別，導致 Gradio 4.44 的 OAuth / Hub 內部組件在 `import gradio` 時觸發 `ImportError: cannot import name 'HfFolder' from 'huggingface_hub'` 致命錯誤。
