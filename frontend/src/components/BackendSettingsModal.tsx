@@ -10,10 +10,9 @@ import {
   Loader2, 
   Copy, 
   Check, 
-  HelpCircle,
-  Cpu,
-  Layers,
   Sparkles,
+  ArrowRight,
+  ShieldCheck,
   X
 } from 'lucide-react';
 import { apiClient, ConnectionTestResult } from '../api/client';
@@ -23,6 +22,9 @@ interface BackendSettingsModalProps {
   onClose: () => void;
   onBackendConnected?: (url: string) => void;
 }
+
+const OFFICIAL_DUPLICATE_URL = "https://huggingface.co/spaces/hauchieh/omniseam-engine?duplicate=true";
+const OFFICIAL_DEMO_NODE_URL = "https://hauchieh-omniseam-engine.hf.space";
 
 export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   isOpen,
@@ -55,7 +57,8 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
     setIsTesting(true);
     setTestResult(null);
     try {
-      const res = await apiClient.testBackendConnection(urlToTest !== undefined ? urlToTest : backendUrl);
+      const target = urlToTest !== undefined ? urlToTest : backendUrl;
+      const res = await apiClient.testBackendConnection(target);
       setTestResult(res);
     } catch (err: any) {
       setTestResult({
@@ -85,6 +88,11 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
     onClose();
   };
 
+  const handleUseOfficialDemo = () => {
+    setBackendUrl(OFFICIAL_DEMO_NODE_URL);
+    handleTest(OFFICIAL_DEMO_NODE_URL);
+  };
+
   const copyDockerCommand = () => {
     navigator.clipboard.writeText('docker run -d -p 8000:8000 --name omniseam-backend ghcr.io/hauchiehlin-ops/omniseam-3d-backend:latest');
     setCopiedCode(true);
@@ -92,7 +100,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div className="relative w-full max-w-2xl bg-dark-surface border border-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border bg-dark-panel/60">
@@ -104,7 +112,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
               <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
                 <span>{t('backend_modal.title', '專屬轉譯節點設定 (Dedicated Engine Node)')}</span>
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">
-                  Free 16GB RAM Node
+                  Free 16GB RAM
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
@@ -131,7 +139,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{t('backend_modal.tab_hf', '🚀 Hugging Face (免費 16GB 記憶體)')}</span>
+            <span>{t('backend_modal.tab_hf', '🚀 Hugging Face 專屬免費節點 (推薦)')}</span>
           </button>
           <button
             onClick={() => setActiveTab('local')}
@@ -142,7 +150,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
             }`}
           >
             <Server className="w-3.5 h-3.5 text-brand-400" />
-            <span>{t('backend_modal.tab_local', '💻 本地 Docker / 內部伺服器')}</span>
+            <span>{t('backend_modal.tab_local', '💻 本地 Docker / 企業伺服器')}</span>
           </button>
           <button
             onClick={() => setActiveTab('client')}
@@ -161,35 +169,57 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
           {activeTab === 'hf' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-3">
+              {/* 1-Click Duplicate Action Card */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/40 via-dark-panel to-dark-panel border border-indigo-500/40 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-indigo-400" />
-                    {t('backend_modal.hf_step_title', 'Hugging Face Spaces 免費建立專屬節點')}
+                    <span>{t('backend_modal.hf_duplicate_heading', '超簡易！1 鍵複製官方免費節點 (無需上傳任何檔案)')}</span>
                   </span>
-                  <a
-                    href="https://huggingface.co/new-space"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 underline"
-                  >
-                    <span>{t('backend_modal.hf_open_link', '一鍵開啟 Spaces 申請頁面')}</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-semibold">
+                    16 GB RAM · $0/月
+                  </span>
                 </div>
 
-                <ol className="text-xs text-slate-300 space-y-2 list-decimal list-inside pl-1 leading-relaxed">
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('backend_modal.hf_duplicate_desc', '點擊下方按鈕，系統會自動在 Hugging Face 複製官方預先配置好的 FreeCAD/OpenCASCADE 專屬算力空間，完全不需要懂技術或手動上傳檔案。')}
+                </p>
+
+                <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                  <a
+                    href={OFFICIAL_DUPLICATE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all group"
+                  >
+                    <span>{t('backend_modal.hf_duplicate_btn', '🚀 點此一鍵 Duplicate 複製專屬節點')}</span>
+                    <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleUseOfficialDemo}
+                    className="px-3 py-2.5 bg-dark-surface border border-dark-border hover:border-slate-500 text-slate-300 hover:text-white text-xs font-medium rounded-xl transition-all"
+                  >
+                    {t('backend_modal.use_public_demo', '填入官方公共示範節點')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step Flow */}
+              <div className="p-3 bg-dark-panel/60 border border-dark-border rounded-xl space-y-2">
+                <span className="text-xs font-semibold text-slate-300">
+                  {t('backend_modal.steps_title', '操作步驟：')}
+                </span>
+                <ol className="text-xs text-slate-400 space-y-1.5 list-decimal list-inside leading-relaxed pl-0.5">
                   <li>
-                    {t('backend_modal.hf_step1', 'Space SDK 點選')} <strong className="text-white font-mono bg-amber-900/60 px-1 py-0.5 rounded border border-amber-500/40">Gradio</strong> {t('backend_modal.hf_step1_template', '並選擇 Template:')} <strong className="text-white font-mono bg-indigo-900/60 px-1 py-0.5 rounded">Blank</strong> <span className="text-emerald-400 text-[11px] font-semibold">(100% 免費無鎖定)</span>
+                    {t('backend_modal.step_1', '點擊上方按鈕，在開啟的 Hugging Face 頁面點擊綠色「Duplicate Space」確認複製。')}
                   </li>
                   <li>
-                    {t('backend_modal.hf_step2', '硬體規格選擇免費方案')} <span className="text-emerald-400 font-semibold">(2 vCPU · 16 GB RAM · $0/mo)</span>
+                    {t('backend_modal.step_2', '等待約 1 分鐘部署完成後，複製您的 Space 網址（例如：https://您的帳號-omniseam-engine.hf.space）。')}
                   </li>
                   <li>
-                    {t('backend_modal.hf_step3', '進入 Space 頁面後，將本專案 GitHub 倉庫關聯或上傳 app.py 與 requirements.txt')}
-                  </li>
-                  <li>
-                    {t('backend_modal.hf_step4', '部署完成後，複製 Space 的 Direct URL（例如：https://username-omniseam.hf.space）貼在下方')}
+                    {t('backend_modal.step_3', '將網址貼在下方，點擊「⚡ 測試連線」即可永久啟用您的專屬 16GB 轉譯伺服器！')}
                   </li>
                 </ol>
               </div>
@@ -197,13 +227,13 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
               {/* URL Input & Connection test */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                  <span>{t('backend_modal.input_url_label', 'Hugging Face Space Direct URL (轉譯節點網址)')}</span>
-                  <span className="text-[11px] text-slate-400 font-normal">格式: https://xxx.hf.space</span>
+                  <span>{t('backend_modal.input_url_label', '您的 Hugging Face Space 節點網址')}</span>
+                  <span className="text-[11px] text-slate-400 font-normal">格式: https://username-spacename.hf.space</span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="url"
-                    placeholder="https://your-space-name.hf.space"
+                    placeholder="https://your-username-omniseam-engine.hf.space"
                     value={backendUrl}
                     onChange={(e) => setBackendUrl(e.target.value)}
                     className="flex-1 bg-dark-panel border border-dark-border rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 font-mono transition-all"
@@ -216,7 +246,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                     {isTesting ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>{t('backend_modal.testing', '連線測試中...')}</span>
+                        <span>{t('backend_modal.testing', '連線中...')}</span>
                       </>
                     ) : (
                       <>

@@ -45,7 +45,17 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
-### `v1.0.9` (2026-09-04) - Hugging Face Spaces Gradio SDK 100% 免費轉譯節點適配
+### `v1.0.12` (2026-09-04) - 面向大眾使用者的「一鍵 Duplicate 複製官方免費節點」極簡流程
+- **轉譯節點設定流程重構（徹底消除終端機與檔案上傳門檻）**：
+  - 一般大眾使用者完全無需懂 Git、無需安裝任何工具，亦無需手動拖放上傳代碼。
+  - **1-Click Duplicate Space 機制**：點擊按鈕直接開啟官方模板（`https://huggingface.co/spaces/hauchieh/omniseam-engine?duplicate=true`），一鍵複製整個 16GB FreeCAD 引擎到個人免費帳號。
+  - 新增「填入官方公共示範節點」快捷按鈕，支援免設定立即體驗。
+  - 介面文案全面重構為直覺的 3 步驟圖文指引。
+
+### `v1.0.11` (2026-09-04) - 提供腳本自動同步至 Hugging Face Spaces
+- 新增 `scripts/deploy_to_hf.sh` 供維護者與工程師一鍵同步整個後端代碼庫。
+
+### `v1.0.10` / `v1.0.9` (2026-09-04) - Hugging Face Spaces Gradio SDK 100% 免費轉譯節點適配
 - **解決 Hugging Face Docker "🔒 Paid" 限制**：
   - Hugging Face 近期將建立 Docker Space 設為付費鎖定（Paid）。
   - **方案全面適配 Gradio Blank SDK（100% 免費，無需信用卡，提供 16GB RAM + 2 vCPU）**：
