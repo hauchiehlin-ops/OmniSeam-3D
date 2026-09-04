@@ -255,6 +255,11 @@ graph TD
   4. 啟動進入點：`uvicorn.run(app, host="0.0.0.0", port=7860)`。
   如此一來，Gradio Web UI（位於 `/`）與 FastAPI REST API（位於 `/api/v1/...`、`/docs`）可完美共存且保證 100% 路由有效。
 
+### 3.6 Hugging Face ZeroGPU 鉤子守則 (@spaces.GPU)
+- **問題根因**：若在模組載入階段同步呼叫被 `@spaces.GPU` 裝飾的函式（例如 `zerogpu_handler()`），ZeroGPU IPC 排程器會試圖在 Uvicorn 伺服器啟動前獲取 GPU 租約，導致整個 Python 執行緒永久卡死（導致前端連線 15 秒逾時 Timeout）。
+- **正確做法**：僅需宣告 `@spaces.GPU` 函式定義以供 ZeroGPU 啟動時掃描辨識，**絕對不可在啟動時同步執行該函式**。
+
+
 ---
 
 ## 📋 4. 目錄結構速查表 (Directory Map)

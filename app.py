@@ -56,19 +56,19 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
 # 5. Mount Gradio UI onto FastAPI root path
 app = gr.mount_gradio_app(app, demo, path="/")
 
-# 6. Hugging Face ZeroGPU Activation Hook
+# 6. Hugging Face ZeroGPU Activation Hook (Definition only, do not invoke synchronously on import)
 try:
     import spaces
     @spaces.GPU
     def zerogpu_handler():
         return "ZeroGPU Active"
-    zerogpu_handler()
 except Exception:
     pass
 
 # 7. Launch Server
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7860)
+
 
 
 
