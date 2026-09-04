@@ -30,7 +30,7 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full h-[520px]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full min-h-[640px] lg:h-[520px]">
       {/* Left: Original / Defect Viewport */}
       <div className="relative h-full flex flex-col">
         <Viewer3D

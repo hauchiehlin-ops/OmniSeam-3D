@@ -393,12 +393,12 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   const roundNum = (n: number) => Math.round(n * 100) / 100;
 
   return (
-    <div className="relative w-full h-full min-h-[420px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#0D121F] to-[#080B13] border border-dark-border">
+    <div className="relative w-full h-full min-h-[360px] sm:min-h-[440px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#0D121F] to-[#080B13] border border-dark-border">
       {/* Title & Badge */}
       {(title || badge) && (
         <div className="absolute top-4 left-4 z-10 flex items-center gap-2 pointer-events-none">
           {title && (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-dark-panel/90 border border-dark-border text-slate-200 backdrop-blur-md">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-dark-panel/90 border border-dark-border text-slate-200 backdrop-blur-md max-w-[200px] truncate">
               {title}
             </span>
           )}
@@ -428,6 +428,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
       <div
         ref={containerRef}
         onPointerDown={handlePointerDown}
+        style={{ touchAction: 'none' }}
         className="w-full h-full cursor-grab active:cursor-grabbing"
       />
 

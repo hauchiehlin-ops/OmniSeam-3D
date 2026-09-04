@@ -92,6 +92,24 @@ export const App: React.FC = () => {
     apiClient.setEngineMode(engineMode);
   }, [engineMode]);
 
+  // Dynamic SEO & Title Synchronization
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+    const isZh = i18n.language.startsWith('zh');
+    document.title = isZh
+      ? 'OmniSeam 3D - 通用 3D 模型格式轉換與幾何自動修復引擎 (100% 離線隱私)'
+      : 'OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        'content',
+        isZh
+          ? '企業級 CAD (STEP, IGES, SolidWorks)、網格 (STL, 3MF, OBJ) 與 Web (GLB) 雙向互轉，零授權費（100% FOSS）與自動拓撲破面修復。'
+          : 'Free enterprise-grade bidirectional 3D conversion & automated mesh healing for CAD (STEP, IGES, SolidWorks), Web (GLB/glTF), and 3D Printing (STL, 3MF, OBJ) with 100% offline privacy and zero license fees.'
+      );
+    }
+  }, [i18n.language]);
+
   const projectFileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle File Selection: Auto Engine Routing & Auto-Inspect
@@ -407,7 +425,7 @@ export const App: React.FC = () => {
             />
 
             {/* 3D Canvas Area */}
-            <div className="w-full h-[520px]">
+            <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px]">
               {isSplitView && repairedPreviewUrl ? (
                 <SplitViewer3D
                   originalFile={selectedFile}

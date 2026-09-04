@@ -1,0 +1,4 @@
+# OmniSeam 3D Search Engine Crawler Directives
+User-agent: *
+Allow: /
+Sitemap: https://omniseam-3d.app/sitemap.xml
