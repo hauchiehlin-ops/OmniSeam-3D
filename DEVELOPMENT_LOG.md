@@ -45,6 +45,16 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.14` (2026-09-04) - 極速直達：ZeroGPU、智慧網址解析與免註冊公共節點
+- **無帳號使用者極速方案**：
+  - 新增「⚡ 免註冊！一鍵使用官方公共轉譯節點」快捷啟動按鈕，免註冊即可直接開始轉換 CAD。
+- **Hugging Face Duplicate 彈窗填寫指引**：
+  - **Owner**：提示可直接使用 Google / GitHub 一秒授權登入。
+  - **Space name**：提示可自由自訂任何名稱或保留預設。
+  - **Space hardware**：指引選擇 **`ZeroGPU (Free)`** 或 `CPU Basic`（均為 100% 免費）。
+- **智慧網址正規化（Smart URL Normalizer）**：
+  - 前端內建正規化演算法，使用者直接貼上 Hugging Face 網頁 URL（如 `https://huggingface.co/spaces/user/space`），系統自動秒轉為 API Direct URL（`https://user-space.hf.space`）。
+
 ### `v1.0.13` (2026-09-04) - 修復 Hugging Face Spaces 現代 Debian 套件相依性
 - **問題根因**：
   - Hugging Face Spaces 採用現代 Debian（Bookworm / Trixie），舊版的 `libgl1-mesa-glx` 已被淘汰無安裝候選包，導致構建報錯 `Package 'libgl1-mesa-glx' has no installation candidate`。

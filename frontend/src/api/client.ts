@@ -26,6 +26,34 @@ export interface ConnectionTestResult {
   error?: string;
 }
 
+export function normalizeBackendUrl(rawUrl: string): string {
+  let clean = rawUrl.trim();
+  if (!clean) return '';
+
+  // Auto-convert Hugging Face repository URL to Direct .hf.space URL
+  // e.g., https://huggingface.co/spaces/hauchieh/omniseam-engine -> https://hauchieh-omniseam-engine.hf.space
+  const hfRepoMatch = clean.match(/huggingface\.co\/spaces\/([^/]+)\/([^/?#]+)/i);
+  if (hfRepoMatch) {
+    const owner = hfRepoMatch[1].toLowerCase();
+    const spaceName = hfRepoMatch[2].toLowerCase().replace(/_/g, '-');
+    return `https://${owner}-${spaceName}.hf.space`;
+  }
+
+  // Ensure protocol
+  if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+    clean = clean.includes('localhost') || clean.includes('127.0.0.1')
+      ? `http://${clean}`
+      : `https://${clean}`;
+  }
+
+  // Strip trailing slashes
+  while (clean.endsWith('/')) {
+    clean = clean.slice(0, -1);
+  }
+
+  return clean;
+}
+
 const STORAGE_KEY_BACKEND_URL = 'omniseam_backend_url';
 
 export const apiClient = {
@@ -41,10 +69,7 @@ export const apiClient = {
   },
 
   setBackendUrl(url: string) {
-    let clean = url.trim();
-    if (clean.endsWith('/')) {
-      clean = clean.slice(0, -1);
-    }
+    const clean = normalizeBackendUrl(url);
     this.customBackendUrl = clean;
     if (clean) {
       localStorage.setItem(STORAGE_KEY_BACKEND_URL, clean);
@@ -61,10 +86,8 @@ export const apiClient = {
   },
 
   async testBackendConnection(targetUrl?: string): Promise<ConnectionTestResult> {
-    let url = (targetUrl !== undefined ? targetUrl : this.customBackendUrl).trim();
-    if (url.endsWith('/')) {
-      url = url.slice(0, -1);
-    }
+    const raw = (targetUrl !== undefined ? targetUrl : this.customBackendUrl);
+    const url = normalizeBackendUrl(raw);
     const endpoint = url ? `${url}/api/v1/health` : '/api/v1/health';
 
     const startTime = performance.now();

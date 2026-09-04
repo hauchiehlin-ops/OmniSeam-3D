@@ -13,9 +13,11 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
+  UserCheck,
+  HelpCircle,
   X
 } from 'lucide-react';
-import { apiClient, ConnectionTestResult } from '../api/client';
+import { apiClient, ConnectionTestResult, normalizeBackendUrl } from '../api/client';
 
 interface BackendSettingsModalProps {
   isOpen: boolean;
@@ -57,8 +59,12 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
     setIsTesting(true);
     setTestResult(null);
     try {
-      const target = urlToTest !== undefined ? urlToTest : backendUrl;
-      const res = await apiClient.testBackendConnection(target);
+      const rawTarget = urlToTest !== undefined ? urlToTest : backendUrl;
+      const cleanTarget = normalizeBackendUrl(rawTarget);
+      if (cleanTarget !== backendUrl) {
+        setBackendUrl(cleanTarget);
+      }
+      const res = await apiClient.testBackendConnection(cleanTarget);
       setTestResult(res);
     } catch (err: any) {
       setTestResult({
@@ -72,11 +78,12 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   };
 
   const handleSave = () => {
-    apiClient.setBackendUrl(backendUrl);
+    const clean = normalizeBackendUrl(backendUrl);
+    apiClient.setBackendUrl(clean);
     apiClient.setEngineMode('server');
     setSaveSuccess(true);
     if (onBackendConnected) {
-      onBackendConnected(backendUrl);
+      onBackendConnected(clean);
     }
     setTimeout(() => {
       onClose();
@@ -139,7 +146,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{t('backend_modal.tab_hf', '🚀 Hugging Face 專屬免費節點 (推薦)')}</span>
+            <span>{t('backend_modal.tab_hf', '🚀 雲端轉譯節點 (Hugging Face / 公共節點)')}</span>
           </button>
           <button
             onClick={() => setActiveTab('local')}
@@ -169,71 +176,83 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
           {activeTab === 'hf' && (
             <div className="space-y-4">
-              {/* 1-Click Duplicate Action Card */}
+              {/* Option A: Fast Public Demo Node */}
+              <div className="p-3.5 rounded-xl bg-dark-panel border border-dark-border flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <span>{t('backend_modal.public_node_title', '不想註冊帳號？一鍵使用官方公共轉譯節點')}</span>
+                      <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">免註冊 · 即開即用</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      {t('backend_modal.public_node_desc', '無需任何帳號或設定，一鍵直接連線官方展示節點開始轉換模型。')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleUseOfficialDemo}
+                  className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-lg transition-all shrink-0"
+                >
+                  {t('backend_modal.use_public_btn', '⚡ 一鍵使用')}
+                </button>
+              </div>
+
+              {/* Option B: 1-Click Duplicate Personal Free 16GB Node */}
               <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/40 via-dark-panel to-dark-panel border border-indigo-500/40 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-indigo-400" />
-                    <span>{t('backend_modal.hf_duplicate_heading', '超簡易！1 鍵複製官方免費節點 (無需上傳任何檔案)')}</span>
+                    <span>{t('backend_modal.hf_duplicate_heading', '建立個人專屬 16GB 私有節點 (不限速 · 隱私獨立)')}</span>
                   </span>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-semibold">
+                  <span className="text-[10px] text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 font-semibold">
                     16 GB RAM · $0/月
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  {t('backend_modal.hf_duplicate_desc', '點擊下方按鈕，系統會自動在 Hugging Face 複製官方預先配置好的 FreeCAD/OpenCASCADE 專屬算力空間，完全不需要懂技術或手動上傳檔案。')}
+                  {t('backend_modal.hf_duplicate_desc', '在 Hugging Face 建立屬於您自己的專屬算力空間，完全無需手動上傳檔案。')}
                 </p>
 
-                <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                <div className="pt-1">
                   <a
                     href={OFFICIAL_DUPLICATE_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all group"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all group"
                   >
                     <span>{t('backend_modal.hf_duplicate_btn', '🚀 點此一鍵 Duplicate 複製專屬節點')}</span>
                     <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </a>
-
-                  <button
-                    type="button"
-                    onClick={handleUseOfficialDemo}
-                    className="px-3 py-2.5 bg-dark-surface border border-dark-border hover:border-slate-500 text-slate-300 hover:text-white text-xs font-medium rounded-xl transition-all"
-                  >
-                    {t('backend_modal.use_public_demo', '填入官方公共示範節點')}
-                  </button>
                 </div>
-              </div>
 
-              {/* Step Flow */}
-              <div className="p-3 bg-dark-panel/60 border border-dark-border rounded-xl space-y-2">
-                <span className="text-xs font-semibold text-slate-300">
-                  {t('backend_modal.steps_title', '操作步驟：')}
-                </span>
-                <ol className="text-xs text-slate-400 space-y-1.5 list-decimal list-inside leading-relaxed pl-0.5">
-                  <li>
-                    {t('backend_modal.step_1', '點擊上方按鈕，在開啟的 Hugging Face 頁面點擊綠色「Duplicate Space」確認複製。')}
-                  </li>
-                  <li>
-                    {t('backend_modal.step_2', '等待約 1 分鐘部署完成後，複製您的 Space 網址（例如：https://您的帳號-omniseam-engine.hf.space）。')}
-                  </li>
-                  <li>
-                    {t('backend_modal.step_3', '將網址貼在下方，點擊「⚡ 測試連線」即可永久啟用您的專屬 16GB 轉譯伺服器！')}
-                  </li>
-                </ol>
+                {/* Clear Field Guidance for Duplicate Screen */}
+                <div className="p-3 bg-dark-bg/80 border border-indigo-500/20 rounded-lg text-xs space-y-1.5">
+                  <div className="text-[11px] font-bold text-indigo-300 flex items-center gap-1">
+                    <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>{t('backend_modal.fields_guide_title', 'Hugging Face 彈窗填寫指引：')}</span>
+                  </div>
+                  <ul className="text-[11px] text-slate-300 space-y-1 pl-1">
+                    <li>• <strong className="text-white">Owner (帳號)</strong>：若無帳號，可使用 Google / GitHub 一秒授權登入。</li>
+                    <li>• <strong className="text-white">Space name (名稱)</strong>：可自訂任何名稱或保留預設。</li>
+                    <li>• <strong className="text-white">Space hardware (硬體)</strong>：請點選 <span className="text-emerald-400 font-semibold">ZeroGPU (Free)</span> 或 <span className="text-emerald-400 font-semibold">CPU Basic</span>（均為 100% 免費）。</li>
+                  </ul>
+                </div>
               </div>
 
               {/* URL Input & Connection test */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                  <span>{t('backend_modal.input_url_label', '您的 Hugging Face Space 節點網址')}</span>
-                  <span className="text-[11px] text-slate-400 font-normal">格式: https://username-spacename.hf.space</span>
+                  <span>{t('backend_modal.input_url_label', '轉譯節點網址 (支援直接貼上 Hugging Face 網址)')}</span>
+                  <span className="text-[11px] text-slate-400 font-normal">自動正規化解析</span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="url"
-                    placeholder="https://your-username-omniseam-engine.hf.space"
+                    placeholder="https://your-username-spacename.hf.space 或 https://huggingface.co/spaces/xxx/yyy"
                     value={backendUrl}
                     onChange={(e) => setBackendUrl(e.target.value)}
                     className="flex-1 bg-dark-panel border border-dark-border rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 font-mono transition-all"
@@ -399,7 +418,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                 className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-semibold shadow-lg shadow-indigo-500/20 disabled:opacity-50 transition-all"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>{t('backend_modal.save_and_activate', '儲存並啟用專屬節點')}</span>
+                <span>{t('backend_modal.save_and_activate', '儲存並啟用轉譯節點')}</span>
               </button>
             )}
           </div>
