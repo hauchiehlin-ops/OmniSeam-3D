@@ -43,21 +43,27 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     dummy_btn = gr.Button("GPU Warmup", visible=False)
     dummy_btn.click(fn=zerogpu_event)
 
-# 3. Enable Queue & Create Gradio App with FastAPI REST Routes (/api/v1) + CORS
-demo.queue()
-custom_app = App.create_app(demo)
-custom_app.add_middleware(
+# 3. Add CORS & Mount REST API Router (/api/v1) onto Gradio's FastAPI App
+demo.app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-custom_app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
-# 4. Launch with Gradio's Queue and preserved custom App (Required for ZeroGPU and HF Spaces)
+# 4. Launch with Gradio's Queue (Compatible with Hugging Face ZeroGPU and CPU Basic)
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, _app=custom_app)
+    demo.queue().launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        prevent_thread_lock=True
+    )
+    if hasattr(demo, "server_app") and demo.server_app is not None:
+        demo.server_app.include_router(api_v1_router, prefix=settings.API_V1_STR)
+    demo.block_thread()
+
 
 
 
