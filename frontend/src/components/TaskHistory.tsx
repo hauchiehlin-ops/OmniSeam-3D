@@ -124,14 +124,25 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
                       {task.current_step || t('tasks.status_failed')}
                     </span>
                   ) : (
-                    <div className="flex items-center gap-2 w-full max-w-xs">
-                      <div className="w-3.5 h-3.5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-                      <span>{task.current_step || 'Processing...'}</span>
-                      <div className="flex-1 bg-dark-surface rounded-full h-1.5 overflow-hidden">
+                    <div className="flex flex-col gap-1 w-full max-w-sm">
+                      <div className="flex items-center justify-between gap-2 text-[11px]">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="w-3.5 h-3.5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                          <span className="text-brand-300 font-medium truncate">
+                            {task.current_step || t('settings.processing')}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-brand-400 shrink-0">
+                          {task.progress || 0}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-dark-surface rounded-full h-1.5 overflow-hidden border border-dark-border/50">
                         <div
-                          className="bg-brand-500 h-full rounded-full transition-all duration-300"
-                          style={{ width: `${task.progress}%` }}
-                        />
+                          className="bg-gradient-to-r from-brand-500 to-indigo-500 h-full rounded-full transition-all duration-300 relative overflow-hidden"
+                          style={{ width: `${Math.max(task.progress || 5, 5)}%` }}
+                        >
+                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        </div>
                       </div>
                     </div>
                   )}
