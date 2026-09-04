@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   BookOpen, 
@@ -8,7 +8,10 @@ import {
   Layers, 
   ExternalLink,
   Sparkles,
-  Heart
+  Heart,
+  Share2,
+  Check,
+  Mail
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { APP_VERSION } from '../version';
@@ -25,11 +28,31 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenBackendSettings
 }) => {
   const { t } = useTranslation();
+  const [copiedShare, setCopiedShare] = useState(false);
 
   const supportedFormats = [
     'STEP', 'IGES', 'SolidWorks', 'Inventor', 'IFC', 'Rhino (3DM)', 
     'STL', 'OBJ', '3MF', 'GLTF / GLB', 'PLY', 'DXF', 'OFF'
   ];
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine',
+      text: 'Free enterprise-grade 3D CAD/Mesh converter with automated watertight healing and 100% offline privacy!',
+      url: window.location.href,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User dismissed share dialog
+      }
+    } else {
+      navigator.clipboard.writeText(`${shareData.title}\n${shareData.url}`);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2000);
+    }
+  };
 
   return (
     <footer className="mt-12 border-t border-dark-border bg-dark-surface/90 backdrop-blur-md text-slate-400 text-xs">
@@ -57,6 +80,15 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Quick Action Buttons */}
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-500/15 border border-brand-500/30 text-brand-300 hover:text-white hover:bg-brand-500/25 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+              title="Share OmniSeam 3D"
+            >
+              {copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-brand-400" />}
+              <span>{copiedShare ? (t('nav.copied_link') || 'Link Copied!') : (t('nav.share') || 'Share')}</span>
+            </button>
+
             <button
               onClick={onOpenManual}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-panel border border-dark-border text-slate-200 hover:text-white hover:border-slate-500 text-xs font-semibold transition-all active:scale-95 shadow-sm"
@@ -95,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Supported Format Pills */}
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-          <span className="text-slate-400 font-semibold mr-1">{t('manual.supported_formats_tag')}:</span>
+          <span className="text-slate-400 font-semibold mr-1">Supported Formats:</span>
           {supportedFormats.map((fmt) => (
             <span
               key={fmt}
@@ -107,9 +139,20 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Bottom Copyright & Guarantee */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-[11px] text-slate-500">
-          <p>© {new Date().getFullYear()} OmniSeam 3D Project. Released under MIT/Apache-2.0 License. 100% Free & Open Source.</p>
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-[11px] text-slate-400">
+          <p className="flex items-center gap-1.5 flex-wrap">
+            <span>© {new Date().getFullYear()} <strong className="text-slate-200">@B&B</strong></span>
+            <span>·</span>
+            <span>Email :</span>
+            <a 
+              href="mailto:dr.cobra.lin@gmail.com" 
+              className="text-brand-400 hover:text-brand-300 font-medium underline transition-colors inline-flex items-center gap-1"
+            >
+              <Mail className="w-3 h-3 inline" />
+              <span>dr.cobra.lin@gmail.com</span>
+            </a>
+          </p>
+          <div className="flex items-center gap-1 text-slate-500">
             <span>Crafted with</span>
             <Heart className="w-3 h-3 text-rose-500 fill-rose-500 inline" />
             <span>for Global Engineers & Makers</span>

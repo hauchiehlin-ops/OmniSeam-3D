@@ -195,7 +195,9 @@
     "docs": "API ドキュメント",
     "github": "GitHub リポジトリ",
     "language": "言語 (Language)",
-    "engine_status": "エンジン準備完了"
+    "engine_status": "エンジン準備完了",
+    "share": "アプリを共有",
+    "copied_link": "リンクをコピーしました！"
   },
   "backend_modal": {
     "title": "専用バックエンド計算ノード設定",

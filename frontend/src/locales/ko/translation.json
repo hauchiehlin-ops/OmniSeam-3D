@@ -195,7 +195,9 @@
     "docs": "API 문서",
     "github": "GitHub 저장소",
     "language": "언어 (Language)",
-    "engine_status": "엔진 준비됨"
+    "engine_status": "엔진 준비됨",
+    "share": "공유하기",
+    "copied_link": "링크가 복사되었습니다!"
   },
   "backend_modal": {
     "title": "전용 백엔드 연산 노드 설정",

@@ -195,7 +195,9 @@
     "docs": "API Docs",
     "github": "GitHub",
     "language": "Language",
-    "engine_status": "Engine Ready"
+    "engine_status": "Engine Ready",
+    "share": "Share App",
+    "copied_link": "Link Copied!"
   },
   "backend_modal": {
     "title": "Dedicated Engine Node Setup",

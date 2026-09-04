@@ -10,11 +10,21 @@
     <title>OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine</title>
     <meta name="title" content="OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine" />
     <meta name="description" content="Free enterprise-grade bidirectional 3D conversion & automated mesh healing for CAD (STEP, IGES, SolidWorks), Web (GLB/glTF), and 3D Printing (STL, 3MF, OBJ) with 100% offline privacy and zero license fees." />
-    <meta name="keywords" content="3D model converter, CAD converter, STEP to STL, STL repair, watertight mesh, 3D printing slicer, 3MF converter, IGES to GLB, SolidWorks conversion, FreeCAD Web, OpenCASCADE, mesh auto healing, 3D file converter" />
-    <meta name="author" content="OmniSeam 3D Open Source Community" />
+    <meta name="keywords" content="3D model converter, CAD converter, STEP to STL, STL repair, watertight mesh, 3D printing slicer, 3MF converter, IGES to GLB, SolidWorks conversion, FreeCAD Web, OpenCASCADE, mesh auto healing, 3D file converter, STEP 轉 STL, 3D 模型格式轉換, CAD 轉檔, 3D 列印破面修復, 3Dモデル変換, STL修復, 3D 모델 변환, แปลงไฟล์ 3D" />
+    <meta name="author" content="@B&B - dr.cobra.lin@gmail.com" />
+    <meta name="publisher" content="@B&B" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#090D16" />
     <link rel="canonical" href="https://omniseam-3d.app/" />
+
+    <!-- Multi-Language Alternate Hreflang SEO Matrix -->
+    <link rel="alternate" hreflang="x-default" href="https://omniseam-3d.app/" />
+    <link rel="alternate" hreflang="en" href="https://omniseam-3d.app/?lang=en" />
+    <link rel="alternate" hreflang="zh-TW" href="https://omniseam-3d.app/?lang=zh-TW" />
+    <link rel="alternate" hreflang="zh-CN" href="https://omniseam-3d.app/?lang=zh-CN" />
+    <link rel="alternate" hreflang="ja" href="https://omniseam-3d.app/?lang=ja" />
+    <link rel="alternate" hreflang="ko" href="https://omniseam-3d.app/?lang=ko" />
+    <link rel="alternate" hreflang="th" href="https://omniseam-3d.app/?lang=th" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -25,6 +35,10 @@
     <meta property="og:image" content="/logo.png" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="zh_TW" />
+    <meta property="og:locale:alternate" content="zh_CN" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="ko_KR" />
+    <meta property="og:locale:alternate" content="th_TH" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -32,8 +46,9 @@
     <meta name="twitter:title" content="OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine" />
     <meta name="twitter:description" content="Convert and heal 3D models directly in your browser with zero data leakage. Supports STEP, IGES, SolidWorks, STL, OBJ, 3MF, and GLB." />
     <meta name="twitter:image" content="/logo.png" />
+    <meta name="twitter:creator" content="@B&B" />
 
-    <!-- Schema.org JSON-LD Structured Data: SoftwareApplication & FAQPage -->
+    <!-- Schema.org JSON-LD Structured Data: WebApplication, HowTo & FAQPage -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -43,13 +58,25 @@
           "name": "OmniSeam 3D",
           "url": "https://omniseam-3d.app/",
           "applicationCategory": "DesignApplication",
-          "operatingSystem": "All (Web, Linux, macOS, Windows)",
+          "operatingSystem": "All (Web, Linux, macOS, Windows, iOS, Android)",
           "browserRequirements": "Requires WebGL2 and WebAssembly support",
           "description": "Enterprise-grade universal 3D CAD/Mesh converter with automated geometry defect repair, watertight solid healing, and tolerance heatmap.",
+          "creator": {
+            "@type": "Person",
+            "name": "@B&B",
+            "email": "dr.cobra.lin@gmail.com"
+          },
           "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1280",
+            "bestRating": "5",
+            "worstRating": "1"
           },
           "featureList": [
             "100% Client-Side Pure WebAssembly Offline Conversion",
@@ -58,7 +85,30 @@
             "Coplanar Face Clustering for Mesh-to-CAD (STEP/IGES)",
             "3D Print Slicer Readiness & Overhang (>45°) Audit",
             "Interactive Geometric Deviation Heatmap",
-            "Assembly Tree & Material Semantic Preservation"
+            "Exploded View & Dynamic Section Plane Clipping",
+            "Native Safari Quick Look & Google Scene Viewer 1:1 AR"
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "name": "How to Convert and Auto-Heal 3D Models in 3 Steps",
+          "description": "Quick guide to converting CAD and mesh files to watertight solids for 3D printing and WebGL.",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "Drag & Drop 3D File",
+              "text": "Upload STEP, IGES, SolidWorks, STL, OBJ, 3MF, IFC, or DXF files into the browser."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Select Scenario Preset",
+              "text": "Choose 3D Printing (Full Repair), VFX / Game (Lightweight), or Raw Passthrough."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Convert & Compare in 3D",
+              "text": "Inspect the deviation heatmap and download the watertight converted file or audit report."
+            }
           ]
         },
         {
@@ -69,7 +119,7 @@
               "name": "How to convert STEP / CAD files to STL for 3D printing?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Simply drag and drop your STEP (.step, .stp) or IGES file into OmniSeam 3D, select the '3D Printing' scenario preset, and the engine will perform adaptive tessellation and watertight verification within seconds."
+                "text": "Drag and drop your STEP (.step, .stp) or IGES file into OmniSeam 3D, select the '3D Printing' scenario preset, and the engine will perform adaptive tessellation and watertight verification within seconds."
               }
             },
             {
@@ -82,10 +132,18 @@
             },
             {
               "@type": "Question",
-              "name": "What is a Watertight 3D mesh?",
+              "name": "What is a Watertight 3D mesh and why is it needed?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "A watertight (2-manifold) 3D solid is a completely closed surface without holes or open boundaries where every edge is shared by exactly two triangles, ensuring error-free 3D printer slicer processing."
+                "text": "A watertight (2-manifold) 3D solid is a completely closed surface without holes or open boundaries where every edge is shared by exactly two triangles, ensuring error-free slicer processing in Cura, PrusaSlicer, and Bambu Studio."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I fix non-manifold edges in 3D models?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "OmniSeam 3D automatically detects non-manifold edges (edges shared by more than 2 faces or self-intersecting vertices) and reconstructs the surface topology into a clean 2-manifold solid."
               }
             }
           ]

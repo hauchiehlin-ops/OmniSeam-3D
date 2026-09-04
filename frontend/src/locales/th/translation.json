@@ -195,7 +195,9 @@
     "docs": "เอกสาร API",
     "github": "GitHub",
     "language": "ภาษา (Language)",
-    "engine_status": "เอนจินพร้อมใช้งาน"
+    "engine_status": "เอนจินพร้อมใช้งาน",
+    "share": "แชร์แอป",
+    "copied_link": "คัดลอกลิงก์แล้ว!"
   },
   "backend_modal": {
     "title": "การตั้งค่าโหนดเอนจินประมวลผลเฉพาะ",

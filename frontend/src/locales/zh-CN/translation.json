@@ -195,7 +195,9 @@
     "docs": "API 文档",
     "github": "GitHub 开源仓库",
     "language": "界面语言",
-    "engine_status": "引擎就绪"
+    "engine_status": "引擎就绪",
+    "share": "分享推荐",
+    "copied_link": "已复制推荐链接！"
   },
   "backend_modal": {
     "title": "专属后端算力节点设置",

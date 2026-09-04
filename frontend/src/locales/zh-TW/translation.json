@@ -192,10 +192,12 @@
   },
   "nav": {
     "features": "核心功能",
-    "docs": "API 文檔",
-    "github": "開源倉庫",
-    "language": "語系切換",
-    "engine_status": "引擎運作正常"
+    "docs": "API 文件",
+    "github": "GitHub 開源專案",
+    "language": "語系",
+    "engine_status": "核心就緒",
+    "share": "分享推薦",
+    "copied_link": "已複製推薦連結！"
   },
   "backend_modal": {
     "title": "專屬轉譯節點設定 (Dedicated Engine Node)",
