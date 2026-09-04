@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.13` (2026-09-04) - 修復 Hugging Face Spaces 現代 Debian 套件相依性
+- **問題根因**：
+  - Hugging Face Spaces 採用現代 Debian（Bookworm / Trixie），舊版的 `libgl1-mesa-glx` 已被淘汰無安裝候選包，導致構建報錯 `Package 'libgl1-mesa-glx' has no installation candidate`。
+- **修復方案**：
+  - 將 `packages.txt` 與 `backend/Dockerfile` 的 `libgl1-mesa-glx` 全面替換為現代標準套件 `libgl1` 與 `libglx-mesa0`。
+
 ### `v1.0.12` (2026-09-04) - 面向大眾使用者的「一鍵 Duplicate 複製官方免費節點」極簡流程
 - **轉譯節點設定流程重構（徹底消除終端機與檔案上傳門檻）**：
   - 一般大眾使用者完全無需懂 Git、無需安裝任何工具，亦無需手動拖放上傳代碼。
