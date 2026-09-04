@@ -45,6 +45,12 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.15` (2026-09-04) - 修復 Hugging Face Spaces Errno 98 埠位重複綁定
+- **問題根因**：
+  - Hugging Face Spaces Gradio SDK 啟動器內部會自動接管網路連接埠，若 `app.py` 中額外呼叫 `uvicorn.run(...)` 會導致重複綁定 `0.0.0.0:7860` 出現 `[Errno 98] address already in use` 錯誤。
+- **修復方案**：
+  - `app.py` 採用 Gradio 原生架構：將 FastAPI 路由 (`api_v1_router`) 與 CORS 中介軟體直接掛載於 `demo.app`，並以 `demo.launch()` 啟動，由 Gradio 自動適配 Hugging Face Spaces 的執行環境。
+
 ### `v1.0.14` (2026-09-04) - 極速直達：ZeroGPU、智慧網址解析與免註冊公共節點
 - **無帳號使用者極速方案**：
   - 新增「⚡ 免註冊！一鍵使用官方公共轉譯節點」快捷啟動按鈕，免註冊即可直接開始轉換 CAD。
