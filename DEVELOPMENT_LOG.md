@@ -45,6 +45,15 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v1.0.9` (2026-09-04) - Hugging Face Spaces Gradio SDK 100% 免費轉譯節點適配
+- **解決 Hugging Face Docker "🔒 Paid" 限制**：
+  - Hugging Face 近期將建立 Docker Space 設為付費鎖定（Paid）。
+  - **方案全面適配 Gradio Blank SDK（100% 免費，無需信用卡，提供 16GB RAM + 2 vCPU）**：
+    - Gradio 本身底層即為 FastAPI 服務端。
+    - 新增 `app.py` 與 `backend/app.py`：將 OmniSeam 3D FastAPI 路由 (`/api/v1/...`)、Swagger 文檔 (`/docs`) 與 Gradio 儀表板無縫掛載於 7860 埠。
+    - 新增 `packages.txt`：自動由 Hugging Face 原生安裝 `freecad`、`libgl1` 等系統級幾何底層依賴。
+    - 更新 `BackendSettingsModal.tsx` 引導文案，指引使用者點選 `Gradio (Template: Blank)` 100% 免費解鎖專屬節點。
+
 ### `v1.0.8` (2026-09-04) - 透明背景高對比 Icon 視覺升級
 - **Icon 背景去背與主體凸顯**：
   - 應用程式圖標（`frontend/src/assets/logo.png`, `frontend/public/logo.png`, `frontend/public/favicon.png`, `frontend/public/favicon.ico`）全面更新為 **100% 純透明背景（RGBA 864x864）**。

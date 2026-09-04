@@ -180,13 +180,13 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
 
                 <ol className="text-xs text-slate-300 space-y-2 list-decimal list-inside pl-1 leading-relaxed">
                   <li>
-                    {t('backend_modal.hf_step1', '點擊上方連結進入 Hugging Face，Space SDK 選擇')} <strong className="text-white font-mono bg-indigo-900/60 px-1 py-0.5 rounded">Docker (Blank)</strong>
+                    {t('backend_modal.hf_step1', 'Space SDK 點選')} <strong className="text-white font-mono bg-amber-900/60 px-1 py-0.5 rounded border border-amber-500/40">Gradio</strong> {t('backend_modal.hf_step1_template', '並選擇 Template:')} <strong className="text-white font-mono bg-indigo-900/60 px-1 py-0.5 rounded">Blank</strong> <span className="text-emerald-400 text-[11px] font-semibold">(100% 免費無鎖定)</span>
                   </li>
                   <li>
-                    {t('backend_modal.hf_step2', '硬體選擇免費方案')} <span className="text-emerald-400 font-semibold">(2 vCPU · 16 GB RAM · $0/mo)</span>
+                    {t('backend_modal.hf_step2', '硬體規格選擇免費方案')} <span className="text-emerald-400 font-semibold">(2 vCPU · 16 GB RAM · $0/mo)</span>
                   </li>
                   <li>
-                    {t('backend_modal.hf_step3', '將本專案 GitHub 倉庫中的 backend 代碼匯入或上傳 Dockerfile')}
+                    {t('backend_modal.hf_step3', '進入 Space 頁面後，將本專案 GitHub 倉庫關聯或上傳 app.py 與 requirements.txt')}
                   </li>
                   <li>
                     {t('backend_modal.hf_step4', '部署完成後，複製 Space 的 Direct URL（例如：https://username-omniseam.hf.space）貼在下方')}
