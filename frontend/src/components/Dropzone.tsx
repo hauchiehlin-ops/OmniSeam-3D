@@ -5,7 +5,9 @@ import { apiClient } from '../api/client';
 
 interface DropzoneProps {
   onFileSelected: (file: File) => void;
+  onFilesSelected?: (files: File[]) => void;
   selectedFile: File | null;
+  batchFilesCount?: number;
   isLoading?: boolean;
 }
 
@@ -15,7 +17,9 @@ const SUPPORTED_FORMATS = [
 
 export const Dropzone: React.FC<DropzoneProps> = ({
   onFileSelected,
+  onFilesSelected,
   selectedFile,
+  batchFilesCount = 0,
   isLoading
 }) => {
   const { t } = useTranslation();
@@ -35,13 +39,23 @@ export const Dropzone: React.FC<DropzoneProps> = ({
     e.preventDefault();
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onFileSelected(e.dataTransfer.files[0]);
+      const fileList = Array.from(e.dataTransfer.files);
+      if (fileList.length > 1 && onFilesSelected) {
+        onFilesSelected(fileList);
+      } else {
+        onFileSelected(fileList[0]);
+      }
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      onFileSelected(e.target.files[0]);
+      const fileList = Array.from(e.target.files);
+      if (fileList.length > 1 && onFilesSelected) {
+        onFilesSelected(fileList);
+      } else {
+        onFileSelected(fileList[0]);
+      }
     }
   };
 
@@ -72,6 +86,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         <input
           ref={fileInputRef}
           type="file"
+          multiple
           className="hidden"
           onChange={handleFileInput}
           disabled={isLoading}
@@ -82,10 +97,16 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         </div>
 
         <h3 className="text-sm font-semibold text-slate-100 mb-1">
-          {selectedFile ? selectedFile.name : t('dropzone.title')}
+          {batchFilesCount > 1
+            ? `📦 ${batchFilesCount} ${t('dropzone.batch_selected_label')}`
+            : selectedFile
+            ? selectedFile.name
+            : t('dropzone.title')}
         </h3>
         <p className="text-xs text-slate-400 max-w-sm mb-3">
-          {selectedFile
+          {batchFilesCount > 1
+            ? t('dropzone.batch_ready_hint', { count: batchFilesCount })
+            : selectedFile
             ? t('dropzone.ready_for_processing', { size: (selectedFile.size / (1024 * 1024)).toFixed(2) })
             : t('dropzone.subtitle')}
         </p>

@@ -30,7 +30,9 @@
     "sample_broken_desc": "模擬常見 3D 掃描或損毀網格，包含多處開放孔洞與非流形缺陷。適合測試自動補洞、法線統一與修復前後雙分屏對比。",
     "sample_bracket": "CAD 工業支架 (Bracket)",
     "sample_bracket_tag": "標準工業零件 · 尺寸量測",
-    "sample_bracket_desc": "標準無缺陷機械支架零件。適合測試高精度 B-Rep 網格離散化、格式轉存速度（如 GLB/3MF）、3D 距離量測與剖面工具。"
+    "sample_bracket_desc": "標準無缺陷機械支架零件。適合測試高精度 B-Rep 網格離散化、格式轉存速度（如 GLB/3MF）、3D 距離量測與剖面工具。",
+    "batch_selected_label": "已選取 {{count}} 個 3D 檔案進行批次處理",
+    "batch_ready_hint": "點擊右側「開始轉換」將依序/並行處理佇列"
   },
   "settings": {
     "title": "轉換與修復參數設定",
@@ -164,6 +166,10 @@
     "delete_task": "刪除此紀錄",
     "download": "下載轉換完成檔案",
     "load_preview": "載入至 3D 視圖",
+    "download_all_zip": "一鍵打包下載全部 (ZIP)",
+    "downloading_zip": "打包壓縮中...",
+    "batch_processing": "批次並行處理中 ({{completed}}/{{total}})",
+    "batch_completed": "批次轉換已全數完成！",
     "status_pending": "排隊中",
     "status_analyzing": "分析幾何拓撲",
     "status_repairing": "自動修復缺陷",
@@ -171,6 +177,16 @@
     "status_optimizing": "壓縮預覽串流",
     "status_completed": "轉換完成",
     "status_failed": "處理失敗"
+  },
+  "ar": {
+    "nav_btn": "AR 實境",
+    "modal_title": "📱 AR 擴增實境即時預覽 (Quick Look / Scene Viewer)",
+    "mobile_detected_title": "檢測到行動裝置瀏覽器",
+    "mobile_detected_desc": "點擊下方按鈕即可直接啟動相機進行 1:1 實體空間 AR 投影：",
+    "launch_now_btn": "🚀 立即在空間中以 AR 投影",
+    "scan_qr_heading": "電腦端用戶：請使用手機相機掃描 QR Code",
+    "scan_qr_instruction": "使用 iPhone (iOS 12+) 或 Android (ARCore 支援機型) 內建相機對準下方二維碼，即可直接在真實環境中 1:1 預覽修復後的 3D 模型實體。",
+    "qr_hover_hint": "無需安裝任何額外 App · 支援原生 Safari Quick Look 與 Android Scene Viewer"
   },
   "nav": {
     "features": "核心功能",

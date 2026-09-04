@@ -16,8 +16,10 @@ import { CadUnlockModal } from './components/CadUnlockModal';
 import { PublicLimitModal } from './components/PublicLimitModal';
 import { UserManualModal } from './components/UserManualModal';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
+import { ArPreviewModal } from './components/ArPreviewModal';
 import { Footer } from './components/Footer';
 
+import * as THREE from 'three';
 import { 
   ConversionConfig, 
   DisplayMode, 
@@ -25,6 +27,8 @@ import {
   TaskResponse 
 } from './types';
 import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES } from './api/client';
+import { ArManager } from './engine/ar-manager';
+import { ZipPackager, ZipEntry } from './engine/zip-packager';
 
 
 const DEFAULT_CONFIG: ConversionConfig = {
@@ -61,12 +65,15 @@ export const App: React.FC = () => {
   const [publicLimitFile, setPublicLimitFile] = useState<File | null>(null);
   const [showManualModal, setShowManualModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showArModal, setShowArModal] = useState(false);
   const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
   // File and Configuration State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ConversionConfig>(DEFAULT_CONFIG);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
   // Conversion Tasks & Inspection
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
@@ -115,6 +122,7 @@ export const App: React.FC = () => {
   // Handle File Selection: Auto Engine Routing & Auto-Inspect
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
+    setSelectedFiles([file]);
     setIsSplitView(false);
     setActiveTask(null);
     setMeasuredDistance(null);
@@ -167,7 +175,6 @@ export const App: React.FC = () => {
       setShowPublicLimitModal(true);
     }
 
-
     try {
       const inspect = await apiClient.inspectModel(file, i18n.language);
       setInspectData(inspect);
@@ -176,15 +183,23 @@ export const App: React.FC = () => {
     }
   };
 
+  // Handle Multi-File Selection
+  const handleFilesSelect = async (files: File[]) => {
+    if (!files || files.length === 0) return;
+    setSelectedFiles(files);
+    handleFileSelect(files[0]);
+  };
+
   // Project Lifecycle Handlers
   const handleNewProject = () => {
     projectFileInputRef.current?.click();
   };
 
   const handleCloseProject = () => {
-    if (selectedFile || tasks.length > 0) {
+    if (selectedFile || selectedFiles.length > 0 || tasks.length > 0) {
       if (window.confirm(t('project.close_confirm'))) {
         setSelectedFile(null);
+        setSelectedFiles([]);
         setTasks([]);
         setActiveTask(null);
         setInspectData(null);
@@ -217,32 +232,88 @@ export const App: React.FC = () => {
     }
   };
 
-  // Start Conversion Pipeline
+  // Start Conversion Pipeline (Supports Single & Multi-File Batch Queue)
   const handleStartConvert = async () => {
-    if (!selectedFile) return;
+    const filesToConvert = selectedFiles.length > 0 ? selectedFiles : (selectedFile ? [selectedFile] : []);
+    if (filesToConvert.length === 0) return;
 
-    const ext = selectedFile.name.split('.').pop()?.toLowerCase() || '';
-    if (PROPRIETARY_CAD_EXTS.has(ext) && engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
-      setLockedCadFile(selectedFile);
-      setShowCadUnlockModal(true);
-      return;
+    for (const file of filesToConvert) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      if (PROPRIETARY_CAD_EXTS.has(ext) && engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
+        setLockedCadFile(file);
+        setShowCadUnlockModal(true);
+        return;
+      }
+      if (engineMode === 'server' && apiClient.isPublicDemoNode() && file.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
+        setPublicLimitFile(file);
+        setShowPublicLimitModal(true);
+        return;
+      }
     }
-
-    // Fair usage public demo node guardrail check
-    if (engineMode === 'server' && apiClient.isPublicDemoNode() && selectedFile.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
-      setPublicLimitFile(selectedFile);
-      setShowPublicLimitModal(true);
-      return;
-    }
-
 
     setIsProcessing(true);
 
+    if (filesToConvert.length > 1) {
+      // Multi-file batch queue processing
+      try {
+        for (const file of filesToConvert) {
+          if (engineMode === 'client') {
+            const res = await apiClient.convertModel(
+              file,
+              config,
+              i18n.language,
+              (pTask) => {
+                setTasks((prev) => {
+                  const idx = prev.findIndex((t) => t.task_id === pTask.task_id);
+                  if (idx >= 0) {
+                    const next = [...prev];
+                    next[idx] = pTask;
+                    return next;
+                  }
+                  return [pTask, ...prev];
+                });
+              }
+            );
+            setActiveTask(res);
+          } else {
+            const initialTask = await apiClient.convertModel(file, config, i18n.language);
+            setTasks((prev) => [initialTask, ...prev]);
+            setActiveTask(initialTask);
+
+            let isDone = false;
+            while (!isDone) {
+              await new Promise((r) => setTimeout(r, 800));
+              const updated = await apiClient.getTaskStatus(initialTask.task_id);
+              setTasks((prev) => prev.map((t) => (t.task_id === updated.task_id ? updated : t)));
+              if (updated.status === 'completed' || updated.status === 'failed') {
+                isDone = true;
+                if (updated.status === 'completed') {
+                  setActiveTask(updated);
+                }
+              }
+            }
+          }
+        }
+        setIsProcessing(false);
+        setIsSplitView(true);
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 },
+        });
+      } catch (err) {
+        console.error("Batch conversion error:", err);
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // Single File processing
+    const singleFile = filesToConvert[0];
     try {
       if (engineMode === 'client') {
-        // Pure Client-Side Execution (Local in-browser)
         const resultTask = await apiClient.convertModel(
-          selectedFile,
+          singleFile,
           config,
           i18n.language,
           (progressTask) => {
@@ -269,8 +340,7 @@ export const App: React.FC = () => {
           origin: { y: 0.6 },
         });
       } else {
-        // Cloud Server Execution (FastAPI Background Task)
-        const initialTask = await apiClient.convertModel(selectedFile, config, i18n.language);
+        const initialTask = await apiClient.convertModel(singleFile, config, i18n.language);
         setTasks((prev) => [initialTask, ...prev]);
         setActiveTask(initialTask);
 
@@ -307,6 +377,62 @@ export const App: React.FC = () => {
       console.error("Conversion failed:", err);
       setIsProcessing(false);
     }
+  };
+
+  // Batch Download All Converted Files as a ZIP Archive
+  const handleDownloadAllZip = async () => {
+    const completedTasks = tasks.filter((t) => t.status === 'completed');
+    if (completedTasks.length === 0) return;
+
+    setIsDownloadingZip(true);
+    try {
+      const entries: ZipEntry[] = [];
+      for (const task of completedTasks) {
+        const baseName = task.filename.substring(0, task.filename.lastIndexOf('.')) || task.filename;
+        const entryFilename = `${baseName}_omniseam.${task.target_format}`;
+        const downloadUrl = apiClient.getDownloadUrl(task);
+
+        const resp = await fetch(downloadUrl);
+        const blob = await resp.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+
+        entries.push({
+          filename: entryFilename,
+          data: arrayBuffer,
+        });
+      }
+
+      const zipBlob = await ZipPackager.createZip(entries);
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = zipUrl;
+      a.download = `OmniSeam3D_Batch_Export_${Date.now()}.zip`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 3000);
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.7 },
+      });
+    } catch (err) {
+      console.error("ZIP packaging error:", err);
+    } finally {
+      setIsDownloadingZip(false);
+    }
+  };
+
+  // Launch Mobile AR Quick Look / Google Scene Viewer
+  const handleLaunchDirectAr = async () => {
+    const previewUrl = activeTask?.status === 'completed'
+      ? (activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id))
+      : undefined;
+
+    const scene = new THREE.Scene();
+    const geom = new THREE.BoxGeometry(1, 1, 1);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x6366f1 });
+    scene.add(new THREE.Mesh(geom, mat));
+
+    await ArManager.launchAr(scene, previewUrl);
   };
 
   // Inspect Only
@@ -421,6 +547,7 @@ export const App: React.FC = () => {
               explodedOffset={explodedOffset}
               onChangeExplodedOffset={setExplodedOffset}
               onResetCamera={() => {}}
+              onOpenArPreview={() => setShowArModal(true)}
               hasRepairedModel={Boolean(repairedPreviewUrl)}
             />
 
@@ -475,7 +602,9 @@ export const App: React.FC = () => {
           <div className="lg:col-span-5 flex flex-col gap-5">
             <Dropzone
               onFileSelected={handleFileSelect}
+              onFilesSelected={handleFilesSelect}
               selectedFile={selectedFile}
+              batchFilesCount={selectedFiles.length}
               isLoading={isProcessing}
             />
 
@@ -484,7 +613,7 @@ export const App: React.FC = () => {
               onChangeConfig={setConfig}
               onStartConvert={handleStartConvert}
               onInspectOnly={handleInspectOnly}
-              disabled={!selectedFile}
+              disabled={!selectedFile && selectedFiles.length === 0}
               isProcessing={isProcessing}
               engineMode={engineMode}
               autoEngineNotice={autoEngineNotice}
@@ -501,6 +630,8 @@ export const App: React.FC = () => {
               onSelectPreview={handleSelectPreviewTask}
               onDeleteTask={handleDeleteTask}
               onClearAll={handleClearAllTasks}
+              onDownloadAllZip={handleDownloadAllZip}
+              isDownloadingZip={isDownloadingZip}
               activeTaskId={activeTask?.task_id}
             />
           </div>
@@ -525,6 +656,15 @@ export const App: React.FC = () => {
       <PrivacyPolicyModal
         isOpen={showPrivacyModal}
         onClose={() => setShowPrivacyModal(false)}
+      />
+
+      {/* AR Preview Modal */}
+      <ArPreviewModal
+        isOpen={showArModal}
+        onClose={() => setShowArModal(false)}
+        modelName={selectedFile?.name}
+        onLaunchDirectAr={handleLaunchDirectAr}
+        isMobileDevice={ArManager.getArPlatform() !== 'desktop'}
       />
 
       {/* Backend Settings Modal */}

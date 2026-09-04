@@ -41,6 +41,7 @@ interface ToolbarProps {
   explodedOffset: number;
   onChangeExplodedOffset: (val: number) => void;
   onResetCamera: () => void;
+  onOpenArPreview?: () => void;
   hasRepairedModel: boolean;
 }
 
@@ -67,6 +68,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   explodedOffset,
   onChangeExplodedOffset,
   onResetCamera,
+  onOpenArPreview,
   hasRepairedModel
 }) => {
   const { t } = useTranslation();
@@ -278,6 +280,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <Ruler className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t('viewer.measure_tool')}</span>
           </button>
+
+          {/* AR Quick Look Button */}
+          {onOpenArPreview && (
+            <button
+              type="button"
+              onClick={onOpenArPreview}
+              disabled={!hasLoadedModel}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                hasLoadedModel
+                  ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400 active:scale-95 shadow-sm'
+                  : 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
+              }`}
+              title={t('ar.nav_btn')}
+            >
+              <span>📱</span>
+              <span className="hidden md:inline">{t('ar.nav_btn')}</span>
+            </button>
+          )}
 
           {/* Reset Camera */}
           <button

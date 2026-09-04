@@ -7,6 +7,7 @@ import {
   CheckCircle2, 
   AlertCircle,
   Trash2,
+  Package,
   X
 } from 'lucide-react';
 import { TaskResponse } from '../types';
@@ -17,6 +18,8 @@ interface TaskHistoryProps {
   onSelectPreview: (task: TaskResponse) => void;
   onDeleteTask?: (taskId: string) => void;
   onClearAll?: () => void;
+  onDownloadAllZip?: () => void;
+  isDownloadingZip?: boolean;
   activeTaskId?: string | null;
 }
 
@@ -25,16 +28,20 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
   onSelectPreview,
   onDeleteTask,
   onClearAll,
+  onDownloadAllZip,
+  isDownloadingZip = false,
   activeTaskId
 }) => {
   const { t } = useTranslation();
 
   if (tasks.length === 0) return null;
 
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
+
   return (
     <div className="flex flex-col gap-3 p-5 bg-dark-surface border border-dark-border rounded-2xl animate-fade-in">
-      {/* Header with Title and Clear All button */}
-      <div className="flex items-center justify-between pb-2 border-b border-dark-border">
+      {/* Header with Title, Batch Download ZIP and Clear All button */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-dark-border">
         <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
           <ListOrdered className="w-4 h-4 text-brand-400" />
           <span>{t('tasks.title')}</span>
@@ -43,17 +50,37 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
           </span>
         </div>
 
-        {onClearAll && tasks.length > 0 && (
-          <button
-            type="button"
-            onClick={onClearAll}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 transition-all"
-            title={t('tasks.clear_all')}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>{t('tasks.clear_all')}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onDownloadAllZip && completedTasks.length > 0 && (
+            <button
+              type="button"
+              onClick={onDownloadAllZip}
+              disabled={isDownloadingZip}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+              title={t('tasks.download_all_zip')}
+            >
+              <Package className="w-3.5 h-3.5 text-emerald-400" />
+              <span>
+                {isDownloadingZip ? t('tasks.downloading_zip') : t('tasks.download_all_zip')}
+              </span>
+              <span className="px-1 py-0.2 text-[9px] font-mono rounded bg-emerald-950/80 text-emerald-300">
+                ({completedTasks.length})
+              </span>
+            </button>
+          )}
+
+          {onClearAll && tasks.length > 0 && (
+            <button
+              type="button"
+              onClick={onClearAll}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 transition-all"
+              title={t('tasks.clear_all')}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{t('tasks.clear_all')}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">

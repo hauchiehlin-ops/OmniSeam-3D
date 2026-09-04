@@ -30,7 +30,9 @@
     "sample_broken_desc": "Simulates a damaged/scanned mesh with open boundary holes and non-manifold edges. Ideal for testing auto hole-filling, normal unification, and side-by-side comparison.",
     "sample_bracket": "CAD Mechanical Bracket",
     "sample_bracket_tag": "Clean Solid · Dimension Metric",
-    "sample_bracket_desc": "Clean industrial mechanical bracket. Ideal for testing B-Rep tessellation quality, export speed (GLB/3MF), 3D dimension measurement, and cross-section slicing."
+    "sample_bracket_desc": "Clean industrial mechanical bracket. Ideal for testing B-Rep tessellation quality, export speed (GLB/3MF), 3D dimension measurement, and cross-section slicing.",
+    "batch_selected_label": "{{count}} 3D files selected for batch processing",
+    "batch_ready_hint": "Click 'Start Conversion' to process the queue in parallel"
   },
   "settings": {
     "title": "Conversion & Repair Options",
@@ -164,6 +166,10 @@
     "delete_task": "Delete task item",
     "download": "Download Converted File",
     "load_preview": "View in 3D Viewport",
+    "download_all_zip": "Download All as ZIP",
+    "downloading_zip": "Packaging ZIP...",
+    "batch_processing": "Batch Processing ({{completed}}/{{total}})",
+    "batch_completed": "Batch conversion completed!",
     "status_pending": "Queued",
     "status_analyzing": "Analyzing Geometry",
     "status_repairing": "Auto-Healing",
@@ -171,6 +177,16 @@
     "status_optimizing": "Compressing GLB",
     "status_completed": "Completed",
     "status_failed": "Failed"
+  },
+  "ar": {
+    "nav_btn": "AR Preview",
+    "modal_title": "📱 AR Augmented Reality Preview (Quick Look / Scene Viewer)",
+    "mobile_detected_title": "Mobile Device Detected",
+    "mobile_detected_desc": "Tap below to launch direct 1:1 spatial AR projection:",
+    "launch_now_btn": "🚀 Launch AR Quick Look Now",
+    "scan_qr_heading": "Desktop Users: Scan with your Phone Camera",
+    "scan_qr_instruction": "Point your iPhone (iOS 12+) or Android (ARCore) camera at the QR code below to project this 3D model into your physical environment at 1:1 scale.",
+    "qr_hover_hint": "No extra app required · Native Safari Quick Look & Google Scene Viewer supported"
   },
   "nav": {
     "features": "Features",
