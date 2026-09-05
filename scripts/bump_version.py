@@ -39,6 +39,16 @@ def main():
     with open(pkg_json_path, "w", encoding="utf-8") as f:
         json.dump(pkg_data, f, indent=2)
         f.write("\n")
+
+    # 1.1 Update root package.json
+    root_pkg_json = ROOT / "package.json"
+    if root_pkg_json.exists():
+        with open(root_pkg_json, "r", encoding="utf-8") as f:
+            root_pkg_data = json.load(f)
+        root_pkg_data["version"] = new_version
+        with open(root_pkg_json, "w", encoding="utf-8") as f:
+            json.dump(root_pkg_data, f, indent=2)
+            f.write("\n")
         
     # 2. Update frontend/src/version.ts
     version_ts_path = ROOT / "frontend" / "src" / "version.ts"
