@@ -121,7 +121,11 @@
     "reset_camera": "Reset Camera",
     "distance": "Distance: {{val}} mm",
     "bbox_dims": "Dimensions: {{dx}} x {{dy}} x {{dz}} mm",
-    "streaming": "Streaming 3D Geometry..."
+    "streaming": "Streaming 3D Geometry...",
+    "cad_placeholder_badge": "📐 CAD / BIM Proprietary Geometry",
+    "cad_placeholder_title": "Detected {{ext}} CAD Model / Drawing",
+    "cad_placeholder_desc": "This format contains advanced B-Rep boundary surfaces or CAD drawing entities requiring geometric kernel tessellation and topological sewing.",
+    "cad_placeholder_hint": "Click \"Start Conversion & Auto-Healing\" on the right to parse and render the true 3D solid geometry."
   },
   "audit": {
     "title": "Geometric Health Audit Report",

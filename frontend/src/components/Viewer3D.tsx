@@ -5,6 +5,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
+import { PCDLoader } from 'three/examples/jsm/loaders/PCDLoader.js';
+import { ThreeMFLoader } from 'three/examples/jsm/loaders/3MFLoader.js';
+import { Compass, FileCode2, Sparkles } from 'lucide-react';
 import { DisplayMode } from '../types';
 
 interface Viewer3DProps {
@@ -23,6 +27,12 @@ interface Viewer3DProps {
   title?: string;
   badge?: string;
   badgeColor?: 'red' | 'emerald' | 'indigo';
+}
+
+interface CadPlaceholderInfo {
+  ext: string;
+  name: string;
+  size: number;
 }
 
 export const Viewer3D: React.FC<Viewer3DProps> = ({
@@ -53,6 +63,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   const measureLineRef = useRef<THREE.Line | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [cadPlaceholder, setCadPlaceholder] = useState<CadPlaceholderInfo | null>(null);
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -167,6 +178,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
       scene.add(object);
       currentMeshRef.current = object;
+      setCadPlaceholder(null);
       setIsLoading(false);
 
       if (cameraRef.current && controlsRef.current) {
@@ -177,6 +189,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
     };
 
     if (modelUrl) {
+      setCadPlaceholder(null);
       setIsLoading(true);
       const gltfLoader = new GLTFLoader();
       gltfLoader.load(
@@ -191,43 +204,133 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
         }
       );
     } else if (modelFile) {
+      const ext = modelFile.name.split('.').pop()?.toLowerCase() || '';
+      const supportedMeshExts = ['stl', 'obj', 'glb', 'gltf', 'ply', 'pcd', '3mf'];
+
+      if (!supportedMeshExts.includes(ext)) {
+        // Proprietary CAD or BIM format requiring server/B-Rep kernel parsing
+        // Display dedicated CAD blueprint card instead of misleading placeholder geometry
+        setIsLoading(false);
+        setCadPlaceholder({
+          ext: ext.toUpperCase(),
+          name: modelFile.name,
+          size: modelFile.size,
+        });
+        return;
+      }
+
+      setCadPlaceholder(null);
       setIsLoading(true);
       const url = URL.createObjectURL(modelFile);
-      const ext = modelFile.name.split('.').pop()?.toLowerCase();
 
       if (ext === 'stl') {
         const stlLoader = new STLLoader();
-        stlLoader.load(url, (geom) => {
-          geom.computeVertexNormals();
-          const mat = new THREE.MeshStandardMaterial({
-            color: highlightColor,
-            roughness: 0.35,
-            metalness: 0.25
-          });
-          const mesh = new THREE.Mesh(geom, mat);
-          applyModel(mesh);
-          URL.revokeObjectURL(url);
-        });
+        stlLoader.load(
+          url,
+          (geom) => {
+            geom.computeVertexNormals();
+            const mat = new THREE.MeshStandardMaterial({
+              color: highlightColor,
+              roughness: 0.35,
+              metalness: 0.25
+            });
+            const mesh = new THREE.Mesh(geom, mat);
+            applyModel(mesh);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("STL load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
       } else if (ext === 'obj') {
         const objLoader = new OBJLoader();
-        objLoader.load(url, (obj) => {
-          applyModel(obj);
-          URL.revokeObjectURL(url);
-        });
+        objLoader.load(
+          url,
+          (obj) => {
+            applyModel(obj);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("OBJ load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
+      } else if (ext === 'ply') {
+        const plyLoader = new PLYLoader();
+        plyLoader.load(
+          url,
+          (geom) => {
+            geom.computeVertexNormals();
+            const mat = new THREE.MeshStandardMaterial({
+              color: highlightColor,
+              roughness: 0.35,
+              metalness: 0.25
+            });
+            const mesh = new THREE.Mesh(geom, mat);
+            applyModel(mesh);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("PLY load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
+      } else if (ext === '3mf') {
+        const threeMFLoader = new ThreeMFLoader();
+        threeMFLoader.load(
+          url,
+          (group) => {
+            applyModel(group);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("3MF load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
+      } else if (ext === 'pcd') {
+        const pcdLoader = new PCDLoader();
+        pcdLoader.load(
+          url,
+          (points) => {
+            applyModel(points);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("PCD load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
       } else if (ext === 'glb' || ext === 'gltf') {
         const gltfLoader = new GLTFLoader();
-        gltfLoader.load(url, (gltf) => {
-          applyModel(gltf.scene);
-          URL.revokeObjectURL(url);
-        });
-      } else {
-        // Fallback procedural visualizer for other CAD formats
-        const geom = new THREE.TorusKnotGeometry(15, 4, 64, 16);
-        const mat = new THREE.MeshStandardMaterial({ color: highlightColor, roughness: 0.4 });
-        const mesh = new THREE.Mesh(geom, mat);
-        applyModel(mesh);
-        URL.revokeObjectURL(url);
+        gltfLoader.load(
+          url,
+          (gltf) => {
+            applyModel(gltf.scene);
+            URL.revokeObjectURL(url);
+          },
+          undefined,
+          (err) => {
+            console.error("GLTF load error:", err);
+            setIsLoading(false);
+            URL.revokeObjectURL(url);
+          }
+        );
       }
+    } else {
+      setCadPlaceholder(null);
+      setIsLoading(false);
     }
   }, [modelUrl, modelFile, highlightColor]);
 
@@ -413,6 +516,41 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
               {badge}
             </span>
           )}
+        </div>
+      )}
+
+      {/* CAD / BIM Proprietary Format Placeholder (Zero Fake Geometry) */}
+      {cadPlaceholder && !modelUrl && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#0D121F]/95 via-[#0A0E18]/95 to-[#080B13]/98 backdrop-blur-md select-none">
+          <div className="relative mb-3.5">
+            <div className="absolute -inset-2 bg-brand-500/20 rounded-3xl blur-md animate-pulse" />
+            <div className="relative w-14 h-14 rounded-2xl bg-dark-panel border border-brand-500/30 flex items-center justify-center shadow-2xl">
+              <Compass className="w-7 h-7 text-brand-400" />
+            </div>
+            <span className="absolute -top-1 -right-2 px-1.5 py-0.5 text-[9px] font-extrabold rounded bg-brand-500 text-white shadow-lg tracking-wider">
+              {cadPlaceholder.ext}
+            </span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-[11px] font-semibold mb-2">
+            <FileCode2 className="w-3.5 h-3.5" />
+            <span>{t('viewer.cad_placeholder_badge')}</span>
+          </div>
+
+          <h3 className="text-sm font-bold text-slate-100 mb-1 max-w-sm">
+            {t('viewer.cad_placeholder_title', { ext: cadPlaceholder.ext })}
+          </h3>
+
+          <p className="text-xs text-slate-400 max-w-md mb-3.5 leading-relaxed">
+            {t('viewer.cad_placeholder_desc')}
+          </p>
+
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-dark-surface/90 border border-dark-border text-xs text-slate-300 shadow-xl max-w-md">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-[11px] text-left leading-snug text-slate-300">
+              {t('viewer.cad_placeholder_hint')}
+            </span>
+          </div>
         </div>
       )}
 

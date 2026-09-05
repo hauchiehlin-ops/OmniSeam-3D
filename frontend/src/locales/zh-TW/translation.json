@@ -121,7 +121,11 @@
     "reset_camera": "重置視角",
     "distance": "點對點距離：{{val}} mm",
     "bbox_dims": "外框尺寸：{{dx}} x {{dy}} x {{dz}} mm",
-    "streaming": "3D 幾何資料串流載入中..."
+    "streaming": "3D 幾何資料串流載入中...",
+    "cad_placeholder_badge": "📐 CAD / BIM 專有幾何格式",
+    "cad_placeholder_title": "檢測到 {{ext}} CAD 圖紙與實體檔案",
+    "cad_placeholder_desc": "此格式包含高階 B-Rep 邊界曲面或 CAD 圖元，需經由後端/雲端工業幾何內核進行拓撲解析與曲面縫合。",
+    "cad_placeholder_hint": "請點擊右側「開始轉換與自動修復」，系統將即刻解析並於修復視圖呈現真實 3D 幾何實體。"
   },
   "audit": {
     "title": "幾何健康體檢報告",

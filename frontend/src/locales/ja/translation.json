@@ -121,7 +121,11 @@
     "reset_camera": "カメラリセット",
     "distance": "測定距離: {{val}} mm",
     "bbox_dims": "外形寸法: {{dx}} x {{dy}} x {{dz}} mm",
-    "streaming": "3D 幾何データをストリーミング中..."
+    "streaming": "3D 幾何データをストリーミング中...",
+    "cad_placeholder_badge": "📐 CAD / BIM 専用幾何フォーマット",
+    "cad_placeholder_title": "{{ext}} CAD 図面 / ソリッドファイルを検出",
+    "cad_placeholder_desc": "このフォーマットには高度な B-Rep 幾何学的曲面が含まれており、幾何カーネルによるトポロジ解析と曲面結合が必要です。",
+    "cad_placeholder_hint": "右側の「変換と自動修復を開始」をクリックすると、実際の 3D ソリッドが表示されます。"
   },
   "audit": {
     "title": "幾何診断・ヘルスレポート (Health Audit)",

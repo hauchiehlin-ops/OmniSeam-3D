@@ -119,9 +119,13 @@
     "measure_tool": "3D 尺寸距离测量",
     "exploded_view": "装配爆炸图",
     "reset_camera": "视角重置",
-    "distance": "测量距离: {{val}} mm",
-    "bbox_dims": "外框尺寸: {{dx}} x {{dy}} x {{dz}} mm",
-    "streaming": "正在流式传输 3D 几何数据..."
+    "distance": "点对点距离：{{val}} mm",
+    "bbox_dims": "外框尺寸：{{dx}} x {{dy}} x {{dz}} mm",
+    "streaming": "3D 几何资料串流载入中...",
+    "cad_placeholder_badge": "📐 CAD / BIM 专有几何格式",
+    "cad_placeholder_title": "检测到 {{ext}} CAD 图纸与实体档案",
+    "cad_placeholder_desc": "此格式包含高阶 B-Rep 边界曲面或 CAD 图元，需经由后端/云端工业几何内核进行拓扑解析与曲面缝合。",
+    "cad_placeholder_hint": "请点击右侧「开始转换与自动修复」，系统将即刻解析并于修复视图呈现真实 3D 几何实体。"
   },
   "audit": {
     "title": "几何健康度体检报告 (Health Audit)",
