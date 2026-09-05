@@ -108,6 +108,17 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             </div>
           </div>
 
+          {/* Geometric Fidelity & Anti-Tampering Guarantee */}
+          <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 space-y-1">
+            <h4 className="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-indigo-400" />
+              <span>{t('privacy.fidelity_guarantee_title')}</span>
+            </h4>
+            <p className="text-xs text-indigo-300/90 leading-relaxed">
+              {t('privacy.fidelity_guarantee_desc')}
+            </p>
+          </div>
+
           {/* Data Lifecycle Table */}
           <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
             <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-2">

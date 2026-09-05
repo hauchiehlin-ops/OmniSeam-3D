@@ -14,7 +14,10 @@ import {
   Check, 
   ExternalLink,
   Layers,
-  HelpCircle
+  HelpCircle,
+  Target,
+  Wrench,
+  Compass
 } from 'lucide-react';
 
 interface UserManualModalProps {
@@ -29,7 +32,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
   onOpenBackendSettings
 }) => {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'quickstart' | 'viewport' | 'engine' | 'commands' | 'slicer'>('quickstart');
+  const [activeTab, setActiveTab] = useState<'quickstart' | 'fidelity' | 'viewport' | 'engine' | 'commands' | 'slicer'>('quickstart');
   const [copiedCmd, setCopiedCmd] = useState(false);
 
   if (!isOpen) return null;
@@ -69,11 +72,11 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           </button>
         </div>
 
-        {/* Navigation Tabs - 5 equal columns on desktop, 100% visible across all languages */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 border-b border-dark-border bg-dark-panel/60 p-2 sm:p-3 gap-1.5 sm:gap-2">
+        {/* Navigation Tabs - 6 equal columns on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-b border-dark-border bg-dark-panel/60 p-2 sm:p-3 gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveTab('quickstart')}
-            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'quickstart'
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
@@ -85,8 +88,21 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('fidelity')}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+              activeTab === 'fidelity'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
+            }`}
+            title={t('manual.tab_fidelity')}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+            <span className="truncate">{t('manual.tab_fidelity')}</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('viewport')}
-            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'viewport'
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
@@ -99,7 +115,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('engine')}
-            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'engine'
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
@@ -112,7 +128,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('slicer')}
-            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'slicer'
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
@@ -125,7 +141,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
           <button
             onClick={() => setActiveTab('commands')}
-            className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
               activeTab === 'commands'
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-dark-hover bg-dark-panel/80 border border-dark-border/40'
@@ -203,7 +219,72 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
             </div>
           )}
 
-          {/* TAB 2: VIEWPORT & TOOLS */}
+          {/* TAB 2: FIDELITY & HEALING */}
+          {activeTab === 'fidelity' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 space-y-1">
+                <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>{t('manual.fidelity_title')}</span>
+                </h3>
+                <p className="text-xs text-emerald-300/90 leading-relaxed">
+                  {t('manual.fidelity_desc')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.fidelity_passthrough_title')}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {t('manual.fidelity_passthrough_desc')}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-brand-400 font-bold text-xs">
+                    <Target className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.fidelity_intent_title')}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {t('manual.fidelity_intent_desc')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
+                <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <Wrench className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>{t('manual.fidelity_tiers_title')}</span>
+                </h4>
+                <div className="space-y-2 text-xs text-slate-300">
+                  <div className="p-3 rounded-xl bg-dark-surface border border-dark-border">
+                    <span className="text-slate-300 leading-relaxed">{t('manual.fidelity_tier1')}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-dark-surface border border-dark-border">
+                    <span className="text-slate-300 leading-relaxed">{t('manual.fidelity_tier2')}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-dark-surface border border-dark-border">
+                    <span className="text-slate-300 leading-relaxed">{t('manual.fidelity_tier3')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-2">
+                <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-2">
+                  <Compass className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t('manual.fidelity_cad_title')}</span>
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('manual.fidelity_cad_desc')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: VIEWPORT & TOOLS */}
           {activeTab === 'viewport' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
