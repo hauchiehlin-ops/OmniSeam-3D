@@ -36,21 +36,32 @@ export const Footer: React.FC<FooterProps> = ({
   ];
 
   const handleShare = async () => {
-    const shareData = {
-      title: 'OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine',
-      text: 'Free enterprise-grade 3D CAD/Mesh converter with automated watertight healing and 100% offline privacy!',
-      url: window.location.href,
-    };
+    // Determine clean official or current live URL
+    const cleanUrl = typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')
+      ? (window.location.origin.includes('localhost') ? 'https://omniseam-3d.vercel.app' : window.location.origin.replace(/\/+$/, ''))
+      : 'https://omniseam-3d.vercel.app';
+
+    // 1. Copy strictly the clean URL to clipboard so any direct paste into browser address bar works immediately
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(cleanUrl);
+        setCopiedShare(true);
+        setTimeout(() => setCopiedShare(false), 2500);
+      }
+    } catch {
+      // Fallback
+    }
+
+    // 2. If Web Share API is supported (e.g. mobile Safari/Chrome), pass url cleanly
     if (navigator.share) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: 'OmniSeam 3D',
+          url: cleanUrl,
+        });
       } catch {
         // User dismissed share dialog
       }
-    } else {
-      navigator.clipboard.writeText(`${shareData.title}\n${shareData.url}`);
-      setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2000);
     }
   };
 
