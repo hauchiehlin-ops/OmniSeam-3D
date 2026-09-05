@@ -37,7 +37,7 @@ const DEFAULT_CONFIG: ConversionConfig = {
   cad_angular_deflection: 0.1,
   enable_sewing: true,
   sewing_tolerance: 0.001,
-  auto_fill_holes: true,
+  auto_fill_holes: false,
   fix_non_manifold: true,
   unify_normals: true,
   remove_degenerate: true,

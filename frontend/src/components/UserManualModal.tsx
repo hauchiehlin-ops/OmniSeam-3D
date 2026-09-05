@@ -17,7 +17,8 @@ import {
   HelpCircle,
   Target,
   Wrench,
-  Compass
+  Compass,
+  ShieldCheck
 } from 'lucide-react';
 
 interface UserManualModalProps {
@@ -199,16 +200,19 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-2">
-                <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider">{t('manual.presets_guide_title')}</h4>
+              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-2.5">
+                <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
+                  <span>{t('manual.presets_guide_title')}</span>
+                </h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-start gap-2">
-                    <span className="text-brand-400 font-bold shrink-0">{t('manual.preset_3dprint_title')}</span>
-                    <span className="text-slate-300">{t('manual.preset_3dprint_desc')}</span>
+                    <span className="text-brand-400 font-bold shrink-0">{t('manual.preset_game_title')}</span>
+                    <span className="text-slate-300">{t('manual.preset_game_desc')}</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-indigo-400 font-bold shrink-0">{t('manual.preset_game_title')}</span>
-                    <span className="text-slate-300">{t('manual.preset_game_desc')}</span>
+                    <span className="text-emerald-400 font-bold shrink-0">{t('manual.preset_3dprint_title')}</span>
+                    <span className="text-slate-300">{t('manual.preset_3dprint_desc')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-amber-400 font-bold shrink-0">{t('manual.preset_asis_title')}</span>
