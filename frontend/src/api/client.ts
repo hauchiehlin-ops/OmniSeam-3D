@@ -69,9 +69,11 @@ export const apiClient = {
 
   isPublicDemoNode(url?: string): boolean {
     const target = url !== undefined ? url : this.customBackendUrl;
-    if (!target) return true; // Default fallback to public demo node
+    if (!target) return true; // Default fallback to public demo node when no custom node is configured
     const clean = normalizeBackendUrl(target);
-    return clean.includes('hauchieh-omniseam-engine.hf.space') || clean.includes('spaces/hauchieh/omniseam-engine');
+    if (!clean) return true;
+    // Any explicitly configured backend URL is treated as a dedicated/private node
+    return false;
   },
 
 
