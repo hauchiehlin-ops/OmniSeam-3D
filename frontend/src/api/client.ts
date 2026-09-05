@@ -272,28 +272,42 @@ export const apiClient = {
       target_format: string;
     }
   ): Promise<FluidDomainResponse> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('inlet_factor', params.inlet_factor.toString());
-    formData.append('outlet_factor', params.outlet_factor.toString());
-    formData.append('margin_factor', params.margin_factor.toString());
-    formData.append('boolean_mode', params.boolean_mode);
-    formData.append('target_format', params.target_format);
-
-    const response = await axios.post<FluidDomainResponse>(
-      `${this.getApiBase()}/wind-tunnel/extract`,
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
-    );
-
-    const result = response.data;
-    if (this.customBackendUrl && result.download_url && !result.download_url.startsWith('http')) {
-      result.download_url = `${this.customBackendUrl}${result.download_url}`;
+    if (this.currentEngineMode === 'client') {
+      try {
+        return await ClientPipeline.extractFluidDomain(file, params);
+      } catch (clientErr) {
+        console.warn('Pure client fluid domain extraction fallback attempting server:', clientErr);
+      }
     }
-    if (this.customBackendUrl && result.preview_url && !result.preview_url.startsWith('http')) {
-      result.preview_url = `${this.customBackendUrl}${result.preview_url}`;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('inlet_factor', params.inlet_factor.toString());
+      formData.append('outlet_factor', params.outlet_factor.toString());
+      formData.append('margin_factor', params.margin_factor.toString());
+      formData.append('boolean_mode', params.boolean_mode);
+      formData.append('target_format', params.target_format);
+
+      const response = await axios.post<FluidDomainResponse>(
+        `${this.getApiBase()}/wind-tunnel/extract`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+
+      const result = response.data;
+      if (this.customBackendUrl && result.download_url && !result.download_url.startsWith('http')) {
+        result.download_url = `${this.customBackendUrl}${result.download_url}`;
+      }
+      if (this.customBackendUrl && result.preview_url && !result.preview_url.startsWith('http')) {
+        result.preview_url = `${this.customBackendUrl}${result.preview_url}`;
+      }
+      return result;
+    } catch (serverErr) {
+      console.warn('Server API failed or not found, falling back to 100% in-browser extraction:', serverErr);
+      return await ClientPipeline.extractFluidDomain(file, params);
     }
-    return result;
   }
 };
+
 

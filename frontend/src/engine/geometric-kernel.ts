@@ -349,7 +349,92 @@ export class GeometricKernel {
       warnings,
     };
   }
+
+  /**
+   * Generates CFD wind tunnel flow domain mesh geometry by subtracting model geometry from outer bounding box.
+   */
+  static generateWindTunnelDomain(
+    mesh: MeshGeometry,
+    params: { inlet_factor: number; outlet_factor: number; margin_factor: number }
+  ): { fluidMesh: MeshGeometry; tunnelBounds: BoundingBox } {
+    const { vertices, faces } = mesh;
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
+    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+
+    for (let i = 0; i < vertices.length; i++) {
+      const [x, y, z] = vertices[i];
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (z < minZ) minZ = z;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+      if (z > maxZ) maxZ = z;
+    }
+
+    if (!isFinite(minX)) {
+      minX = -50; minY = -50; minZ = -50;
+      maxX = 50; maxY = 50; maxZ = 50;
+    }
+
+    const dx = Math.max(0.1, maxX - minX);
+    const dy = Math.max(0.1, maxY - minY);
+    const dz = Math.max(0.1, maxZ - minZ);
+
+    const boxMinX = minX - dx * params.inlet_factor;
+    const boxMaxX = maxX + dx * params.outlet_factor;
+    const boxMinY = minY - dy * params.margin_factor;
+    const boxMaxY = maxY + dy * params.margin_factor;
+    const boxMinZ = minZ - dz * params.margin_factor;
+    const boxMaxZ = maxZ + dz * params.margin_factor;
+
+    const tunnelBounds: BoundingBox = {
+      min: [round(boxMinX), round(boxMinY), round(boxMinZ)],
+      max: [round(boxMaxX), round(boxMaxY), round(boxMaxZ)],
+      size: [round(boxMaxX - boxMinX), round(boxMaxY - boxMinY), round(boxMaxZ - boxMinZ)],
+    };
+
+    // 8 outer box corners
+    const boxVertices: number[][] = [
+      [boxMinX, boxMinY, boxMinZ], // 0
+      [boxMaxX, boxMinY, boxMinZ], // 1
+      [boxMaxX, boxMaxY, boxMinZ], // 2
+      [boxMinX, boxMaxY, boxMinZ], // 3
+      [boxMinX, boxMinY, boxMaxZ], // 4
+      [boxMaxX, boxMinY, boxMaxZ], // 5
+      [boxMaxX, boxMaxY, boxMaxZ], // 6
+      [boxMinX, boxMaxY, boxMaxZ], // 7
+    ];
+
+    // 12 outward box faces
+    const boxFaces: number[][] = [
+      [0, 2, 1], [0, 3, 2], // Bottom
+      [4, 5, 6], [4, 6, 7], // Top
+      [0, 1, 5], [0, 5, 4], // Front
+      [3, 6, 2], [3, 7, 6], // Back
+      [0, 4, 7], [0, 7, 3], // Inlet (-X)
+      [1, 2, 6], [1, 6, 5], // Outlet (+X)
+    ];
+
+    const vOffset = 8;
+    const combinedVertices = [...boxVertices, ...vertices.map((v) => [v[0], v[1], v[2]])];
+    const combinedFaces = [...boxFaces];
+
+    // Invert inner cavity faces (flip winding order)
+    for (let i = 0; i < faces.length; i++) {
+      const [f0, f1, f2] = faces[i];
+      combinedFaces.push([f0 + vOffset, f2 + vOffset, f1 + vOffset]);
+    }
+
+    return {
+      fluidMesh: {
+        vertices: combinedVertices,
+        faces: combinedFaces,
+      },
+      tunnelBounds,
+    };
+  }
 }
+
 
 function addEdge(map: Map<string, number>, v0: number, v1: number) {
   const key = v0 < v1 ? `${v0}_${v1}` : `${v1}_${v0}`;

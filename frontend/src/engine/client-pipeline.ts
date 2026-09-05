@@ -7,8 +7,12 @@ import {
   HealthAuditReport, 
   InspectResponse, 
   TaskResponse, 
-  TaskStatus 
+  TaskStatus,
+  FluidDomainResponse,
+  TargetFormat
 } from '../types';
+
+
 
 export class ClientPipeline {
   private static createdObjectUrls: string[] = [];
@@ -217,7 +221,53 @@ export class ClientPipeline {
     onProgress?.(finalTask);
     return finalTask;
   }
+
+  /**
+   * Extracts wind tunnel CFD fluid domain 100% in-browser with zero network latency.
+   */
+  static async extractFluidDomain(
+    file: File,
+    params: {
+      inlet_factor: number;
+      outlet_factor: number;
+      margin_factor: number;
+      boolean_mode: string;
+      target_format: string;
+    }
+  ): Promise<FluidDomainResponse> {
+    const rawMesh = await FormatParsers.parseFile(file);
+    const origMetrics = GeometricKernel.computeMetrics(rawMesh);
+    const { fluidMesh, tunnelBounds } = GeometricKernel.generateWindTunnelDomain(rawMesh, params);
+    const fluidMetrics = GeometricKernel.computeMetrics(fluidMesh);
+
+    const ext = params.target_format.toLowerCase() as TargetFormat;
+    const blob = FormatExporters.exportBlob(fluidMesh, ext);
+
+
+    const previewBlob = await FormatExporters.exportGLB(fluidMesh);
+    const downloadUrl = URL.createObjectURL(blob);
+    const previewUrl = URL.createObjectURL(previewBlob);
+
+    this.createdObjectUrls.push(downloadUrl);
+    this.createdObjectUrls.push(previewUrl);
+
+    const stem = file.name.replace(/\.[^/.]+$/, '');
+    const filename = `${stem}_fluid_domain.${ext}`;
+    const taskId = `local_wt_${Date.now()}`;
+
+    return {
+      task_id: taskId,
+      filename,
+      original_metrics: origMetrics,
+      fluid_domain_metrics: fluidMetrics,
+      wind_tunnel_bounds: tunnelBounds,
+      download_url: downloadUrl,
+      preview_url: previewUrl,
+      created_at: new Date().toISOString(),
+    };
+  }
 }
+
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
