@@ -93,15 +93,37 @@ class ConversionPipelineRouter:
             orig_metrics = ModelAuditor.compute_metrics(mesh)
             defects_found = ModelAuditor.detect_defects(mesh)
 
-            # Stage 2: Repairing
+            # Stage 2: Repairing (with Pass-Through Gating for intact prototypes)
             file_manager.update_task(
                 task_id,
                 status=TaskStatus.REPAIRING,
                 progress=50,
                 current_step=get_text("status.repairing", lang)
             )
-            repaired_mesh, defects_fixed, max_deviation = MeshRepairEngine.repair_mesh(mesh, params.repair_options)
-            repaired_metrics = ModelAuditor.compute_metrics(repaired_mesh)
+            is_already_clean = (
+                orig_metrics.is_watertight and 
+                defects_found.open_boundary_loops == 0 and 
+                defects_found.non_manifold_edges == 0 and 
+                defects_found.degenerate_faces == 0
+            )
+
+            if is_already_clean:
+                # 100% Pass-Through Mode: Preserves exact original vertices and faces without modification
+                repaired_mesh = mesh
+                defects_fixed = {
+                    "holes_filled": 0,
+                    "non_manifold_fixed": 0,
+                    "degenerate_faces_removed": 0,
+                    "duplicate_faces_removed": 0,
+                    "normals_unified": 0,
+                    "vertices_welded": 0,
+                    "passthrough_preserved": 1
+                }
+                max_deviation = 0.0
+                repaired_metrics = orig_metrics
+            else:
+                repaired_mesh, defects_fixed, max_deviation = MeshRepairEngine.repair_mesh(mesh, params.repair_options)
+                repaired_metrics = ModelAuditor.compute_metrics(repaired_mesh)
 
             # Stage 3: Converting
             file_manager.update_task(

@@ -105,20 +105,45 @@ export class ClientPipeline {
     const origMetrics = GeometricKernel.computeMetrics(rawMesh);
     const defectsFound = GeometricKernel.detectDefects(rawMesh);
 
-    // Stage 2: Repairing
-    update('repairing', 50, isZh ? '正在執行拓撲破面縫合與補洞...' : 'Auto-healing mesh defects & suturing...');
+    // Stage 2: Repairing (with Pass-Through Gating)
+    update('repairing', 50, isZh ? '正在執行拓撲診斷與保護修復...' : 'Topological diagnosis & fidelity repair...');
     await sleep(60);
 
-    const repairOptions = {
-      auto_fill_holes: config.auto_fill_holes,
-      fix_non_manifold: config.fix_non_manifold,
-      unify_normals: config.unify_normals,
-      remove_degenerate: config.remove_degenerate,
-      weld_vertices: config.weld_vertices,
-      weld_tolerance: 1e-5,
-    };
+    const isAlreadyClean = origMetrics.is_watertight && 
+      defectsFound.open_boundary_loops === 0 && 
+      defectsFound.non_manifold_edges === 0 && 
+      defectsFound.degenerate_faces === 0;
 
-    const { repairedMesh, defectsFixed, maxDeviationMm } = MeshRepairKernel.repair(rawMesh, repairOptions);
+    let repairedMesh = rawMesh;
+    let defectsFixed: Record<string, number> = {
+      holes_filled: 0,
+      non_manifold_fixed: 0,
+      degenerate_faces_removed: 0,
+      duplicate_faces_removed: 0,
+      normals_unified: 0,
+      vertices_welded: 0,
+    };
+    let maxDeviationMm = 0;
+
+    if (isAlreadyClean) {
+      // 100% Pass-through: Zero modification to intact prototypes
+      defectsFixed.passthrough_preserved = 1;
+    } else {
+      const repairOptions = {
+        auto_fill_holes: config.auto_fill_holes,
+        fix_non_manifold: config.fix_non_manifold,
+        unify_normals: config.unify_normals,
+        remove_degenerate: config.remove_degenerate,
+        weld_vertices: config.weld_vertices,
+        weld_tolerance: 1e-5,
+      };
+
+      const res = MeshRepairKernel.repair(rawMesh, repairOptions);
+      repairedMesh = res.repairedMesh;
+      defectsFixed = res.defectsFixed;
+      maxDeviationMm = res.maxDeviationMm;
+    }
+
     const repairedMetrics = GeometricKernel.computeMetrics(repairedMesh);
 
     // Stage 3: Converting to Target Format

@@ -6,7 +6,7 @@ from typing import List
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OmniSeam 3D - Universal Model Converter & Auto-Healing Engine"
     API_V1_STR: str = "/api/v1"
-    VERSION: str = "2.2.2"
+    VERSION: str = "3.0.0"
     
     # Storage & Fair Usage Guardrails
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "/tmp/omniseam/uploads")

@@ -345,7 +345,7 @@ export class FormatExporters {
       'ISO-10303-21;',
       'HEADER;',
       "FILE_DESCRIPTION(('OmniSeam 3D Faceted B-Rep Model'),'2;1');",
-      `FILE_NAME('model.step','${nowStr}',('OmniSeam Web Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','OmniSeam','');`,
+      `FILE_NAME('model.step','${nowStr}',('OmniSeam Web Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.0','OmniSeam','');`,
       "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
       'ENDSEC;',
       'DATA;',

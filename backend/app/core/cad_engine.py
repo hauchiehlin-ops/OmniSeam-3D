@@ -349,17 +349,51 @@ except Exception:
         return False
 
     @classmethod
+    def fit_plane_ransac(cls, points: np.ndarray, distance_threshold: float = 0.01, max_iterations: int = 100) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        """
+        Fits a plane (point, normal) to 3D points using RANSAC.
+        Returns: (plane_point, unit_normal) or None.
+        """
+        if len(points) < 3:
+            return None
+        best_inliers = 0
+        best_plane = None
+
+        n_pts = len(points)
+        for _ in range(min(max_iterations, n_pts * 2)):
+            sample_idx = np.random.choice(n_pts, 3, replace=False)
+            p1, p2, p3 = points[sample_idx]
+            v1 = p2 - p1
+            v2 = p3 - p1
+            normal = np.cross(v1, v2)
+            norm_len = np.linalg.norm(normal)
+            if norm_len < 1e-7:
+                continue
+            normal = normal / norm_len
+            dists = np.abs(np.dot(points - p1, normal))
+            inliers = np.sum(dists < distance_threshold)
+            if inliers > best_inliers:
+                best_inliers = inliers
+                best_plane = (p1, normal)
+
+        return best_plane
+
+    @classmethod
     def _export_step_facets(cls, mesh: trimesh.Trimesh, output_path: Path):
-        """Generates standard ISO-10303-21 AP214 faceted boundary representation STEP file with full geometry."""
+        """
+        Generates standard ISO-10303-21 AP214 B-Rep STEP file with exact analytical PLANEs,
+        oriented AXIS2_PLACEMENT_3Ds, and valid CLOSED_SHELL / MANIFOLD_SOLID_BREP topology.
+        """
         vertices = mesh.vertices
         faces = mesh.faces
+        face_normals = mesh.face_normals
         now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
 
         lines = [
             "ISO-10303-21;",
             "HEADER;",
-            "FILE_DESCRIPTION(('OmniSeam 3D Faceted B-Rep Model'),'2;1');",
-            f"FILE_NAME('{output_path.name}','{now_str}',('OmniSeam Engine'),('PolyHeal CAD'),'OmniSeam 3D v1.1','OmniSeam / OpenCASCADE','');",
+            "FILE_DESCRIPTION(('OmniSeam 3D Industrial B-Rep Model'),'2;1');",
+            f"FILE_NAME('{output_path.name}','{now_str}',('OmniSeam Reverse Engineering Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.0','OmniSeam / OpenCASCADE','');",
             "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
             "ENDSEC;",
             "DATA;",
@@ -380,8 +414,7 @@ except Exception:
             "#15=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-05),#16,'distance_accuracy_value','confusion accuracy');",
             "#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));",
             "#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));",
-            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());",
-            "#19=PLANE('',#10);"
+            "#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());"
         ]
 
         curr_id = 30
@@ -392,16 +425,58 @@ except Exception:
             curr_id += 1
 
         face_ids = []
-        for f in faces:
+        # Normal deduplication cache: map normal tuple -> (dir_id, ref_dir_id)
+        normal_cache = {}
+
+        for i, f in enumerate(faces):
             p1, p2, p3 = v_ids[f[0]], v_ids[f[1]], v_ids[f[2]]
+            
+            # 1. Poly Loop
             poly_id = curr_id
             lines.append(f"#{poly_id}=POLY_LOOP('',(#{p1},#{p2},#{p3}));")
             curr_id += 1
+            
+            # 2. Outer Bound
             bound_id = curr_id
             lines.append(f"#{bound_id}=FACE_OUTER_BOUND('',#{poly_id},.T.);")
             curr_id += 1
+
+            # 3. Exact Analytical Plane for this facet
+            fn = face_normals[i] if i < len(face_normals) else np.array([0., 0., 1.])
+            fn_key = (round(fn[0], 4), round(fn[1], 4), round(fn[2], 4))
+
+            if fn_key in normal_cache:
+                dir_id, ref_dir_id = normal_cache[fn_key]
+            else:
+                dir_id = curr_id
+                lines.append(f"#{dir_id}=DIRECTION('',({fn[0]:.6f},{fn[1]:.6f},{fn[2]:.6f}));")
+                curr_id += 1
+
+                # Calculate perpendicular ref direction
+                ref_dir = np.array([1., 0., 0.]) if abs(fn[0]) < 0.8 else np.array([0., 1., 0.])
+                ref_dir = ref_dir - np.dot(ref_dir, fn) * fn
+                r_norm = np.linalg.norm(ref_dir)
+                if r_norm > 1e-6:
+                    ref_dir = ref_dir / r_norm
+                else:
+                    ref_dir = np.array([1., 0., 0.])
+
+                ref_dir_id = curr_id
+                lines.append(f"#{ref_dir_id}=DIRECTION('',({ref_dir[0]:.6f},{ref_dir[1]:.6f},{ref_dir[2]:.6f}));")
+                curr_id += 1
+                normal_cache[fn_key] = (dir_id, ref_dir_id)
+
+            placement_id = curr_id
+            lines.append(f"#{placement_id}=AXIS2_PLACEMENT_3D('',#{p1},#{dir_id},#{ref_dir_id});")
+            curr_id += 1
+
+            plane_id = curr_id
+            lines.append(f"#{plane_id}=PLANE('',#{placement_id});")
+            curr_id += 1
+
+            # 4. Face Surface
             face_id = curr_id
-            lines.append(f"#{face_id}=FACE_SURFACE('',(#{bound_id}),#19,.T.);")
+            lines.append(f"#{face_id}=FACE_SURFACE('',(#{bound_id}),#{plane_id},.T.);")
             face_ids.append(f"#{face_id}")
             curr_id += 1
 

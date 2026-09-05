@@ -46,7 +46,15 @@ export class MeshRepairKernel {
       defectsFixed.holes_filled += filled.holesCount;
     }
 
-    // Step 4: Unify Outward Normals
+    // Step 4: Fix Non-Manifold Edges
+    if (options.fix_non_manifold) {
+      const cleaned = this.disentangleNonManifold(vertices, faces);
+      const diff = faces.length - cleaned.faces.length;
+      if (diff > 0) defectsFixed.non_manifold_fixed += diff;
+      faces = cleaned.faces;
+    }
+
+    // Step 5: Unify Outward Normals
     if (options.unify_normals) {
       faces = this.unifyNormals(vertices, faces);
       defectsFixed.normals_unified += 1;
@@ -63,8 +71,121 @@ export class MeshRepairKernel {
   }
 
   /**
-   * Spatial hash grid vertex welding.
+   * Disentangles non-manifold edges where an edge is shared by >2 faces.
    */
+  private static disentangleNonManifold(
+    vertices: number[][],
+    faces: number[][]
+  ): { vertices: number[][]; faces: number[][] } {
+    const edgeCount = new Map<string, number>();
+
+    for (let i = 0; i < faces.length; i++) {
+      const [i0, i1, i2] = faces[i];
+      const e1 = i0 < i1 ? `${i0}_${i1}` : `${i1}_${i0}`;
+      const e2 = i1 < i2 ? `${i1}_${i2}` : `${i2}_${i1}`;
+      const e3 = i2 < i0 ? `${i2}_${i0}` : `${i0}_${i2}`;
+      edgeCount.set(e1, (edgeCount.get(e1) || 0) + 1);
+      edgeCount.set(e2, (edgeCount.get(e2) || 0) + 1);
+      edgeCount.set(e3, (edgeCount.get(e3) || 0) + 1);
+    }
+
+    const cleanFaces: number[][] = [];
+    for (let i = 0; i < faces.length; i++) {
+      const [i0, i1, i2] = faces[i];
+      const e1 = i0 < i1 ? `${i0}_${i1}` : `${i1}_${i0}`;
+      const e2 = i1 < i2 ? `${i1}_${i2}` : `${i2}_${i1}`;
+      const e3 = i2 < i0 ? `${i2}_${i0}` : `${i0}_${i2}`;
+      
+      const overloaded = (edgeCount.get(e1)! > 2 ? 1 : 0) +
+                         (edgeCount.get(e2)! > 2 ? 1 : 0) +
+                         (edgeCount.get(e3)! > 2 ? 1 : 0);
+      if (overloaded < 2) {
+        cleanFaces.push([i0, i1, i2]);
+      }
+    }
+
+    return { vertices, faces: cleanFaces };
+  }
+
+  /**
+   * Detects open boundary loops and triangulates each hole via centroid fan patching.
+   */
+  private static fillBoundaryHoles(
+    vertices: number[][],
+    faces: number[][]
+  ): { vertices: number[][]; faces: number[][]; holesCount: number } {
+    const edgeMap = new Map<string, { count: number; u: number; v: number }>();
+
+    for (let i = 0; i < faces.length; i++) {
+      const [i0, i1, i2] = faces[i];
+      addDirectedEdge(edgeMap, i0, i1);
+      addDirectedEdge(edgeMap, i1, i2);
+      addDirectedEdge(edgeMap, i2, i0);
+    }
+
+    // Boundary edges are those with count == 1
+    const adjGraph = new Map<number, number[]>();
+    let boundaryCount = 0;
+
+    edgeMap.forEach(({ count, u, v }) => {
+      if (count === 1) {
+        boundaryCount++;
+        if (!adjGraph.has(u)) adjGraph.set(u, []);
+        if (!adjGraph.has(v)) adjGraph.set(v, []);
+        adjGraph.get(u)!.push(v);
+        adjGraph.get(v)!.push(u);
+      }
+    });
+
+    if (boundaryCount === 0) {
+      return { vertices, faces, holesCount: 0 };
+    }
+
+    const newVertices = [...vertices];
+    const newFaces = [...faces];
+    const visited = new Set<number>();
+    let holesSealed = 0;
+
+    // Traverse connected boundary loops
+    adjGraph.forEach((_, startNode) => {
+      if (visited.has(startNode)) return;
+
+      const loop: number[] = [];
+      let curr: number | null = startNode;
+
+      while (curr !== null && !visited.has(curr)) {
+        visited.add(curr);
+        loop.push(curr);
+        const neighbors: number[] = adjGraph.get(curr) || [];
+        const next: number | undefined = neighbors.find((n: number) => !visited.has(n));
+        curr = next !== undefined ? next : null;
+      }
+
+      if (loop.length === 3) {
+        newFaces.push([loop[0], loop[1], loop[2]]);
+        holesSealed++;
+      } else if (loop.length > 3) {
+        // Centroid fan triangulation
+        let cx = 0, cy = 0, cz = 0;
+        for (const idx of loop) {
+          cx += newVertices[idx][0];
+          cy += newVertices[idx][1];
+          cz += newVertices[idx][2];
+        }
+        const centroidIdx = newVertices.length;
+        newVertices.push([cx / loop.length, cy / loop.length, cz / loop.length]);
+
+        for (let i = 0; i < loop.length; i++) {
+          const u = loop[i];
+          const v = loop[(i + 1) % loop.length];
+          newFaces.push([u, v, centroidIdx]);
+        }
+        holesSealed++;
+      }
+    });
+
+    return { vertices: newVertices, faces: newFaces, holesCount: holesSealed };
+  }
   private static weldVertices(
     vertices: number[][],
     faces: number[][],
@@ -152,86 +273,6 @@ export class MeshRepairKernel {
     }
 
     return uniqueFaces;
-  }
-
-  /**
-   * Detects open boundary loops and triangulates each hole via centroid fan patching.
-   */
-  private static fillBoundaryHoles(
-    vertices: number[][],
-    faces: number[][]
-  ): { vertices: number[][]; faces: number[][]; holesCount: number } {
-    const edgeMap = new Map<string, { count: number; u: number; v: number }>();
-
-    for (let i = 0; i < faces.length; i++) {
-      const [i0, i1, i2] = faces[i];
-      addDirectedEdge(edgeMap, i0, i1);
-      addDirectedEdge(edgeMap, i1, i2);
-      addDirectedEdge(edgeMap, i2, i0);
-    }
-
-    // Boundary edges are those with count == 1
-    const adjGraph = new Map<number, number[]>();
-    let boundaryCount = 0;
-
-    edgeMap.forEach(({ count, u, v }) => {
-      if (count === 1) {
-        boundaryCount++;
-        if (!adjGraph.has(u)) adjGraph.set(u, []);
-        if (!adjGraph.has(v)) adjGraph.set(v, []);
-        adjGraph.get(u)!.push(v);
-        adjGraph.get(v)!.push(u);
-      }
-    });
-
-    if (boundaryCount === 0) {
-      return { vertices, faces, holesCount: 0 };
-    }
-
-    const newVertices = [...vertices];
-    const newFaces = [...faces];
-    const visited = new Set<number>();
-    let holesSealed = 0;
-
-    // Traverse connected boundary loops
-    adjGraph.forEach((_, startNode) => {
-      if (visited.has(startNode)) return;
-
-      const loop: number[] = [];
-      let curr: number | null = startNode;
-
-      while (curr !== null && !visited.has(curr)) {
-        visited.add(curr);
-        loop.push(curr);
-        const neighbors: number[] = adjGraph.get(curr) || [];
-        const next: number | undefined = neighbors.find((n: number) => !visited.has(n));
-        curr = next !== undefined ? next : null;
-      }
-
-      if (loop.length === 3) {
-        newFaces.push([loop[0], loop[1], loop[2]]);
-        holesSealed++;
-      } else if (loop.length > 3) {
-        // Centroid fan triangulation
-        let cx = 0, cy = 0, cz = 0;
-        for (const idx of loop) {
-          cx += newVertices[idx][0];
-          cy += newVertices[idx][1];
-          cz += newVertices[idx][2];
-        }
-        const centroidIdx = newVertices.length;
-        newVertices.push([cx / loop.length, cy / loop.length, cz / loop.length]);
-
-        for (let i = 0; i < loop.length; i++) {
-          const u = loop[i];
-          const v = loop[(i + 1) % loop.length];
-          newFaces.push([u, v, centroidIdx]);
-        }
-        holesSealed++;
-      }
-    });
-
-    return { vertices: newVertices, faces: newFaces, holesCount: holesSealed };
   }
 
   /**

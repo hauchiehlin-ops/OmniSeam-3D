@@ -219,8 +219,12 @@ except Exception:
             try:
                 center = np.array([circle.dxf.center.x, circle.dxf.center.y, getattr(circle.dxf.center, 'z', 0.0)])
                 radius = circle.dxf.radius
+                if radius <= 0:
+                    continue
                 start_angle = getattr(circle.dxf, 'start_angle', 0.0)
                 end_angle = getattr(circle.dxf, 'end_angle', 360.0)
+                is_full_circle = circle.dxftype() == 'CIRCLE' or abs(end_angle - start_angle) >= 360.0
+
                 if end_angle <= start_angle:
                     end_angle += 360.0
                 
@@ -229,7 +233,19 @@ except Exception:
                 angles = np.linspace(np.radians(start_angle), np.radians(end_angle), segments)
                 
                 pts = [center + np.array([radius * np.cos(a), radius * np.sin(a), 0.0]) for a in angles]
-                polylines_to_process.append(pts)
+                
+                if is_full_circle:
+                    # Form closed planar disc
+                    c_idx = len(all_vertices)
+                    all_vertices.append(center.tolist())
+                    base_idx = len(all_vertices)
+                    all_vertices.extend([p.tolist() for p in pts[:-1]])
+                    num_pts = len(pts) - 1
+                    for k in range(num_pts):
+                        all_faces.append([c_idx, base_idx + k, base_idx + ((k + 1) % num_pts)])
+                else:
+                    polylines_to_process.append(pts)
+
                 for pt in pts:
                     min_pt = np.minimum(min_pt, pt)
                     max_pt = np.maximum(max_pt, pt)
@@ -267,8 +283,30 @@ except Exception:
                 [v_idx, v_idx + 2, v_idx + 3],
             ])
 
-        # Convert polylines to visible 3D ribbons
+        # Convert polylines to visible 3D ribbons and detect closed planar loops
         for pts in polylines_to_process:
+            if len(pts) < 2:
+                continue
+            
+            # Check if closed planar loop
+            is_closed = np.linalg.norm(pts[0] - pts[-1]) < 1e-4 and len(pts) >= 4
+            if is_closed:
+                try:
+                    # Triangulate planar polygon cap
+                    poly_2d = np.array(pts[:-1])[:, :2]
+                    from trimesh.creation import triangulate_polygon
+                    from shapely.geometry import Polygon
+                    shp_poly = Polygon(poly_2d)
+                    if shp_poly.is_valid and shp_poly.area > 1e-6:
+                        t_verts, t_faces = triangulate_polygon(shp_poly)
+                        z_elev = pts[0][2] if len(pts[0]) > 2 else 0.0
+                        v_offset = len(all_vertices)
+                        all_vertices.extend([[v[0], v[1], z_elev] for v in t_verts])
+                        all_faces.extend((t_faces + v_offset).tolist())
+                        continue
+                except Exception:
+                    pass
+
             for i in range(len(pts) - 1):
                 p1, p2 = pts[i], pts[i + 1]
                 v_idx = len(all_vertices)
@@ -296,6 +334,7 @@ except Exception:
                 ])
 
         if len(all_vertices) > 0 and len(all_faces) > 0:
-            return trimesh.Trimesh(vertices=np.array(all_vertices), faces=np.array(all_faces))
+            mesh = trimesh.Trimesh(vertices=np.array(all_vertices), faces=np.array(all_faces), process=True)
+            return mesh
         return None
 
