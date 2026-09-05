@@ -12,7 +12,8 @@ import {
   Box,
   CheckCircle2,
   AlertTriangle,
-  Info
+  Info,
+  Wind
 } from 'lucide-react';
 import { DisplayMode } from '../types';
 
@@ -42,8 +43,10 @@ interface ToolbarProps {
   onChangeExplodedOffset: (val: number) => void;
   onResetCamera: () => void;
   onOpenArPreview?: () => void;
+  onOpenWindTunnel?: () => void;
   hasRepairedModel: boolean;
 }
+
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   onNewProject,
@@ -69,8 +72,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onChangeExplodedOffset,
   onResetCamera,
   onOpenArPreview,
+  onOpenWindTunnel,
   hasRepairedModel
 }) => {
+
   const { t } = useTranslation();
 
   const hasLoadedModel = Boolean(selectedFileName);
@@ -281,7 +286,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <span className="hidden sm:inline">{t('viewer.measure_tool')}</span>
           </button>
 
+          {/* Wind Tunnel Fluid Domain Button */}
+          {onOpenWindTunnel && (
+            <button
+              type="button"
+              onClick={onOpenWindTunnel}
+              disabled={!hasLoadedModel}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                hasLoadedModel
+                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 hover:text-cyan-200 active:scale-95 shadow-sm'
+                  : 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
+              }`}
+              title={t('wind_tunnel.toolbar_btn', '風洞流體域抽取 (Wind Tunnel)')}
+            >
+              <Wind className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">{t('wind_tunnel.nav_btn', '風洞流體域')}</span>
+            </button>
+          )}
+
           {/* AR Quick Look Button */}
+
           {onOpenArPreview && (
             <button
               type="button"

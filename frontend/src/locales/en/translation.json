@@ -409,6 +409,35 @@
     "stage_ret_client": "Destroyed on Tab Close (Zero Retention)",
     "stage_ret_server": "Deleted Immediately Post-Conversion (Ephemeral)",
     "close": "Close Statement"
+  },
+  "wind_tunnel": {
+    "nav_btn": "Wind Tunnel",
+    "toolbar_btn": "Wind Tunnel Fluid Domain Extraction",
+    "title": "Wind Tunnel Fluid Domain Extraction",
+    "subtitle": "CFD Aerodynamic Fluid Domain Boolean Extraction",
+    "desc_title": "End-to-End CFD Fluid Domain Extraction",
+    "desc_body": "Directly in-app using OpenCASCADE / Manifold Boolean engines, subtract the solid body from an expanded bounding flow domain to generate a watertight fluid cavity without needing external CAD tools.",
+    "bounds_settings": "Wind Tunnel Flow Domain Bounds",
+    "multiplier_hint": "Relative to model bounding box extents",
+    "inlet_label": "Upstream Inlet Length",
+    "outlet_label": "Downstream Wake Outlet Length",
+    "margin_label": "Side & Vertical Wall Clearance",
+    "boolean_mode": "Boolean Engine",
+    "mode_auto": "Auto Adaptive",
+    "mode_manifold": "Manifold Mesh Boolean (Recommended for Complex Airfoils)",
+    "mode_cad": "CAD Solid B-Rep Boolean (OpenCASCADE)",
+    "export_format": "Export Fluid Domain Format",
+    "start_extract": "Start Wind Tunnel Boolean Extraction",
+    "extracting": "Extracting CFD fluid domain...",
+    "success_title": "Fluid Domain Extracted Successfully!",
+    "fluid_faces": "Fluid Domain Faces",
+    "watertight": "Watertightness",
+    "domain_size": "Domain Bounds (X×Y×Z)",
+    "download_btn": "Download Fluid Domain",
+    "preview_btn": "Preview in 3D Viewer",
+    "failed": "Fluid domain extraction failed",
+    "no_file_error": "No 3D model selected"
   }
 }
+
 

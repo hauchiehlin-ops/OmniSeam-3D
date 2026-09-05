@@ -146,3 +146,22 @@ export interface ConversionConfig {
 
 export type DisplayMode = 'shaded' | 'wireframe' | 'normals' | 'xray' | 'heatmap';
 
+export interface WindTunnelParams {
+  inlet_factor: number;
+  outlet_factor: number;
+  margin_factor: number;
+  boolean_mode: 'auto' | 'solid_cad' | 'manifold_mesh';
+  target_format: TargetFormat;
+}
+
+export interface FluidDomainResponse {
+  task_id: string;
+  filename: string;
+  original_metrics: GeometricMetrics;
+  fluid_domain_metrics: GeometricMetrics;
+  wind_tunnel_bounds: BoundingBox;
+  download_url: string;
+  preview_url?: string;
+  created_at: string;
+}
+

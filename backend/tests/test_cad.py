@@ -31,9 +31,11 @@ def test_cad_engine_step_export_structure(tmp_path):
     assert "ISO-10303-21;" in content
     assert "=PLANE(" in content
     assert "POLY_LOOP('',(#" in content
-    assert "FACE_SURFACE('',(#" in content
+    assert "ADVANCED_FACE('',(#" in content
     assert "=AXIS2_PLACEMENT_3D(" in content
-    assert "#20=FACETED_BREP('Solid1',#21);" in content
+    assert "#20=MANIFOLD_SOLID_BREP('Solid1',#21);" in content
+    assert "#9=ADVANCED_BREP_SHAPE_REPRESENTATION(" in content
+
 
 
 def test_cad_engine_ransac_plane_fitting():

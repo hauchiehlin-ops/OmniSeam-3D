@@ -409,5 +409,34 @@
     "stage_ret_client": "탭을 닫으면 즉시 영구 삭제 (보관 제로)",
     "stage_ret_server": "변환 완료 즉시 메모리 및 임시 파일 자동 삭제",
     "close": "방침 닫기"
+  },
+  "wind_tunnel": {
+    "nav_btn": "풍동 유체 영역",
+    "toolbar_btn": "풍동 유체 영역 추출 (Wind Tunnel)",
+    "title": "풍동 유체 영역 추출 (Wind Tunnel)",
+    "subtitle": "CFD 공기역학 풍동 불리언 추출 도구",
+    "desc_title": "엔드투엔드 CFD 공기 유로 추출",
+    "desc_body": "외부 CAD 소프트웨어 없이 앱 내에서 OpenCASCADE / 수밀 불리언 엔진을 사용하여 직육면체 풍동에서 모델을 감산하여 유체 캐비티를 생성합니다.",
+    "bounds_settings": "풍동 경계 및 확장 계수",
+    "multiplier_hint": "모델 바운딩 박스 기준 배수",
+    "inlet_label": "상류 유입구 길이 (Upstream Inlet)",
+    "outlet_label": "하류 후류 길이 (Downstream Outlet / Wake)",
+    "margin_label": "측벽 및 상하 간극 (Side & Wall Margin)",
+    "boolean_mode": "불리언 엔진",
+    "mode_auto": "자동 최적화 (Auto Adaptive)",
+    "mode_manifold": "매니폴드 메시 불리언 (복잡한 익형에 권장)",
+    "mode_cad": "CAD 솔리드 불리언 (OpenCASCADE)",
+    "export_format": "유체 영역 내보내기 형식",
+    "start_extract": "풍동 불리언 추출 시작",
+    "extracting": "유체 영역 추출 중...",
+    "success_title": "유체 영역 추출 성공!",
+    "fluid_faces": "유체 영역 면 수",
+    "watertight": "수밀성",
+    "domain_size": "풍동 치수 (X×Y×Z)",
+    "download_btn": "유체 영역 파일 다운로드",
+    "preview_btn": "3D 뷰어에서 미리보기",
+    "failed": "유체 영역 추출 실패",
+    "no_file_error": "3D 모델이 선택되지 않았습니다"
   }
 }
+

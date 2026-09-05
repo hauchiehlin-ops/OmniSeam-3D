@@ -164,3 +164,23 @@ class InspectResponse(BaseModel):
     assembly_tree: Optional[AssemblyTree] = None
     suggested_actions: List[Dict[str, str]]
 
+
+class WindTunnelParams(BaseModel):
+    inlet_factor: float = Field(2.0, description="Upstream inlet distance multiplier relative to bounding box X extent", ge=0.5, le=20.0)
+    outlet_factor: float = Field(5.0, description="Downstream outlet distance multiplier relative to bounding box X extent", ge=1.0, le=30.0)
+    margin_factor: float = Field(2.0, description="Side and vertical clearance multiplier relative to Y/Z extents", ge=0.5, le=10.0)
+    boolean_mode: str = Field("auto", description="Boolean algorithm mode: 'auto', 'solid_cad', 'manifold_mesh'")
+    target_format: TargetFormat = Field(TargetFormat.STEP, description="Output format for the fluid domain: step, stl, glb, etc.")
+
+
+class FluidDomainResponse(BaseModel):
+    task_id: str
+    filename: str
+    original_metrics: GeometricMetrics
+    fluid_domain_metrics: GeometricMetrics
+    wind_tunnel_bounds: BoundingBox
+    download_url: str
+    preview_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+

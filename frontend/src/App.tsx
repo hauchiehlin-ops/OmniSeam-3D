@@ -17,7 +17,9 @@ import { PublicLimitModal } from './components/PublicLimitModal';
 import { UserManualModal } from './components/UserManualModal';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { ArPreviewModal } from './components/ArPreviewModal';
+import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
+
 
 import * as THREE from 'three';
 import { 
@@ -66,6 +68,7 @@ export const App: React.FC = () => {
   const [showManualModal, setShowManualModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showArModal, setShowArModal] = useState(false);
+  const [showWindTunnelModal, setShowWindTunnelModal] = useState(false);
   const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
   // File and Configuration State
@@ -80,6 +83,8 @@ export const App: React.FC = () => {
   const [activeTask, setActiveTask] = useState<TaskResponse | null>(null);
   const [inspectData, setInspectData] = useState<InspectResponse | null>(null);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
+
 
   // 3D Viewport Controls
   const [isSplitView, setIsSplitView] = useState(false);
@@ -479,9 +484,10 @@ export const App: React.FC = () => {
     nonManifold: inspectData.defects.non_manifold_points,
   } : undefined;
 
-  const repairedPreviewUrl = activeTask?.status === 'completed'
+  const repairedPreviewUrl = customPreviewUrl || (activeTask?.status === 'completed'
     ? activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id)
-    : null;
+    : null);
+
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-slate-100 selection:bg-brand-500 selection:text-white">
@@ -548,8 +554,10 @@ export const App: React.FC = () => {
               onChangeExplodedOffset={setExplodedOffset}
               onResetCamera={() => {}}
               onOpenArPreview={() => setShowArModal(true)}
+              onOpenWindTunnel={() => setShowWindTunnelModal(true)}
               hasRepairedModel={Boolean(repairedPreviewUrl)}
             />
+
 
             {/* 3D Canvas Area */}
             <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px]">
@@ -666,6 +674,17 @@ export const App: React.FC = () => {
         onLaunchDirectAr={handleLaunchDirectAr}
         isMobileDevice={ArManager.getArPlatform() !== 'desktop'}
       />
+
+      {/* Wind Tunnel Fluid Domain Modal */}
+      <WindTunnelModal
+        isOpen={showWindTunnelModal}
+        file={selectedFile}
+        selectedFileName={selectedFile?.name}
+        onClose={() => setShowWindTunnelModal(false)}
+        onLoadPreviewUrl={(url) => setCustomPreviewUrl(url)}
+      />
+
+
 
       {/* Backend Settings Modal */}
       <BackendSettingsModal

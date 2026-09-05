@@ -409,5 +409,34 @@
     "stage_ret_client": "タブを閉じると即時完全破棄 (保存ゼロ)",
     "stage_ret_server": "変換完了後直ちにメモリ・一時ファイルを削除",
     "close": "方針を閉じる"
+  },
+  "wind_tunnel": {
+    "nav_btn": "風洞流体域",
+    "toolbar_btn": "風洞流体ドメイン抽出 (Wind Tunnel)",
+    "title": "風洞流体ドメイン抽出 (Wind Tunnel)",
+    "subtitle": "CFD 空気力学風洞ブーリアン抽出ツール",
+    "desc_title": "エンドツーエンド CFD 流体ドメイン抽出",
+    "desc_body": "外部 CAD ツール不要で、アプリ内で OpenCASCADE / 水密ブーリアンエンジンを使用し、直方体風洞からモデルを減算して流体キャビティを生成します。",
+    "bounds_settings": "風洞境界および拡張倍率",
+    "multiplier_hint": "モデルのバウンディングボックス基準倍率",
+    "inlet_label": "上流インレット長 (Upstream Inlet)",
+    "outlet_label": "下流ウェイク長 (Downstream Outlet / Wake)",
+    "margin_label": "側壁・上下クリアランス (Side & Wall Margin)",
+    "boolean_mode": "ブーリアンエンジン",
+    "mode_auto": "自動調適 (Auto Adaptive)",
+    "mode_manifold": "マニホールドメッシュブーリアン (複雑な翼面に推奨)",
+    "mode_cad": "CAD ソリッドブーリアン (OpenCASCADE)",
+    "export_format": "流体ドメイン出力形式",
+    "start_extract": "風洞ブーリアン抽出を開始",
+    "extracting": "流体ドメインを抽出中...",
+    "success_title": "流体ドメインの抽出に成功しました！",
+    "fluid_faces": "流体ドメイン面数",
+    "watertight": "水密性",
+    "domain_size": "風洞寸法 (X×Y×Z)",
+    "download_btn": "流体ドメインファイルをダウンロード",
+    "preview_btn": "3D ビューアでプレビュー",
+    "failed": "流体ドメインの抽出に失敗しました",
+    "no_file_error": "3D モデルが選択されていません"
   }
 }
+

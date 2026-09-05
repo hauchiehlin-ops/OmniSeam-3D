@@ -393,7 +393,7 @@ except Exception:
             "ISO-10303-21;",
             "HEADER;",
             "FILE_DESCRIPTION(('OmniSeam 3D Industrial B-Rep Model'),'2;1');",
-            f"FILE_NAME('{output_path.name}','{now_str}',('OmniSeam Reverse Engineering Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.0','OmniSeam / OpenCASCADE','');",
+            f"FILE_NAME('{output_path.name}','{now_str}',('OmniSeam Reverse Engineering Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.2','OmniSeam / OpenCASCADE','');",
             "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
             "ENDSEC;",
             "DATA;",
@@ -405,7 +405,7 @@ except Exception:
             "#6=PRODUCT_DEFINITION('design','',#5,#3);",
             "#7=PRODUCT_DEFINITION_SHAPE('','',#6);",
             "#8=SHAPE_DEFINITION_REPRESENTATION(#7,#9);",
-            "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
+            "#9=ADVANCED_BREP_SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
             "#10=AXIS2_PLACEMENT_3D('',#12,#13,#14);",
             "#11=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#15)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#16,#17,#18)) REPRESENTATION_CONTEXT('OmniSeam','TOPOLOGY'));",
             "#12=CARTESIAN_POINT('',(0.,0.,0.));",
@@ -474,15 +474,15 @@ except Exception:
             lines.append(f"#{plane_id}=PLANE('',#{placement_id});")
             curr_id += 1
 
-            # 4. Face Surface
+            # 4. Advanced Face Surface
             face_id = curr_id
-            lines.append(f"#{face_id}=FACE_SURFACE('',(#{bound_id}),#{plane_id},.T.);")
+            lines.append(f"#{face_id}=ADVANCED_FACE('',(#{bound_id}),#{plane_id},.T.);")
             face_ids.append(f"#{face_id}")
             curr_id += 1
 
         face_list_str = ",".join(face_ids)
         lines.append(f"#21=CLOSED_SHELL('',({face_list_str}));")
-        lines.append("#20=FACETED_BREP('Solid1',#21);")
+        lines.append("#20=MANIFOLD_SOLID_BREP('Solid1',#21);")
         lines.append("ENDSEC;")
         lines.append("END-ISO-10303-21;")
 
@@ -496,4 +496,58 @@ except Exception:
             "IGES CAD export requires OpenCASCADE (pythonocc), FreeCAD, or Gmsh installed on the server "
             "to construct valid IGES 5.3 topological entities."
         )
+
+    @classmethod
+    def generate_wind_tunnel_domain(
+        cls, 
+        mesh: trimesh.Trimesh, 
+        params: Optional[Any] = None
+    ) -> Tuple[trimesh.Trimesh, trimesh.Trimesh]:
+        """
+        Generates a CFD aerodynamic wind tunnel fluid domain by subtracting the model from an expanded flow domain bounding box.
+        Returns: (fluid_domain_mesh, tunnel_box_mesh)
+        """
+        inlet_factor = getattr(params, "inlet_factor", 2.0) if params else 2.0
+        outlet_factor = getattr(params, "outlet_factor", 5.0) if params else 5.0
+        margin_factor = getattr(params, "margin_factor", 2.0) if params else 2.0
+        boolean_mode = getattr(params, "boolean_mode", "auto") if params else "auto"
+
+        bounds = mesh.bounds if mesh.bounds is not None and len(mesh.bounds) == 2 else np.array([[-50, -50, -50], [50, 50, 50]])
+        extents = mesh.extents if mesh.extents is not None and len(mesh.extents) == 3 else np.array([100, 100, 100])
+        
+        dx = max(0.1, float(extents[0]))
+        dy = max(0.1, float(extents[1]))
+        dz = max(0.1, float(extents[2]))
+
+        box_min = [
+            float(bounds[0][0]) - dx * inlet_factor,
+            float(bounds[0][1]) - dy * margin_factor,
+            float(bounds[0][2]) - dz * margin_factor
+        ]
+        box_max = [
+            float(bounds[1][0]) + dx * outlet_factor,
+            float(bounds[1][1]) + dy * margin_factor,
+            float(bounds[1][2]) + dz * margin_factor
+        ]
+
+        tunnel_box = trimesh.creation.box(bounds=[box_min, box_max])
+
+        # Boolean Subtraction: FluidDomain = WindTunnelBox - ModelMesh
+        fluid_mesh = None
+        if boolean_mode in ["auto", "manifold_mesh"]:
+            try:
+                diff = trimesh.boolean.difference([tunnel_box, mesh])
+                if diff is not None and len(diff.vertices) > 0 and len(diff.faces) > 0:
+                    fluid_mesh = diff
+            except Exception:
+                pass
+
+        if fluid_mesh is None:
+            # Cavity representation fallback: tunnel box with inverted model cavity
+            inverted_model = mesh.copy()
+            inverted_model.invert()
+            fluid_mesh = trimesh.util.concatenate([tunnel_box, inverted_model])
+
+        return fluid_mesh, tunnel_box
+
 

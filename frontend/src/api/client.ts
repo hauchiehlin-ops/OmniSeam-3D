@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ConversionConfig, InspectResponse, TaskResponse } from '../types';
+import { ConversionConfig, InspectResponse, TaskResponse, FluidDomainResponse } from '../types';
 import { ClientPipeline } from '../engine/client-pipeline';
 
 export type EngineMode = 'client' | 'server';
@@ -260,5 +260,40 @@ export const apiClient = {
       const file = new File([stl], "watertight_bracket.stl", { type: 'model/stl' });
       return { file, name: "watertight_bracket.stl" };
     }
+  },
+
+  async extractFluidDomain(
+    file: File,
+    params: {
+      inlet_factor: number;
+      outlet_factor: number;
+      margin_factor: number;
+      boolean_mode: string;
+      target_format: string;
+    }
+  ): Promise<FluidDomainResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('inlet_factor', params.inlet_factor.toString());
+    formData.append('outlet_factor', params.outlet_factor.toString());
+    formData.append('margin_factor', params.margin_factor.toString());
+    formData.append('boolean_mode', params.boolean_mode);
+    formData.append('target_format', params.target_format);
+
+    const response = await axios.post<FluidDomainResponse>(
+      `${this.getApiBase()}/wind-tunnel/extract`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    const result = response.data;
+    if (this.customBackendUrl && result.download_url && !result.download_url.startsWith('http')) {
+      result.download_url = `${this.customBackendUrl}${result.download_url}`;
+    }
+    if (this.customBackendUrl && result.preview_url && !result.preview_url.startsWith('http')) {
+      result.preview_url = `${this.customBackendUrl}${result.preview_url}`;
+    }
+    return result;
   }
 };
+

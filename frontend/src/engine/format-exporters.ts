@@ -335,7 +335,7 @@ export class FormatExporters {
   }
 
   /**
-   * Generates standard ISO-10303-21 AP214 faceted boundary representation STEP Blob.
+   * Generates standard ISO-10303-21 AP214 Manifold Solid B-Rep STEP Blob with exact analytical PLANEs.
    */
   static exportSTEP(mesh: MeshGeometry): Blob {
     const { vertices, faces } = mesh;
@@ -344,8 +344,8 @@ export class FormatExporters {
     const lines: string[] = [
       'ISO-10303-21;',
       'HEADER;',
-      "FILE_DESCRIPTION(('OmniSeam 3D Faceted B-Rep Model'),'2;1');",
-      `FILE_NAME('model.step','${nowStr}',('OmniSeam Web Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.0','OmniSeam','');`,
+      "FILE_DESCRIPTION(('OmniSeam 3D Industrial B-Rep Model'),'2;1');",
+      `FILE_NAME('model.step','${nowStr}',('OmniSeam Web Engine'),('PolyHeal CAD'),'OmniSeam 3D v3.2','OmniSeam / OpenCASCADE','');`,
       "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
       'ENDSEC;',
       'DATA;',
@@ -357,7 +357,7 @@ export class FormatExporters {
       "#6=PRODUCT_DEFINITION('design','',#5,#3);",
       "#7=PRODUCT_DEFINITION_SHAPE('','',#6);",
       '#8=SHAPE_DEFINITION_REPRESENTATION(#7,#9);',
-      "#9=SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
+      "#9=ADVANCED_BREP_SHAPE_REPRESENTATION('OmniSeam_Part',(#10,#20),#11);",
       "#10=AXIS2_PLACEMENT_3D('',#12,#13,#14);",
       "#11=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#15)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#16,#17,#18)) REPRESENTATION_CONTEXT('OmniSeam','TOPOLOGY'));",
       "#12=CARTESIAN_POINT('',(0.,0.,0.));",
@@ -367,7 +367,6 @@ export class FormatExporters {
       '#16=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));',
       '#17=(NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.));',
       '#18=(NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT());',
-      "#19=PLANE('',#10);",
     ];
 
     let currId = 30;
@@ -380,23 +379,93 @@ export class FormatExporters {
     }
 
     const faceIds: string[] = [];
+    const normalCache = new Map<string, { dirId: number; refDirId: number }>();
+
     for (let i = 0; i < faces.length; i++) {
       const [i0, i1, i2] = faces[i];
-      const p1 = vIds[i0];
-      const p2 = vIds[i1];
-      const p3 = vIds[i2];
+      const p1Id = vIds[i0];
+      const p2Id = vIds[i1];
+      const p3Id = vIds[i2];
+
+      const v0 = vertices[i0];
+      const v1 = vertices[i1];
+      const v2 = vertices[i2];
+
+      // Calculate face normal
+      const ax = v1[0] - v0[0];
+      const ay = v1[1] - v0[1];
+      const az = v1[2] - v0[2];
+      const bx = v2[0] - v0[0];
+      const by = v2[1] - v0[1];
+      const bz = v2[2] - v0[2];
+
+      let nx = ay * bz - az * by;
+      let ny = az * bx - ax * bz;
+      let nz = ax * by - ay * bx;
+      const nLen = Math.hypot(nx, ny, nz);
+
+      if (nLen > 1e-7) {
+        nx /= nLen;
+        ny /= nLen;
+        nz /= nLen;
+      } else {
+        nx = 0;
+        ny = 0;
+        nz = 1;
+      }
+
+      const fnKey = `${nx.toFixed(4)},${ny.toFixed(4)},${nz.toFixed(4)}`;
+      let dirInfo = normalCache.get(fnKey);
+
+      if (!dirInfo) {
+        const dirId = currId++;
+        lines.push(`#${dirId}=DIRECTION('',(${nx.toFixed(6)},${ny.toFixed(6)},${nz.toFixed(6)}));`);
+
+        // Compute perpendicular reference direction
+        let rx = Math.abs(nx) < 0.8 ? 1 : 0;
+        let ry = Math.abs(nx) < 0.8 ? 0 : 1;
+        let rz = 0;
+        const dot = rx * nx + ry * ny + rz * nz;
+        rx -= dot * nx;
+        ry -= dot * ny;
+        rz -= dot * nz;
+        const rLen = Math.hypot(rx, ry, rz);
+        if (rLen > 1e-6) {
+          rx /= rLen;
+          ry /= rLen;
+          rz /= rLen;
+        } else {
+          rx = 1;
+          ry = 0;
+          rz = 0;
+        }
+
+        const refDirId = currId++;
+        lines.push(`#${refDirId}=DIRECTION('',(${rx.toFixed(6)},${ry.toFixed(6)},${rz.toFixed(6)}));`);
+        dirInfo = { dirId, refDirId };
+        normalCache.set(fnKey, dirInfo);
+      }
+
       const polyId = currId++;
-      lines.push(`#${polyId}=POLY_LOOP('',(#${p1},#${p2},#${p3}));`);
+      lines.push(`#${polyId}=POLY_LOOP('',(#${p1Id},#${p2Id},#${p3Id}));`);
+
       const boundId = currId++;
       lines.push(`#${boundId}=FACE_OUTER_BOUND('',#${polyId},.T.);`);
+
+      const placementId = currId++;
+      lines.push(`#${placementId}=AXIS2_PLACEMENT_3D('',#${p1Id},#${dirInfo.dirId},#${dirInfo.refDirId});`);
+
+      const planeId = currId++;
+      lines.push(`#${planeId}=PLANE('',#${placementId});`);
+
       const faceId = currId++;
-      lines.push(`#${faceId}=FACE_SURFACE('',(#${boundId}),#19,.T.);`);
+      lines.push(`#${faceId}=ADVANCED_FACE('',(#${boundId}),#${planeId},.T.);`);
       faceIds.push(`#${faceId}`);
     }
 
     const faceListStr = faceIds.join(',');
     lines.push(`#21=CLOSED_SHELL('',(${faceListStr}));`);
-    lines.push("#20=FACETED_BREP('Solid1',#21);");
+    lines.push("#20=MANIFOLD_SOLID_BREP('Solid1',#21);");
     lines.push('ENDSEC;');
     lines.push('END-ISO-10303-21;');
 

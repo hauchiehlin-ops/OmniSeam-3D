@@ -409,5 +409,34 @@
     "stage_ret_client": "关闭标签页立即销毁 (零持久化留存)",
     "stage_ret_server": "转换完成即刻释放删除 (无持久化存储)",
     "close": "关闭声明"
+  },
+  "wind_tunnel": {
+    "nav_btn": "风洞流体域",
+    "toolbar_btn": "风洞流体域抽取 (Wind Tunnel)",
+    "title": "风洞流体域抽取 (Wind Tunnel)",
+    "subtitle": "CFD 气动风洞流场布尔抽取工具",
+    "desc_title": "端到端 CFD 空气流道抽取",
+    "desc_body": "直接在应用程序内使用 OpenCASCADE / 高阶水密布尔引擎，自长方体风洞中减去实体模型，生成水密流场域与流道，无需借助外部 CAD 软件。",
+    "bounds_settings": "风洞边界与扩展系数",
+    "multiplier_hint": "以模型长宽高为基准倍数",
+    "inlet_label": "上游入口长度 (Upstream Inlet)",
+    "outlet_label": "下游尾流长度 (Downstream Outlet / Wake)",
+    "margin_label": "侧壁与顶底间隙 (Side & Wall Margin)",
+    "boolean_mode": "布尔相减引擎",
+    "mode_auto": "自动调优 (Auto Adaptive)",
+    "mode_manifold": "高阶水密网格布尔 (推荐复杂叶片)",
+    "mode_cad": "CAD 实体布尔 (OpenCASCADE)",
+    "export_format": "导出流体域格式",
+    "start_extract": "开始风洞布尔抽取",
+    "extracting": "正在抽取流体域...",
+    "success_title": "流体域抽取成功！",
+    "fluid_faces": "流体域面数",
+    "watertight": "水密性",
+    "domain_size": "风洞尺寸 (X×Y×Z)",
+    "download_btn": "下载流体域文件",
+    "preview_btn": "在视图中预览",
+    "failed": "流体域抽取失败",
+    "no_file_error": "未选择 3D 模型"
   }
 }
+
