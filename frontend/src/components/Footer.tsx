@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { 
   BookOpen, 
   ShieldCheck, 
-  Github, 
   Settings, 
   Layers, 
   ExternalLink,
@@ -123,16 +122,6 @@ export const Footer: React.FC<FooterProps> = ({
               <Settings className="w-3.5 h-3.5 text-indigo-400" />
               <span>{t('backend_modal.title').split('(')[0]}</span>
             </button>
-
-            <a
-              href="https://github.com/hauchiehlin-ops/OmniSeam-3D"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-panel border border-dark-border text-slate-200 hover:text-white hover:border-slate-500 text-xs font-semibold transition-all active:scale-95 shadow-sm"
-            >
-              <Github className="w-3.5 h-3.5 text-slate-300" />
-              <span>GitHub</span>
-            </a>
           </div>
         </div>
 
