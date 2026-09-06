@@ -226,26 +226,22 @@ class MeshRepairEngine:
 
     @staticmethod
     def disentangle_non_manifold(mesh: trimesh.Trimesh) -> trimesh.Trimesh:
-        """Removes duplicate / overlapping non-manifold faces sharing overloaded edges."""
+        """Strictly ensures every edge is shared by at most 2 faces (Strict 2-Manifold)."""
         try:
-            edges = mesh.edges_sorted
-            unique_edges, counts = np.unique(edges, axis=0, return_counts=True)
-            bad_edges = set(map(tuple, unique_edges[counts > 2]))
-            
-            if not bad_edges:
-                return mesh
-
+            edge_usage = {}
             keep_faces = []
             for face in mesh.faces:
+                if len(set(face)) < 3:
+                    continue
                 f_edges = [
                     tuple(sorted([face[0], face[1]])),
                     tuple(sorted([face[1], face[2]])),
                     tuple(sorted([face[2], face[0]]))
                 ]
-                # If face contains >1 overloaded edge, it is a non-manifold flap
-                bad_count = sum(1 for e in f_edges if e in bad_edges)
-                if bad_count < 2:
+                if all(edge_usage.get(e, 0) < 2 for e in f_edges):
                     keep_faces.append(face)
+                    for e in f_edges:
+                        edge_usage[e] = edge_usage.get(e, 0) + 1
 
             if len(keep_faces) > 0:
                 cleaned = trimesh.Trimesh(vertices=mesh.vertices, faces=np.array(keep_faces), process=True)
@@ -265,7 +261,7 @@ class MeshRepairEngine:
             extents = mesh.extents
             max_dim = float(np.max(extents)) if len(extents) > 0 else 50.0
             if pitch is None:
-                pitch = max(0.2, max_dim / 80.0) # 80x80x80 resolution
+                pitch = max(0.1, max_dim / 140.0) # High-precision 140x140x140 resolution
 
             voxelized = mesh.voxelized(pitch=pitch)
             filled = voxelized.fill()

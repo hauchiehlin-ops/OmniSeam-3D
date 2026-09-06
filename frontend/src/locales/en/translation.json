@@ -101,7 +101,21 @@
     "start_process": "Start Conversion & Auto-Healing",
     "inspect_only": "Inspect Geometry (Audit Only)",
     "processing": "Processing & Healing...",
-    "privacy_guarantee": "100% Client-Side Offline: Models never leave your device. Zero privacy risk."
+    "privacy_guarantee": "100% Client-Side Offline: Models never leave your device. Zero privacy risk.",
+    "adaptive_card_title": "AI Smart Adaptive Intent",
+    "adaptive_active_badge": "AI Optimization Active",
+    "adaptive_manual_badge": "Manual Override Mode",
+    "adaptive_reset_btn": "Reset to AI Recommended",
+    "adaptive_intent_title": "🎯 Format & Geometry Intent Detection:",
+    "adaptive_reason_default": "Optimal repair strategy and engine dynamically synthesized based on geometry health and target format.",
+    "adaptive_reason_cad_solid_open": "Detected {{holes}} open boundary loops. To guarantee a valid closed solid body in CAD ({{target}}), Watertight Healing and adaptive {{tol}} mm B-Rep Sewing Tolerance are automatically enabled.",
+    "adaptive_reason_cad_solid_clean": "Geometry is healthy and watertight. Configured Smart Lossless mode with {{tol}} mm sewing tolerance to generate standard CAD solids ({{target}}).",
+    "adaptive_reason_cad_to_cad": "Native CAD geometry detected. High-precision B-Rep topology conversion configured with zero geometric loss.",
+    "adaptive_reason_3dprint_holes": "Detected {{holes}} mesh boundary holes. Forced Watertight Solid enabled to seal all openings and prevent slicer (Cura/Bambu/Prusa) leak errors.",
+    "adaptive_reason_3dprint_clean": "Geometry is 100% watertight. Configured lossless fidelity mode for high-precision 3D printing ({{target}}).",
+    "adaptive_reason_web_glb": "Target format is WebGL/AR ({{target}}). Configured Draco compression and normal smoothing for ultra-fast loading.",
+    "adaptive_reason_cad_to_mesh": "CAD input detected. Dynamically calculated optimal sagitta deflection ({{deflection}} mm) based on model extent ({{extent}} mm) for crisp surface discretization.",
+    "adaptive_reason_mesh_interchange": "Standard mesh conversion configured with direct topology passthrough."
   },
   "viewer": {
     "split_view": "Dual Split Comparison",
@@ -313,11 +327,22 @@
     "subtitle": "Step-by-Step Guide · 3D Viewport Controls & Self-Hosting Instructions",
     "badge": "Operations Manual",
     "tab_quickstart": "Quick Start (3 Steps)",
+    "tab_troubleshooting": "CAD & STEP Troubleshooting",
     "tab_fidelity": "Fidelity & Auto-Healing",
     "tab_viewport": "3D Viewport & Tools",
     "tab_engine": "Dual Engine Architecture",
     "tab_slicer": "3D Print Watertight Guide",
     "tab_commands": "Deployment Commands",
+    "cad_troubleshooting_title": "📐 Mesh-to-CAD (STEP) & Solid Sewing Troubleshooting Guide",
+    "cad_troubleshooting_desc": "Common issues and standard resolution workflows when converting STL/OBJ meshes to STEP/IGES CAD solids or importing them into CFD (Aetherflow, OpenFOAM) and CAD (SolidWorks, Fusion 360) tools.",
+    "cad_issue1_title": "❓ Why does a STEP exported from STL report \"Open Shell / 0 Faces / [0,0,0] Bounds\" in CFD/CAD?",
+    "cad_issue1_desc": "STL is a discrete triangular mesh (Polygon Facets), whereas industrial STEP (ISO 10303) requires continuous closed boundary topology (Manifold Solid). If the source STL has open holes (e.g. 158 boundary edges) or self-intersecting facets, strict CAD kernels (OpenCASCADE, Parasolid) cannot construct a closed volume and fall back to treating it as an \"Unsewn Open Shell of Faces\", causing solid face count to display as 0.",
+    "cad_solution1_title": "🛠️ 3-Step Workflow to Export 100% Watertight Closed CAD Solids:",
+    "cad_solution1_step1": "1️⃣ Switch to [☁️ Cloud Server Node]: Pure in-browser execution only produces facetted wrappers; Cloud/Private nodes execute full FreeCAD/OpenCASCADE B-Rep sewing.",
+    "cad_solution1_step2": "2️⃣ Select [💧 Forced Watertight Solid] strategy: Automatically patches boundary holes, resolves non-manifold self-intersections, and welds duplicate vertices.",
+    "cad_solution1_step3": "3️⃣ Enable [B-Rep Topology Sewing]: In Expert Tuning, enable sewing with tolerance (0.001mm ~ 0.01mm) to fuse all analytical faces into an ISO-compliant Closed Solid.",
+    "cad_issue2_title": "❓ Difference between Model Body (_omniseam.step) vs Fluid Domain (_fluid_domain.step)?",
+    "cad_issue2_desc": "• _omniseam.step: The solid physical body of your part (e.g., fan impeller).\n• _fluid_domain.step: The extracted air cavity around the part (wind tunnel box subtracted by the part), dedicated to CFD aerodynamic flow and pressure analysis.",
     "quickstart_banner_title": "⚡ 3-Step Quick Start Guide",
     "quickstart_banner_desc": "OmniSeam 3D features intelligent format detection and autonomous surface-healing engines. Whether you are a 3D printing maker, mechanical engineer, or 3D artist, convert models in seconds.",
     "step1_title": "1. Drag & Drop 3D File",
@@ -443,5 +468,3 @@
     "no_file_error": "No 3D model selected"
   }
 }
-
-

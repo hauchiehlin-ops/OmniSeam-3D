@@ -101,7 +101,21 @@
     "start_process": "변환 및 자동 복구 시작",
     "inspect_only": "지오메트리 진단만 수행 (Audit Only)",
     "processing": "지오메트리 연산 및 복구 중...",
-    "privacy_guarantee": "100% 클라이언트 오프라인 연산: 모델이 기기 외부로 전송되지 않습니다."
+    "privacy_guarantee": "100% 클라이언트 오프라인 연산: 모델이 기기 외부로 전송되지 않습니다.",
+    "adaptive_card_title": "AI 스마트 파라미터 자동 적응",
+    "adaptive_active_badge": "AI 최적화 활성화됨",
+    "adaptive_manual_badge": "수동 사용자 지정 모드",
+    "adaptive_reset_btn": "AI 권장값으로 초기화",
+    "adaptive_intent_title": "🎯 포맷 및 형상 의도 자동 판별:",
+    "adaptive_reason_default": "모델 형상 특성과 출력 대상 포맷을 기반으로 최적의 복구 전략과 연산 엔진을 자동 추천합니다.",
+    "adaptive_reason_cad_solid_open": "{{holes}}개의 개방 루프가 감지되었습니다. CAD 솔리드({{target}}) 변환 성공을 위해 【수밀 복구】 및 적응형 【{{tol}} mm B-Rep 봉합 공차】가 자동 설정되었습니다.",
+    "adaptive_reason_cad_solid_clean": "형상이 완전히 수밀 상태입니다. 스마트 무손실 모드 및 【{{tol}} mm 봉합 공차】로 표준 CAD 솔리드({{target}})를 생성합니다.",
+    "adaptive_reason_cad_to_cad": "CAD 형상 입력이 감지되어 고정밀 B-Rep 토폴로지 변환이 구성되었습니다.",
+    "adaptive_reason_3dprint_holes": "{{holes}}개의 메쉬 구멍이 감지되어 슬라이서 오류를 방지하기 위해 【강제 수밀 복구】가 활성화되었습니다.",
+    "adaptive_reason_3dprint_clean": "형상이 100% 수밀 상태입니다. 고정밀 3D 프린팅({{target}})을 위해 무손실 모드가 구성되었습니다.",
+    "adaptive_reason_web_glb": "WebGL/AR 포맷({{target}})을 위해 Draco 압축 및 법선 최적화가 구성되었습니다.",
+    "adaptive_reason_cad_to_mesh": "CAD 입력을 기반으로 모델 크기({{extent}} mm)에 맞춘 최적 현고 편차({{deflection}} mm)가 자동 계산되었습니다.",
+    "adaptive_reason_mesh_interchange": "표준 메쉬 상호 변환이 직접 구성되었습니다."
   },
   "viewer": {
     "split_view": "듀얼 분할 비교",
@@ -313,11 +327,22 @@
     "subtitle": "초보자 맞춤 튜토리얼 · 3D 조작법 및 자체 호스팅 명령어",
     "badge": "공식 사용자 매뉴얼",
     "tab_quickstart": "빠른 시작 (3단계)",
+    "tab_troubleshooting": "CAD 솔리드 & 변환 문제 해결",
     "tab_fidelity": "무변형 패스스루 및 복구",
     "tab_viewport": "3D 뷰포트 및 도구",
     "tab_engine": "듀얼 엔진 아키텍처",
     "tab_slicer": "3D 프린팅 수밀화 가이드",
     "tab_commands": "배포 명령어",
+    "cad_troubleshooting_title": "📐 메시 to CAD (STEP) 변환 및 솔리드 봉합 문제 해결 가이드",
+    "cad_troubleshooting_desc": "STL/OBJ 메시를 STEP/IGES 산업용 솔리드로 변환하거나 CFD (Aetherflow, OpenFOAM) 및 CAD (SolidWorks, Fusion 360) 소프트웨어로 가져올 때의 일반적인 문제와 해결 방법.",
+    "cad_issue1_title": "❓ 왜 STL에서 변환된 STEP이 CFD/CAD에서 \"열린 서피스 집합 / 면 수 0 / 바운딩 박스 [0,0,0]\"으로 표시되나요?",
+    "cad_issue1_desc": "STL은 이산적인 삼각형 메시(Polygon)인 반면, 산업용 STEP(ISO 10303)은 모든 곡면이 엄격하게 닫힌 연속체(Manifold Solid)여야 합니다. 원본 STL에 구멍(158개 비수밀 모서리 등)이나 자가 교차면이 있는 경우, OpenCASCADE 등의 CAD 커널은 닫힌 체적을 형성하지 못하고 \"봉합되지 않은 열린 서피스 집합 (Open Shell)\"으로 인식하여 솔리드 면 수가 0으로 표시됩니다.",
+    "cad_solution1_title": "🛠️ 100% 닫힌 CAD 솔리드를 내보내는 3단계 해결 방법:",
+    "cad_solution1_step1": "1️⃣ 【☁️ 클라우드 컴퓨팅 노드 (Cloud Server)】로 전환: 브라우저 단독으로는 면 래퍼만 생성됩니다. 클라우드 노드에서 OpenCASCADE B-Rep 봉합을 수행합니다.",
+    "cad_solution1_step2": "2️⃣ 지오메트리 전략에서 【💧 강제 수밀 솔리드】 선택: 구멍 자동 메우기, 비매니폴드 자가 교차 해소, 중복 정점 토폴로지 용접을 수행합니다.",
+    "cad_solution1_step3": "3️⃣ 【B-Rep 토폴로지 봉합 (Sewing)】 활성화: 전문가 설정에서 봉합 공차(0.001mm ~ 0.01mm)를 설정하여 모든 면을 ISO 규격 Closed Solid로 결합합니다.",
+    "cad_issue2_title": "❓ 모델 본체 (_omniseam.step) 와 풍동 유체 영역 (_fluid_domain.step) 의 차이점은 무엇인가요?",
+    "cad_issue2_desc": "• _omniseam.step: 모델 실체 파트 본체(팬 임펠러 등).\n• _fluid_domain.step: 풍동 도구로 추출한 외부 공기 유로 공간(풍동 박스에서 팬 본체를 뺀 공간). CFD 공기역학 시뮬레이션 전용입니다.",
     "quickstart_banner_title": "⚡ 3단계 빠른 시작 가이드",
     "quickstart_banner_desc": "OmniSeam 3D는 지능형 포맷 인식과 자율 표면 복구 엔진을 탑재했습니다. 3D 프린팅 메이커, 기계 엔지니어, 3D 아티스트 누구나 단 3단계로 모델 변환 및 품질 검사를 완료할 수 있습니다.",
     "step1_title": "1. 3D 파일 드래그 앤 드롭",
@@ -443,4 +468,3 @@
     "no_file_error": "3D 모델이 선택되지 않았습니다"
   }
 }
-

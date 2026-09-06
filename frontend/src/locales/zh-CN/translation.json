@@ -101,7 +101,21 @@
     "start_process": "开始格式转换与几何修复",
     "inspect_only": "仅进行几何诊断 (Audit Only)",
     "processing": "正在进行几何运算与转换...",
-    "privacy_guarantee": "100% 纯前端离线运算：模型不离开您的设备，零隐私泄露风险。"
+    "privacy_guarantee": "100% 纯前端离线运算：模型不离开您的设备，零隐私泄露风险。",
+    "adaptive_card_title": "AI 智能参数自适应",
+    "adaptive_active_badge": "AI 优化已启用",
+    "adaptive_manual_badge": "手动自定义模式",
+    "adaptive_reset_btn": "一键重置为 AI 推荐",
+    "adaptive_intent_title": "🎯 格式与几何意图判别：",
+    "adaptive_reason_default": "已依据模型几何特征与导出目标格式，自动推荐最佳修复策略与运算核心。",
+    "adaptive_reason_cad_solid_open": "检测到网格模型存在 {{holes}} 处开口孔洞与未封闭特征。为确保导出至 CAD 实体 ({{target}}) 具备闭合体积，已自动配置【强制水密修复】与自适应【{{tol}} mm B-Rep 缝合公差】。",
+    "adaptive_reason_cad_solid_clean": "检测到几何结构健康良好，已配置【智能保真】与【{{tol}} mm 拓扑缝合公差】，直接生成标准封闭 CAD 实体 ({{target}})。",
+    "adaptive_reason_cad_to_cad": "检测为 CAD 几何实体输入，已自动配置高精度 B-Rep 几何拓扑转换，保持原始实体曲面无损。",
+    "adaptive_reason_3dprint_holes": "检测到模型存在 {{holes}} 处边界破面。已自动配置【强制水密修复】，封闭所有孔洞以避免切片软件 (Cura/Bambu/Prusa) 漏水报错。",
+    "adaptive_reason_3dprint_clean": "模型结构已达 100% 封闭水密，已自动配置无损保真模式输出高质量 3D 打印文件 ({{target}})。",
+    "adaptive_reason_web_glb": "检测目标为网页/WebGL 格式 ({{target}})，已自动配置【Draco 高压缩比】与法向量平滑化，实现秒开加载与最小传输体积。",
+    "adaptive_reason_cad_to_mesh": "检测到 CAD 输入与网格输出，已依据模型尺度 ({{extent}} mm) 自动计算最佳弦高偏差 ({{deflection}} mm) 进行高质量曲面离散化。",
+    "adaptive_reason_mesh_interchange": "通用网格格式互转，已自动匹配最佳拓扑结构直通转换。"
   },
   "viewer": {
     "split_view": "双视窗分屏对比",
@@ -313,11 +327,22 @@
     "subtitle": "零基础手把手教程 · 3D 视图交互与私有化部署指令",
     "badge": "官方操作手册",
     "tab_quickstart": "快速上手 (3 步)",
+    "tab_troubleshooting": "CAD 实体与转档排查",
     "tab_fidelity": "无损保真与智能修复",
     "tab_viewport": "3D 视图与工具",
     "tab_engine": "双引擎架构",
     "tab_slicer": "3D 打印水密指南",
     "tab_commands": "私有化部署指令",
+    "cad_troubleshooting_title": "📐 网格转 CAD (Mesh to STEP) 与实体缝合问题排查指南",
+    "cad_troubleshooting_desc": "在将 STL/OBJ 网格转换为 STEP/IGES 工业实体，或将其汇入 CFD（如 Aetherflow、OpenFOAM）与 CAD（如 SolidWorks、Fusion 360）软件时的常见问题与标准解决方案。",
+    "cad_issue1_title": "❓ 为什么 STL 转出的 STEP 在 CFD/CAD 软件显示「开放式曲面集合 / 面数为 0 / 包围盒 [0,0,0]」？",
+    "cad_issue1_desc": "STL 格式是由离散三角形顶点组成的网格（Polygon Facet），而工业 STEP 格式（ISO 10303）要求所有曲面必须严格相切闭合（Manifold Solid）。若原始 STL 存在破洞（例如 158 条非水密边缘）或三角面彼此交叉穿插（Self-intersection），严格的 CAD 内核（如 OpenCASCADE、Parasolid）在读取时无法形成封闭体积，会自动将其退化识别为「未缝合的开放曲面片集合 (Open Shell)」，实体面数因而统计为 0，且包围盒无法计算 Solid 体积。",
+    "cad_solution1_title": "🛠️ 正确转出 100% 闭合 CAD 实体的 3 步骤解法：",
+    "cad_solution1_step1": "1️⃣ 切换为【☁️ 云端算力节点 (Cloud Server)】：纯前端浏览器仅能做面片封装；切换至云端/私有节点可调用 FreeCAD / OpenCASCADE 工业几何内核。",
+    "cad_solution1_step2": "2️⃣ 策略选择【💧 强制水密实体】：自动封闭破面孔洞、解开非流形自相交，并执行微米级共点顶点拓扑焊接。",
+    "cad_solution1_step3": "3️⃣ 启用【B-Rep 拓扑缝合 (Sewing)】：于专家抽屉中开启缝合，设置容差公差（0.001mm ~ 0.01mm），让 OpenCASCADE 将所有曲面融合成真正的 ISO 标准 Closed Solid。",
+    "cad_issue2_title": "❓ 风扇本体 (_omniseam.step) 与 风洞流体域 (_fluid_domain.step) 的差异？",
+    "cad_issue2_desc": "• _omniseam.step：为模型实体本体（如风扇叶轮）。\n• _fluid_domain.step：为风洞工具抽取的外部空气流场几何（即长方体风洞减去风扇本体后留下的流道空间），专门用于 CFD 气动阻力、压力分布与流线数值模拟。",
     "quickstart_banner_title": "⚡ 3 步快速上手指南",
     "quickstart_banner_desc": "OmniSeam 3D 具备智能格式识别与自适应破面修复引擎。无论您是 3D 打印玩家、机械工程师还是 3D 创作者，只需 3 步即可完成格式转换与模型体检。",
     "step1_title": "1. 拖放上传 3D 文件",
@@ -443,4 +468,3 @@
     "no_file_error": "未选择 3D 模型"
   }
 }
-

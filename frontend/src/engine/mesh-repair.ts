@@ -71,36 +71,33 @@ export class MeshRepairKernel {
   }
 
   /**
-   * Disentangles non-manifold edges where an edge is shared by >2 faces.
+   * Disentangles non-manifold edges to strictly guarantee that no edge is shared by >2 faces (Strict 2-Manifold).
    */
   private static disentangleNonManifold(
     vertices: number[][],
     faces: number[][]
   ): { vertices: number[][]; faces: number[][] } {
-    const edgeCount = new Map<string, number>();
-
-    for (let i = 0; i < faces.length; i++) {
-      const [i0, i1, i2] = faces[i];
-      const e1 = i0 < i1 ? `${i0}_${i1}` : `${i1}_${i0}`;
-      const e2 = i1 < i2 ? `${i1}_${i2}` : `${i2}_${i1}`;
-      const e3 = i2 < i0 ? `${i2}_${i0}` : `${i0}_${i2}`;
-      edgeCount.set(e1, (edgeCount.get(e1) || 0) + 1);
-      edgeCount.set(e2, (edgeCount.get(e2) || 0) + 1);
-      edgeCount.set(e3, (edgeCount.get(e3) || 0) + 1);
-    }
-
+    const edgeFaceUsage = new Map<string, number>();
     const cleanFaces: number[][] = [];
+
     for (let i = 0; i < faces.length; i++) {
       const [i0, i1, i2] = faces[i];
+      if (i0 === i1 || i1 === i2 || i2 === i0) continue;
+
       const e1 = i0 < i1 ? `${i0}_${i1}` : `${i1}_${i0}`;
       const e2 = i1 < i2 ? `${i1}_${i2}` : `${i2}_${i1}`;
       const e3 = i2 < i0 ? `${i2}_${i0}` : `${i0}_${i2}`;
-      
-      const overloaded = (edgeCount.get(e1)! > 2 ? 1 : 0) +
-                         (edgeCount.get(e2)! > 2 ? 1 : 0) +
-                         (edgeCount.get(e3)! > 2 ? 1 : 0);
-      if (overloaded < 2) {
+
+      const u1 = edgeFaceUsage.get(e1) || 0;
+      const u2 = edgeFaceUsage.get(e2) || 0;
+      const u3 = edgeFaceUsage.get(e3) || 0;
+
+      // In a strict 2-manifold surface, every edge is shared by at most 2 faces
+      if (u1 < 2 && u2 < 2 && u3 < 2) {
         cleanFaces.push([i0, i1, i2]);
+        edgeFaceUsage.set(e1, u1 + 1);
+        edgeFaceUsage.set(e2, u2 + 1);
+        edgeFaceUsage.set(e3, u3 + 1);
       }
     }
 

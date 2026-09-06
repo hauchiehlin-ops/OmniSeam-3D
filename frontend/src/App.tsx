@@ -31,6 +31,7 @@ import {
 import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES } from './api/client';
 import { ArManager } from './engine/ar-manager';
 import { ZipPackager, ZipEntry } from './engine/zip-packager';
+import { AdaptiveIntentEngine, AdaptiveIntentResult } from './engine/adaptive-intent';
 
 
 const DEFAULT_CONFIG: ConversionConfig = {
@@ -75,6 +76,8 @@ export const App: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ConversionConfig>(DEFAULT_CONFIG);
+  const [adaptiveIntent, setAdaptiveIntent] = useState<AdaptiveIntentResult | null>(null);
+  const [isAutoAdaptiveActive, setIsAutoAdaptiveActive] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
@@ -121,6 +124,54 @@ export const App: React.FC = () => {
       );
     }
   }, [i18n.language]);
+
+  // AI Smart Adaptive Intent Synthesis
+  useEffect(() => {
+    if (!selectedFile) {
+      setAdaptiveIntent(null);
+      return;
+    }
+
+    const intentResult = AdaptiveIntentEngine.analyzeIntent(
+      selectedFile,
+      config.target_format,
+      config,
+      inspectData
+    );
+    setAdaptiveIntent(intentResult);
+
+    if (isAutoAdaptiveActive) {
+      setConfig(intentResult.adaptedConfig);
+      setEngineMode(intentResult.recommendedEngineMode);
+      apiClient.setEngineMode(intentResult.recommendedEngineMode);
+    }
+  }, [selectedFile, inspectData, config.target_format, isAutoAdaptiveActive]);
+
+  const handleConfigChange = (newConfig: ConversionConfig) => {
+    if (newConfig.target_format !== config.target_format) {
+      // User changed target format -> keep adaptive mode active and adopt new format
+      setConfig(newConfig);
+    } else {
+      // User manually toggled expert checkboxes or strategies
+      setIsAutoAdaptiveActive(false);
+      setConfig(newConfig);
+    }
+  };
+
+  const handleResetToAdaptive = () => {
+    if (!selectedFile) return;
+    setIsAutoAdaptiveActive(true);
+    const intentResult = AdaptiveIntentEngine.analyzeIntent(
+      selectedFile,
+      config.target_format,
+      config,
+      inspectData
+    );
+    setAdaptiveIntent(intentResult);
+    setConfig(intentResult.adaptedConfig);
+    setEngineMode(intentResult.recommendedEngineMode);
+    apiClient.setEngineMode(intentResult.recommendedEngineMode);
+  };
 
   const projectFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -208,6 +259,8 @@ export const App: React.FC = () => {
         setTasks([]);
         setActiveTask(null);
         setInspectData(null);
+        setAdaptiveIntent(null);
+        setIsAutoAdaptiveActive(true);
         setIsSplitView(false);
         setMeasuredDistance(null);
         setMeasureP1(null);
@@ -618,14 +671,18 @@ export const App: React.FC = () => {
 
             <SettingsPanel
               config={config}
-              onChangeConfig={setConfig}
+              onChangeConfig={handleConfigChange}
               onStartConvert={handleStartConvert}
               onInspectOnly={handleInspectOnly}
               disabled={!selectedFile && selectedFiles.length === 0}
               isProcessing={isProcessing}
               engineMode={engineMode}
               autoEngineNotice={autoEngineNotice}
+              adaptiveIntent={adaptiveIntent}
+              isAutoAdaptiveActive={isAutoAdaptiveActive}
+              onResetToAdaptive={handleResetToAdaptive}
               onChangeEngineMode={(m) => {
+                setIsAutoAdaptiveActive(false);
                 setEngineMode(m);
                 apiClient.setEngineMode(m);
               }}

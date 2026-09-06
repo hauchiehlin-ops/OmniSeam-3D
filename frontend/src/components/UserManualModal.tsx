@@ -33,7 +33,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
   onOpenBackendSettings
 }) => {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'quickstart' | 'fidelity' | 'viewport' | 'engine' | 'commands' | 'slicer'>('quickstart');
+  const [activeTab, setActiveTab] = useState<'quickstart' | 'troubleshooting' | 'fidelity' | 'viewport' | 'engine' | 'commands' | 'slicer'>('quickstart');
   const [copiedCmd, setCopiedCmd] = useState(false);
 
   if (!isOpen) return null;
@@ -73,8 +73,8 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           </button>
         </div>
 
-        {/* Navigation Tabs - 6 equal columns on desktop */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-b border-dark-border bg-dark-panel/60 p-2 sm:p-3 gap-1.5 sm:gap-2">
+        {/* Navigation Tabs - responsive grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 border-b border-dark-border bg-dark-panel/60 p-2 sm:p-3 gap-1.5 sm:gap-2">
           <button
             onClick={() => setActiveTab('quickstart')}
             className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
@@ -86,6 +86,19 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{t('manual.tab_quickstart')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('troubleshooting')}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold transition-all text-center ${
+              activeTab === 'troubleshooting'
+                ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
+                : 'text-amber-300/90 hover:text-amber-200 hover:bg-amber-500/10 bg-dark-panel/80 border border-amber-500/30'
+            }`}
+            title={t('manual.tab_troubleshooting')}
+          >
+            <Wrench className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <span className="truncate">{t('manual.tab_troubleshooting')}</span>
           </button>
 
           <button
@@ -156,7 +169,61 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
 
         {/* Content Body */}
         <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6 text-slate-300 text-xs sm:text-sm leading-relaxed">
-          {/* TAB 1: QUICKSTART */}
+          {/* TAB 0: TROUBLESHOOTING (CAD & STEP SOLID SEWING) */}
+          {activeTab === 'troubleshooting' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-1.5">
+                <h3 className="font-bold text-sm sm:text-base text-amber-100 flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>{t('manual.cad_troubleshooting_title')}</span>
+                </h3>
+                <p className="text-xs text-amber-300/90 leading-relaxed">
+                  {t('manual.cad_troubleshooting_desc')}
+                </p>
+              </div>
+
+              {/* Issue 1 Card */}
+              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-3">
+                <h4 className="font-bold text-slate-100 text-xs sm:text-sm flex items-start gap-2 text-rose-300">
+                  <span>{t('manual.cad_issue1_title')}</span>
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('manual.cad_issue1_desc')}
+                </p>
+
+                {/* 3 Steps Solution Box */}
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.cad_solution1_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-200 pl-1">
+                    <div className="p-2 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.cad_solution1_step1')}
+                    </div>
+                    <div className="p-2 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.cad_solution1_step2')}
+                    </div>
+                    <div className="p-2 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.cad_solution1_step3')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Issue 2 Card: Body vs Fluid Domain */}
+              <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border space-y-2.5">
+                <h4 className="font-bold text-slate-100 text-xs sm:text-sm text-indigo-300 flex items-start gap-2">
+                  <span>{t('manual.cad_issue2_title')}</span>
+                </h4>
+                <div className="text-xs text-slate-300 whitespace-pre-line leading-relaxed p-3 rounded-xl bg-dark-surface border border-dark-border">
+                  {t('manual.cad_issue2_desc')}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 1: QUICK START */}
           {activeTab === 'quickstart' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-200">

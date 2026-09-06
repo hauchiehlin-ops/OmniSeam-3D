@@ -16,10 +16,13 @@ import {
   Sparkles,
   Droplets,
   Search,
-  Layers
+  Bot,
+  RefreshCw,
+  Cpu
 } from 'lucide-react';
 import { ConversionConfig, TargetFormat } from '../types';
 import { EngineMode, apiClient } from '../api/client';
+import { AdaptiveIntentResult } from '../engine/adaptive-intent';
 
 interface SettingsPanelProps {
   config: ConversionConfig;
@@ -32,6 +35,9 @@ interface SettingsPanelProps {
   onChangeEngineMode: (mode: EngineMode) => void;
   onOpenBackendSettings: () => void;
   autoEngineNotice?: { mode: EngineMode; reason: string } | null;
+  adaptiveIntent?: AdaptiveIntentResult | null;
+  isAutoAdaptiveActive?: boolean;
+  onResetToAdaptive?: () => void;
 }
 
 const getFormatGroups = (t: (key: string) => string): { groupName: string; options: { value: TargetFormat; label: string; desc: string }[] }[] => [
@@ -74,6 +80,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onChangeEngineMode,
   onOpenBackendSettings,
   autoEngineNotice,
+  adaptiveIntent,
+  isAutoAdaptiveActive = true,
+  onResetToAdaptive,
 }) => {
   const { t } = useTranslation();
   const formatGroups = getFormatGroups(t);
@@ -243,6 +252,70 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           ))}
         </select>
       </div>
+
+      {/* AI Smart Adaptive Intent Card */}
+      {adaptiveIntent && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-brand-950/60 via-indigo-950/40 to-slate-900 border border-brand-500/30 shadow-md space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold text-brand-300">
+              <Bot className="w-4 h-4 text-brand-400 animate-pulse" />
+              <span>{t('settings.adaptive_card_title')}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {isAutoAdaptiveActive ? (
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>{t('settings.adaptive_active_badge')}</span>
+                </span>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    {t('settings.adaptive_manual_badge')}
+                  </span>
+                  {onResetToAdaptive && (
+                    <button
+                      type="button"
+                      onClick={onResetToAdaptive}
+                      title={t('settings.adaptive_reset_btn')}
+                      className="text-[9px] font-semibold text-brand-300 hover:text-brand-200 flex items-center gap-1 px-1.5 py-0.5 rounded bg-brand-500/20 border border-brand-500/30 hover:bg-brand-500/30 transition-all"
+                    >
+                      <RefreshCw className="w-2.5 h-2.5" />
+                      <span>{t('settings.adaptive_reset_btn')}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-300 leading-relaxed">
+            {t(adaptiveIntent.explanationKey, adaptiveIntent.explanationParams)}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-dark-surface/90 border border-dark-border text-indigo-300 font-mono flex items-center gap-1">
+              <Cpu className="w-3 h-3 text-indigo-400" />
+              <span>{adaptiveIntent.recommendedEngineMode.toUpperCase()}</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-dark-surface/90 border border-dark-border text-emerald-300 font-mono">
+              Strategy: {adaptiveIntent.recommendedStrategy.toUpperCase()}
+            </span>
+            {adaptiveIntent.intentCategory === 'cad_solid' && (
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-dark-surface/90 border border-dark-border text-amber-300 font-mono">
+                Sewing Tol: {adaptiveIntent.computedSewingTolerance} mm
+              </span>
+            )}
+            {adaptiveIntent.inputCategory === 'cad' && (
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-dark-surface/90 border border-dark-border text-cyan-300 font-mono">
+                Sagitta: {adaptiveIntent.computedLinearDeflection} mm
+              </span>
+            )}
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-dark-surface/90 border border-dark-border text-slate-400">
+              Extent: ~{adaptiveIntent.modelExtentMm} mm
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 3 Unified Geometric Strategy Cards */}
       <div className="flex flex-col gap-3">
