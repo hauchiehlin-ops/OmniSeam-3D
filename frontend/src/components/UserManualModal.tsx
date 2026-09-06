@@ -179,9 +179,9 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                 </p>
               </div>
 
-              {/* Interactive Table of Contents (TOC) */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-dark-panel border border-brand-500/30 space-y-3 shadow-lg">
-                <div className="flex items-center gap-2.5">
+              {/* Interactive Table of Contents (TOC) - Dropdown Select Presentation */}
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-dark-panel border border-brand-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5 shrink-0">
                   <div className="w-7 h-7 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center font-bold shrink-0">
                     <Layers className="w-4 h-4" />
                   </div>
@@ -193,38 +193,49 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-                  {[
-                    { id: 'qa-case-1', labelKey: 'manual.qa_case1_toc', badgeKey: 'manual.qa_case1_badge' },
-                    { id: 'qa-case-2', labelKey: 'manual.qa_case2_toc', badgeKey: 'manual.qa_case2_badge' },
-                    { id: 'qa-case-3', labelKey: 'manual.qa_case3_toc', badgeKey: 'manual.qa_case3_badge' },
-                    { id: 'qa-case-4', labelKey: 'manual.qa_case4_toc', badgeKey: 'manual.qa_case4_badge' },
-                    { id: 'qa-case-5', labelKey: 'manual.qa_case5_toc', badgeKey: 'manual.qa_case5_badge' },
-                    { id: 'qa-case-6', labelKey: 'manual.qa_case6_toc', badgeKey: 'manual.qa_case6_badge' },
-                    { id: 'qa-case-7', labelKey: 'manual.qa_case7_toc', badgeKey: 'manual.qa_case7_badge' },
-                  ].map((item, idx) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        const el = document.getElementById(item.id);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                <div className="flex-1 max-w-full sm:max-w-md relative">
+                  <label htmlFor="qa-case-select" className="sr-only">
+                    {t('manual.qa_select_prompt')}
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="qa-case-select"
+                      defaultValue=""
+                      onChange={(e) => {
+                        const targetId = e.target.value;
+                        if (targetId) {
+                          const el = document.getElementById(targetId);
+                          if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                          e.target.value = '';
+                        }
                       }}
-                      className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-dark-surface hover:bg-dark-hover border border-dark-border hover:border-brand-500/50 text-left transition-all group"
+                      className="w-full appearance-none bg-dark-surface hover:bg-dark-hover/80 text-brand-300 font-semibold text-xs sm:text-sm py-2 pl-3 pr-9 rounded-xl border border-dark-border focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer transition-all shadow-sm"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-5 h-5 rounded-md bg-dark-panel text-slate-400 group-hover:text-brand-300 font-mono text-[10px] font-bold flex items-center justify-center border border-dark-border shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span className="text-xs text-slate-300 group-hover:text-white font-medium truncate">
-                          {t(item.labelKey)}
-                        </span>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-dark-panel border border-dark-border text-slate-400 group-hover:text-brand-300 font-semibold shrink-0">
-                        {t(item.badgeKey)}
-                      </span>
-                    </button>
-                  ))}
+                      <option value="" disabled className="text-slate-400">
+                        {t('manual.qa_select_prompt')}
+                      </option>
+                      {[
+                        { id: 'qa-case-1', labelKey: 'manual.qa_case1_toc', badgeKey: 'manual.qa_case1_badge' },
+                        { id: 'qa-case-2', labelKey: 'manual.qa_case2_toc', badgeKey: 'manual.qa_case2_badge' },
+                        { id: 'qa-case-3', labelKey: 'manual.qa_case3_toc', badgeKey: 'manual.qa_case3_badge' },
+                        { id: 'qa-case-4', labelKey: 'manual.qa_case4_toc', badgeKey: 'manual.qa_case4_badge' },
+                        { id: 'qa-case-5', labelKey: 'manual.qa_case5_toc', badgeKey: 'manual.qa_case5_badge' },
+                        { id: 'qa-case-6', labelKey: 'manual.qa_case6_toc', badgeKey: 'manual.qa_case6_badge' },
+                        { id: 'qa-case-7', labelKey: 'manual.qa_case7_toc', badgeKey: 'manual.qa_case7_badge' },
+                        { id: 'qa-case-8', labelKey: 'manual.qa_case8_toc', badgeKey: 'manual.qa_case8_badge' },
+                        { id: 'qa-case-9', labelKey: 'manual.qa_case9_toc', badgeKey: 'manual.qa_case9_badge' },
+                      ].map((item, idx) => (
+                        <option key={item.id} value={item.id} className="bg-dark-surface text-slate-200 py-1.5">
+                          {`Case ${idx + 1}: ${t(item.labelKey)} [${t(item.badgeKey)}]`}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -532,6 +543,107 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                     </div>
                     <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
                       {t('manual.qa_case7_sol3')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CASE 8: Wind Tunnel Settings Linkage */}
+              <div id="qa-case-8" className="p-4.5 rounded-2xl bg-dark-panel border border-sky-500/30 space-y-3.5 shadow-md scroll-mt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                    {t('manual.qa_case8_badge')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('qa-top')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[11px] text-slate-400 hover:text-brand-300 transition-colors"
+                  >
+                    {t('manual.qa_back_to_top')}
+                  </button>
+                </div>
+                <h4 className="font-bold text-slate-100 text-sm sm:text-base leading-snug text-sky-200">
+                  {t('manual.qa_case8_title')}
+                </h4>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-dark-border space-y-2">
+                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-sky-400 shrink-0" />
+                    <span>{t('manual.qa_case8_why_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-300">
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case8_reason1')}
+                    </p>
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case8_reason2')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.qa_case8_solutions_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case8_sol1')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case8_sol2')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CASE 9: Precondition Impact of Mesh Quality on Wind Tunnel Extraction */}
+              <div id="qa-case-9" className="p-4.5 rounded-2xl bg-dark-panel border border-violet-500/30 space-y-3.5 shadow-md scroll-mt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/40">
+                    {t('manual.qa_case9_badge')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('qa-top')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[11px] text-slate-400 hover:text-brand-300 transition-colors"
+                  >
+                    {t('manual.qa_back_to_top')}
+                  </button>
+                </div>
+                <h4 className="font-bold text-slate-100 text-sm sm:text-base leading-snug text-violet-200">
+                  {t('manual.qa_case9_title')}
+                </h4>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-dark-border space-y-2">
+                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-violet-400 shrink-0" />
+                    <span>{t('manual.qa_case9_why_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-300">
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case9_reason1')}
+                    </p>
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case9_reason2')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.qa_case9_solutions_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case9_sol1')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case9_sol2')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case9_sol3')}
                     </div>
                   </div>
                 </div>
