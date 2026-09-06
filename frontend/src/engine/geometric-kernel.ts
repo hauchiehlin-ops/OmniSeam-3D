@@ -219,7 +219,8 @@ export class GeometricKernel {
       let minDistSq = Infinity;
 
       // Check distance against original vertices
-      const step = origVertices.length > 1000 ? Math.ceil(origVertices.length / 500) : 1;
+      const maxOrigSamples = 50;
+      const step = Math.max(1, Math.floor(origVertices.length / maxOrigSamples));
       for (let j = 0; j < origVertices.length; j += step) {
         const [ox, oy, oz] = origVertices[j];
         const dx = rx - ox;
@@ -269,7 +270,7 @@ export class GeometricKernel {
    * Evaluates 3D slicer readiness checklist:
    * Watertightness, Overhangs (>45° angle with bed), and estimated support volume.
    */
-  static analyzeSlicerReadiness(mesh: MeshGeometry, overhangThresholdDeg: number = 45.0) {
+  static analyzeSlicerReadiness(mesh: MeshGeometry, overhangThresholdDeg: number = 45.0, isWatertight: boolean = true) {
     const { vertices, faces } = mesh;
     const fCount = faces.length;
     
@@ -284,6 +285,10 @@ export class GeometricKernel {
       };
     }
 
+    const warnings: string[] = [];
+    if (!isWatertight) {
+      warnings.push('非水密封閉模型 (Non-Watertight)：存在邊界開口或破面，切片機將視為開放殼體，可能導致切片失敗或無法填充。');
+    }
     const cosThreshold = Math.cos((overhangThresholdDeg * Math.PI) / 180.0);
     // Downward normal is [0, -1, 0] (in WebGL/Three.js Y is up, -Y is down)
     let overhangFacesCount = 0;
@@ -335,7 +340,6 @@ export class GeometricKernel {
       }
     }
 
-    const warnings: string[] = [];
     if (overhangFacesCount > fCount * 0.4) {
       warnings.push('High overhang surface area (>40%). Tree supports or re-orientation recommended.');
     }

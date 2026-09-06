@@ -261,8 +261,13 @@ Save "{str(output_path)}";
                     stderr=subprocess.PIPE,
                     timeout=60
                 )
-                if output_path.exists() and output_path.stat().st_size > 0:
-                    return True
+                if output_path.exists() and output_path.stat().st_size > 5000:
+                    with open(output_path, "r", encoding="utf-8", errors="ignore") as f:
+                        header = f.read(10000)
+                    if "FACE" in header or "SHELL" in header or "SOLID" in header:
+                        return True
+                if output_path.exists():
+                    output_path.unlink(missing_ok=True)
         except Exception:
             pass
         return False

@@ -48,7 +48,7 @@ export class ClientPipeline {
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase() || 'mesh';
-    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(mesh);
+    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(mesh, 45.0, metrics.is_watertight);
     const assemblyTree = {
       root: {
         id: 'root',
@@ -139,7 +139,7 @@ export class ClientPipeline {
         unify_normals: config.unify_normals,
         remove_degenerate: config.remove_degenerate,
         weld_vertices: config.weld_vertices,
-        weld_tolerance: 1e-5,
+        weld_tolerance: 1e-4,
       };
 
       const res = MeshRepairKernel.repair(rawMesh, repairOptions);
@@ -174,7 +174,7 @@ export class ClientPipeline {
     const statusEn = `Repaired ${defectsFixed.holes_filled || 0} holes. Watertight: ${repairedMetrics.is_watertight ? 'Yes' : 'No'}. (100% Client-side)`;
     const statusZh = `已修復 ${defectsFixed.holes_filled || 0} 個孔洞。封閉實體：${repairedMetrics.is_watertight ? '是 (Watertight)' : '否'}。(100% 本機端)`;
 
-    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(repairedMesh);
+    const slicerInfo = GeometricKernel.analyzeSlicerReadiness(repairedMesh, 45.0, repairedMetrics.is_watertight);
     const assemblyTree = {
       root: {
         id: 'root',

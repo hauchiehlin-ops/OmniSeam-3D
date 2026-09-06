@@ -120,10 +120,12 @@ class MeshRepairEngine:
             else:
                 repaired = trimesh.Trimesh(vertices=repaired.vertices, faces=repaired.faces)
 
-        # Tier 1: Welding close vertices
+        # Tier 1: Multi-tier adaptive welding (0.0001mm -> 0.001mm industrial tolerance)
         if options.weld_vertices:
             prev_v = len(repaired.vertices)
-            repaired.merge_vertices(merge_tex=True, merge_norm=True)
+            repaired.merge_vertices(merge_tex=True, merge_norm=True, digits_vertex=4)
+            if not repaired.is_watertight:
+                repaired.merge_vertices(merge_tex=True, merge_norm=True, digits_vertex=3)
             welded = prev_v - len(repaired.vertices)
             if welded > 0:
                 defects_fixed["vertices_welded"] += welded

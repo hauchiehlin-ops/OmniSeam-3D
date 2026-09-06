@@ -6,8 +6,9 @@ export class FormatExporters {
   /**
    * Serializes MeshGeometry to a downloadable Blob based on target format.
    */
-  static exportBlob(mesh: MeshGeometry, format: TargetFormat): Blob {
-    switch (format) {
+  static exportBlob(mesh: MeshGeometry, format: TargetFormat | string): Blob {
+    const fmt = (format || '').toLowerCase().trim();
+    switch (fmt) {
       case 'stl':
         return this.exportBinarySTL(mesh);
       case 'obj':
@@ -20,10 +21,15 @@ export class FormatExporters {
         return this.export3MF(mesh);
       case 'step':
       case 'stp':
+      case 'brep':
         return this.exportSTEP(mesh);
       case 'glb':
       case 'gltf':
+        return this.exportGLB(mesh);
       default:
+        if (fmt.includes('step') || fmt.includes('stp') || fmt.includes('cad') || fmt.includes('brep')) {
+          return this.exportSTEP(mesh);
+        }
         return this.exportGLB(mesh);
     }
   }

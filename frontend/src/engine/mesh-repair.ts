@@ -120,17 +120,13 @@ export class MeshRepairKernel {
       addDirectedEdge(edgeMap, i2, i0);
     }
 
-    // Boundary edges are those with count == 1
-    const adjGraph = new Map<number, number[]>();
+    // Directed boundary hole graph: If triangle has u -> v, missing adjacent face needs v -> u
+    const directedNext = new Map<number, number>();
     let boundaryCount = 0;
-
     edgeMap.forEach(({ count, u, v }) => {
       if (count === 1) {
         boundaryCount++;
-        if (!adjGraph.has(u)) adjGraph.set(u, []);
-        if (!adjGraph.has(v)) adjGraph.set(v, []);
-        adjGraph.get(u)!.push(v);
-        adjGraph.get(v)!.push(u);
+        directedNext.set(v, u);
       }
     });
 
@@ -143,46 +139,51 @@ export class MeshRepairKernel {
     const visited = new Set<number>();
     let holesSealed = 0;
 
-    // Traverse connected boundary loops
-    adjGraph.forEach((_, startNode) => {
+    // Traverse directed boundary loops
+    directedNext.forEach((_, startNode) => {
       if (visited.has(startNode)) return;
 
       const loop: number[] = [];
-      let curr: number | null = startNode;
+      let curr: number | undefined = startNode;
 
-      while (curr !== null && !visited.has(curr)) {
+      while (curr !== undefined && !visited.has(curr)) {
         visited.add(curr);
         loop.push(curr);
-        const neighbors: number[] = adjGraph.get(curr) || [];
-        const next: number | undefined = neighbors.find((n: number) => !visited.has(n));
-        curr = next !== undefined ? next : null;
+        curr = directedNext.get(curr);
       }
 
-      if (loop.length === 3) {
-        newFaces.push([loop[0], loop[1], loop[2]]);
-        holesSealed++;
-      } else if (loop.length > 3) {
-        // Centroid fan triangulation
-        let cx = 0, cy = 0, cz = 0;
-        for (const idx of loop) {
-          cx += newVertices[idx][0];
-          cy += newVertices[idx][1];
-          cz += newVertices[idx][2];
-        }
-        const centroidIdx = newVertices.length;
-        newVertices.push([cx / loop.length, cy / loop.length, cz / loop.length]);
+      // Check if loop successfully closed into a cycle back to startNode
+      if (curr === startNode && loop.length >= 3) {
+        if (loop.length === 3) {
+          newFaces.push([loop[0], loop[1], loop[2]]);
+          holesSealed++;
+        } else if (loop.length > 3) {
+          // Centroid fan triangulation with consistent winding
+          let cx = 0, cy = 0, cz = 0;
+          for (const idx of loop) {
+            cx += newVertices[idx][0];
+            cy += newVertices[idx][1];
+            cz += newVertices[idx][2];
+          }
+          const centroidIdx = newVertices.length;
+          newVertices.push([cx / loop.length, cy / loop.length, cz / loop.length]);
 
-        for (let i = 0; i < loop.length; i++) {
-          const u = loop[i];
-          const v = loop[(i + 1) % loop.length];
-          newFaces.push([u, v, centroidIdx]);
+          for (let i = 0; i < loop.length; i++) {
+            const u = loop[i];
+            const v = loop[(i + 1) % loop.length];
+            newFaces.push([u, v, centroidIdx]);
+          }
+          holesSealed++;
         }
-        holesSealed++;
       }
     });
 
     return { vertices: newVertices, faces: newFaces, holesCount: holesSealed };
   }
+
+  /**
+   * Welds duplicate and close vertices within spatial tolerance using hash grid.
+   */
   private static weldVertices(
     vertices: number[][],
     faces: number[][],

@@ -12,7 +12,8 @@ import {
   Sparkles,
   TrendingDown,
   Layers,
-  Box
+  Box,
+  Wrench
 } from 'lucide-react';
 import { HealthAuditReport, InspectResponse } from '../types';
 
@@ -130,6 +131,31 @@ export const AuditReport: React.FC<AuditReportProps> = ({
               </div>
             )}
           </div>
+
+          {/* Zero-Thickness Surface Sheet Diagnostic Alert */}
+          {!isWatertight && ((repairedMetrics && repairedMetrics.volume === 0) || origMetrics.volume === 0) && (
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-2.5 animate-fadeIn">
+              <div className="flex items-center gap-2 font-bold text-amber-300">
+                <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-amber-400" />
+                <span>{t('audit.zero_thickness_alert_title', '零厚度開放曲面 (Zero-Thickness Sheet) 幾何診斷')}</span>
+              </div>
+              <p className="leading-relaxed text-slate-300">
+                {t('audit.zero_thickness_alert_desc', '模型表面積龐大但體積為 0.00 mm³，代表此模型（如風扇葉片、薄殼片體）是由單層無厚度的三角面構成。純前端模式僅能縫合微小破孔，無法自動憑空生成 3D 實體壁厚。')}
+              </p>
+              <div className="p-3 rounded-xl bg-dark-panel/90 border border-dark-border/80 text-slate-200 space-y-1.5 text-[11px]">
+                <div className="font-semibold text-brand-300 flex items-center gap-1.5">
+                  <Wrench className="w-3.5 h-3.5 text-brand-400" />
+                  <span>{t('audit.zero_thickness_solutions_title', '🛠️ 徹底解決方案（2 種途徑）：')}</span>
+                </div>
+                <div className="text-slate-300 pl-1">
+                  1. <b>切換至雲端伺服器 (Cloud Server)</b>：於右上角切換至【Cloud Server】（免費 16GB 節點），後端將自動調用 Tier 3 體積 Marching Cubes 深度實體化演算法，強制重構為 100% 封閉水密實體。
+                </div>
+                <div className="text-slate-300 pl-1">
+                  2. <b>CAD 原模加厚</b>：在原始建模軟體（SolidWorks, Rhino, Blender 等）中為葉片執行「加厚 (Thicken)」或「實體化 (Solidify)」並指定厚度（如 1.0mm）後重新匯出。
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Metrics Delta Table */}
           <div className="flex flex-col gap-2">
