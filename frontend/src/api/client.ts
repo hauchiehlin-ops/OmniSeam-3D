@@ -178,6 +178,9 @@ export const apiClient = {
     formData.append('remove_degenerate', config.remove_degenerate.toString());
     formData.append('weld_vertices', config.weld_vertices.toString());
     formData.append('compress_gltf', config.compress_gltf.toString());
+    formData.append('rotation_x', (config.rotation_x || 0).toString());
+    formData.append('rotation_y', (config.rotation_y || 0).toString());
+    formData.append('rotation_z', (config.rotation_z || 0).toString());
     formData.append('language', lang);
 
     const response = await axios.post<TaskResponse>(`${this.getApiBase()}/convert`, formData, {

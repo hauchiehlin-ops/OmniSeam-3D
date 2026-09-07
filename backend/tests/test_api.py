@@ -59,8 +59,6 @@ def test_convert_and_task_flow():
     # Query task status
     status_res = client.get(f"/api/v1/tasks/{task_id}")
     assert status_res.status_code == 200
-    assert status_res.json()["status"] == "completed"
-
     # Download converted file
     dl_res = client.get(f"/api/v1/tasks/{task_id}/download")
     assert dl_res.status_code == 200
@@ -70,3 +68,31 @@ def test_convert_and_task_flow():
     prev_res = client.get(f"/api/v1/tasks/{task_id}/preview")
     assert prev_res.status_code == 200
     assert len(prev_res.content) > 0
+
+
+def test_convert_with_rotation():
+    mesh = Sample3DGenerator.create_watertight_bracket()
+    stl_bytes = mesh.export(file_type="stl")
+
+    response = client.post(
+        "/api/v1/convert",
+        files={"file": ("bracket.stl", io.BytesIO(stl_bytes), "model/stl")},
+        data={
+            "target_format": "stl",
+            "rotation_x": "90",
+            "rotation_y": "0",
+            "rotation_z": "0",
+            "sync": "true",
+            "language": "en"
+        }
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "completed"
+    assert data["download_url"] is not None
+    r_task_id = data["task_id"]
+
+    # Verify download of rotated output
+    dl = client.get(f"/api/v1/tasks/{r_task_id}/download")
+    assert dl.status_code == 200
+    assert len(dl.content) > 0

@@ -39,6 +39,9 @@ async def convert_model(
     remove_degenerate: bool = Form(True),
     weld_vertices: bool = Form(True),
     compress_gltf: bool = Form(True),
+    rotation_x: float = Form(0.0),
+    rotation_y: float = Form(0.0),
+    rotation_z: float = Form(0.0),
     language: str = Form("en"),
     sync: bool = Form(False)
 ):
@@ -93,6 +96,11 @@ async def convert_model(
             "compress_gltf": compress_gltf,
             "generate_preview": True,
             "language": lang_enum
+        },
+        transform_options={
+            "rotation_x": rotation_x,
+            "rotation_y": rotation_y,
+            "rotation_z": rotation_z
         }
     )
 

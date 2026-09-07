@@ -17,6 +17,9 @@ interface SplitViewer3DProps {
     nonManifold?: [number, number, number][];
   };
   onModelLoaded?: (object: THREE.Object3D) => void;
+  rotation?: { x: number; y: number; z: number };
+  onChangeRotation?: (rot: { x: number; y: number; z: number }) => void;
+  showRotationGizmo?: boolean;
 }
 
 export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
@@ -28,7 +31,10 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
   measureToolActive = false,
   onMeasureDistance,
   defectPoints,
-  onModelLoaded
+  onModelLoaded,
+  rotation,
+  onChangeRotation,
+  showRotationGizmo,
 }) => {
   const { t } = useTranslation();
 
@@ -48,6 +54,9 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
           title={t('viewer.original_label')}
           badge="Defective"
           badgeColor="red"
+          rotation={rotation}
+          onChangeRotation={onChangeRotation}
+          showRotationGizmo={showRotationGizmo}
         />
       </div>
 

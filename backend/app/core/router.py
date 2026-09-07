@@ -125,6 +125,24 @@ class ConversionPipelineRouter:
                 repaired_mesh, defects_fixed, max_deviation = MeshRepairEngine.repair_mesh(mesh, params.repair_options)
                 repaired_metrics = ModelAuditor.compute_metrics(repaired_mesh)
 
+            # Bake geometric transformation if specified
+            rx = params.transform_options.rotation_x
+            ry = params.transform_options.rotation_y
+            rz = params.transform_options.rotation_z
+            if rx != 0.0 or ry != 0.0 or rz != 0.0:
+                import numpy as np
+                centroid = repaired_mesh.centroid
+                t_to_center = trimesh.transformations.translation_matrix(-centroid)
+                t_back = trimesh.transformations.translation_matrix(centroid)
+                rot_mat = trimesh.transformations.euler_matrix(
+                    np.radians(rx),
+                    np.radians(ry),
+                    np.radians(rz),
+                    'sxyz'
+                )
+                transform_mat = t_back @ rot_mat @ t_to_center
+                repaired_mesh.apply_transform(transform_mat)
+
             # Stage 3: Converting
             file_manager.update_task(
                 task_id,

@@ -150,6 +150,16 @@ export class ClientPipeline {
 
     const repairedMetrics = GeometricKernel.computeMetrics(repairedMesh);
 
+    // Bake geometric rotation if requested
+    if (config.rotation_x || config.rotation_y || config.rotation_z) {
+      repairedMesh = GeometricKernel.rotateMesh(
+        repairedMesh,
+        config.rotation_x || 0,
+        config.rotation_y || 0,
+        config.rotation_z || 0
+      );
+    }
+
     // Stage 3: Converting to Target Format
     update('converting', 75, isZh ? '正在封裝目標格式...' : 'Exporting target 3D asset...');
     await sleep(40);

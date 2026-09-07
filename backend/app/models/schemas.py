@@ -58,11 +58,18 @@ class OutputOptions(BaseModel):
     language: SupportedLanguage = Field(SupportedLanguage.EN, description="Language for reports and status")
 
 
+class TransformOptions(BaseModel):
+    rotation_x: float = Field(0.0, description="Rotation around X axis in degrees")
+    rotation_y: float = Field(0.0, description="Rotation around Y axis in degrees")
+    rotation_z: float = Field(0.0, description="Rotation around Z axis in degrees")
+
+
 class ConversionParams(BaseModel):
     target_format: TargetFormat = TargetFormat.GLB
     cad_options: CADOptions = Field(default_factory=CADOptions)
     repair_options: RepairOptions = Field(default_factory=RepairOptions)
     output_options: OutputOptions = Field(default_factory=OutputOptions)
+    transform_options: TransformOptions = Field(default_factory=TransformOptions)
 
 
 class BoundingBox(BaseModel):

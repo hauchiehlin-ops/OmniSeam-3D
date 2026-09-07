@@ -437,6 +437,72 @@ export class GeometricKernel {
       tunnelBounds,
     };
   }
+
+  /**
+   * Bakes 3D rotation (in degrees) around the mesh bounding box centroid into the vertex coordinates.
+   */
+  static rotateMesh(mesh: MeshGeometry, rxDeg: number = 0, ryDeg: number = 0, rzDeg: number = 0): MeshGeometry {
+    if ((!rxDeg && !ryDeg && !rzDeg) || mesh.vertices.length === 0) {
+      return mesh;
+    }
+
+    const radX = (rxDeg * Math.PI) / 180;
+    const radY = (ryDeg * Math.PI) / 180;
+    const radZ = (rzDeg * Math.PI) / 180;
+
+    // Trigonometric components
+    const cx = Math.cos(radX), sx = Math.sin(radX);
+    const cy = Math.cos(radY), sy = Math.sin(radY);
+    const cz = Math.cos(radZ), sz = Math.sin(radZ);
+
+    // Compute bounding box center to rotate around centroid
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
+    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    for (let i = 0; i < mesh.vertices.length; i++) {
+      const [x, y, z] = mesh.vertices[i];
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (z < minZ) minZ = z;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+      if (z > maxZ) maxZ = z;
+    }
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const centerZ = (minZ + maxZ) / 2;
+
+    // Combined Euler rotation matrix R = Rz * Ry * Rx
+    const r00 = cz * cy;
+    const r01 = cz * sy * sx - sz * cx;
+    const r02 = cz * sy * cx + sz * sx;
+
+    const r10 = sz * cy;
+    const r11 = sz * sy * sx + cz * cx;
+    const r12 = sz * sy * cx - cz * sx;
+
+    const r20 = -sy;
+    const r21 = cy * sx;
+    const r22 = cy * cx;
+
+    const rotatedVertices: number[][] = new Array(mesh.vertices.length);
+    for (let i = 0; i < mesh.vertices.length; i++) {
+      const [ox, oy, oz] = mesh.vertices[i];
+      const dx = ox - centerX;
+      const dy = oy - centerY;
+      const dz = oz - centerZ;
+
+      const rx = r00 * dx + r01 * dy + r02 * dz + centerX;
+      const ry = r10 * dx + r11 * dy + r12 * dz + centerY;
+      const rz = r20 * dx + r21 * dy + r22 * dz + centerZ;
+
+      rotatedVertices[i] = [rx, ry, rz];
+    }
+
+    return {
+      vertices: rotatedVertices,
+      faces: mesh.faces,
+    };
+  }
 }
 
 

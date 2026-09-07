@@ -142,7 +142,15 @@
     "cad_placeholder_badge": "📐 CAD / BIM 専用幾何フォーマット",
     "cad_placeholder_title": "{{ext}} CAD 図面 / ソリッドファイルを検出",
     "cad_placeholder_desc": "このフォーマットには高度な B-Rep 幾何学的曲面が含まれており、幾何カーネルによるトポロジ解析と曲面結合が必要です。",
-    "cad_placeholder_hint": "右側の「変換と自動修復を開始」をクリックすると、実際の 3D ソリッドが表示されます。"
+    "cad_placeholder_hint": "右側の「変換と自動修復を開始」をクリックすると、実際の 3D ソリッドが表示されます。",
+    "transform_tool": "回転姿勢",
+    "transform_tool_tip": "3D モデルの X/Y/Z 空間姿勢と回転角度を調整（数値微調整と 3D インタラクティブギズモ対応）"
+  },
+  "transform": {
+    "title": "モデル空間姿勢・回転コントロール",
+    "gizmo_btn": "3D 回転ギズモ",
+    "bake_hint": "回転角度はエクスポート時に 3D 幾何頂点へ自動ベイク（Bake）されます",
+    "reset": "姿勢リセット"
   },
   "audit": {
     "title": "幾何診断・ヘルスレポート (Health Audit)",

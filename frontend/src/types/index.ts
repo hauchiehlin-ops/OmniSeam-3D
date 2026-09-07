@@ -142,6 +142,9 @@ export interface ConversionConfig {
   remove_degenerate: boolean;
   weld_vertices: boolean;
   compress_gltf: boolean;
+  rotation_x?: number;
+  rotation_y?: number;
+  rotation_z?: number;
 }
 
 export type DisplayMode = 'shaded' | 'wireframe' | 'normals' | 'xray' | 'heatmap';

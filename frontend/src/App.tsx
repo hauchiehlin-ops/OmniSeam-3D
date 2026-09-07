@@ -9,6 +9,7 @@ import { Viewer3D } from './components/Viewer3D';
 import { SplitViewer3D } from './components/SplitViewer3D';
 import { SettingsPanel } from './components/SettingsPanel';
 import { TargetFormatCard } from './components/TargetFormatCard';
+import { ModelTransformToolbar } from './components/ModelTransformToolbar';
 import { AuditReport } from './components/AuditReport';
 import { TaskHistory } from './components/TaskHistory';
 import { MeasureTool } from './components/MeasureTool';
@@ -48,6 +49,9 @@ const DEFAULT_CONFIG: ConversionConfig = {
   remove_degenerate: true,
   weld_vertices: true,
   compress_gltf: true,
+  rotation_x: 0,
+  rotation_y: 0,
+  rotation_z: 0,
 };
 
 const PROPRIETARY_CAD_EXTS = new Set([
@@ -82,6 +86,30 @@ export const App: React.FC = () => {
   const [isAutoAdaptiveActive, setIsAutoAdaptiveActive] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [rotation, setRotation] = useState<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 });
+  const [transformToolActive, setTransformToolActive] = useState<boolean>(false);
+  const [showRotationGizmo, setShowRotationGizmo] = useState<boolean>(false);
+
+  const handleRotationChange = (newRot: { x: number; y: number; z: number }) => {
+    setRotation(newRot);
+    setConfig((prev) => ({
+      ...prev,
+      rotation_x: newRot.x,
+      rotation_y: newRot.y,
+      rotation_z: newRot.z,
+    }));
+  };
+
+  const handleResetRotation = () => {
+    const zero = { x: 0, y: 0, z: 0 };
+    setRotation(zero);
+    setConfig((prev) => ({
+      ...prev,
+      rotation_x: 0,
+      rotation_y: 0,
+      rotation_z: 0,
+    }));
+  };
 
   // Conversion Tasks & Inspection
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
@@ -201,6 +229,7 @@ export const App: React.FC = () => {
     setMeasuredDistance(null);
     setMeasureP1(null);
     setMeasureP2(null);
+    setRotation({ x: 0, y: 0, z: 0 });
 
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
 
@@ -283,6 +312,9 @@ export const App: React.FC = () => {
         setMeasureP1(null);
         setMeasureP2(null);
         setAutoEngineNotice(null);
+        setRotation({ x: 0, y: 0, z: 0 });
+        setTransformToolActive(false);
+        setShowRotationGizmo(false);
       }
     }
   };
@@ -643,11 +675,14 @@ export const App: React.FC = () => {
               onOpenArPreview={() => setShowArModal(true)}
               onOpenWindTunnel={() => setShowWindTunnelModal(true)}
               hasRepairedModel={Boolean(repairedPreviewUrl)}
+              transformToolActive={transformToolActive}
+              onToggleTransformTool={() => setTransformToolActive(prev => !prev)}
+              hasRotation={rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0}
             />
 
 
             {/* 3D Canvas Area */}
-            <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px]">
+            <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px] relative">
               {isSplitView && repairedPreviewUrl ? (
                 <SplitViewer3D
                   originalFile={selectedFile}
@@ -663,6 +698,9 @@ export const App: React.FC = () => {
                   }}
                   defectPoints={defectPoints}
                   onModelLoaded={(mesh) => setCurrentModelMesh(mesh)}
+                  rotation={rotation}
+                  onChangeRotation={handleRotationChange}
+                  showRotationGizmo={showRotationGizmo}
                 />
               ) : (
                 <Viewer3D
@@ -680,6 +718,21 @@ export const App: React.FC = () => {
                   defectPoints={defectPoints}
                   title={selectedFile ? selectedFile.name : undefined}
                   onModelLoaded={(mesh) => setCurrentModelMesh(mesh)}
+                  rotation={rotation}
+                  onChangeRotation={handleRotationChange}
+                  showRotationGizmo={showRotationGizmo}
+                />
+              )}
+
+              {/* Model Transform Toolbar (Floating in 3D Canvas) */}
+              {transformToolActive && selectedFile && (
+                <ModelTransformToolbar
+                  rotation={rotation}
+                  onChangeRotation={handleRotationChange}
+                  showRotationGizmo={showRotationGizmo}
+                  onToggleRotationGizmo={() => setShowRotationGizmo((prev) => !prev)}
+                  onResetRotation={handleResetRotation}
+                  onClose={() => setTransformToolActive(false)}
                 />
               )}
             </div>

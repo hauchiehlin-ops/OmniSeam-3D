@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  Wind
+  Wind,
+  Compass
 } from 'lucide-react';
 import { DisplayMode } from '../types';
 
@@ -45,6 +46,9 @@ interface ToolbarProps {
   onOpenArPreview?: () => void;
   onOpenWindTunnel?: () => void;
   hasRepairedModel: boolean;
+  transformToolActive?: boolean;
+  onToggleTransformTool?: () => void;
+  hasRotation?: boolean;
 }
 
 
@@ -73,7 +77,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onResetCamera,
   onOpenArPreview,
   onOpenWindTunnel,
-  hasRepairedModel
+  hasRepairedModel,
+  transformToolActive = false,
+  onToggleTransformTool,
+  hasRotation = false,
 }) => {
 
   const { t } = useTranslation();
@@ -285,6 +292,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <Ruler className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t('viewer.measure_tool')}</span>
           </button>
+
+          {/* Model Transform (Orientation) Toggle */}
+          {onToggleTransformTool && (
+            <button
+              type="button"
+              onClick={onToggleTransformTool}
+              disabled={!hasLoadedModel}
+              title={t('viewer.transform_tool_tip', '調整模型空間旋轉角度與姿態（可烘焙匯出）')}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                !hasLoadedModel
+                  ? 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
+                  : transformToolActive
+                  ? 'bg-brand-500/20 border-brand-400 text-brand-300 shadow-sm shadow-brand-500/20 ring-1 ring-brand-400/40'
+                  : hasRotation
+                  ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
+                  : 'bg-dark-panel border-dark-border text-slate-300 hover:text-white hover:border-slate-500'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-brand-400" />
+              <span className="hidden sm:inline">{t('viewer.transform_tool', '旋轉姿態')}</span>
+              {hasRotation && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              )}
+            </button>
+          )}
 
           {/* Wind Tunnel Fluid Domain Button */}
           {onOpenWindTunnel && (

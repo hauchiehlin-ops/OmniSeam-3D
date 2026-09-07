@@ -142,7 +142,15 @@
     "cad_placeholder_badge": "📐 CAD / BIM 專有幾何格式",
     "cad_placeholder_title": "檢測到 {{ext}} CAD 圖紙與實體檔案",
     "cad_placeholder_desc": "此格式包含高階 B-Rep 邊界曲面或 CAD 圖元，需經由後端/雲端工業幾何內核進行拓撲解析與曲面縫合。",
-    "cad_placeholder_hint": "請點擊右側「開始轉換與自動修復」，系統將即刻解析並於修復視圖呈現真實 3D 幾何實體。"
+    "cad_placeholder_hint": "請點擊右側「開始轉換與自動修復」，系統將即刻解析並於修復視圖呈現真實 3D 幾何實體。",
+    "transform_tool": "旋轉姿態",
+    "transform_tool_tip": "調整 3D 模型 X/Y/Z 空間姿態與旋轉角度（支援數值微調與 3D 互動控制環）"
+  },
+  "transform": {
+    "title": "模型空間姿態與旋轉控制",
+    "gizmo_btn": "3D 互動控制環",
+    "bake_hint": "旋轉角度將於匯出時自動烘焙（Bake）至 3D 幾何實體頂點中",
+    "reset": "重置姿態"
   },
   "audit": {
     "title": "幾何健康體檢報告",

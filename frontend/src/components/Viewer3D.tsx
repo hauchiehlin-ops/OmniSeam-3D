@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
@@ -28,6 +29,9 @@ interface Viewer3DProps {
   badge?: string;
   badgeColor?: 'red' | 'emerald' | 'indigo';
   onModelLoaded?: (object: THREE.Object3D) => void;
+  rotation?: { x: number; y: number; z: number };
+  onChangeRotation?: (rot: { x: number; y: number; z: number }) => void;
+  showRotationGizmo?: boolean;
 }
 
 interface CadPlaceholderInfo {
@@ -49,7 +53,10 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   title,
   badge,
   badgeColor = 'indigo',
-  onModelLoaded
+  onModelLoaded,
+  rotation = { x: 0, y: 0, z: 0 },
+  onChangeRotation,
+  showRotationGizmo = false,
 }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +64,10 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const transformControlsRef = useRef<TransformControls | null>(null);
+  const isDraggingGizmoRef = useRef(false);
+  const onChangeRotationRef = useRef(onChangeRotation);
+  onChangeRotationRef.current = onChangeRotation;
   const currentMeshRef = useRef<THREE.Object3D | null>(null);
   const clippingPlaneRef = useRef<THREE.Plane | null>(null);
   
@@ -118,6 +129,31 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
     const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), sectionOffset);
     clippingPlaneRef.current = clipPlane;
 
+    // 3D Rotation Transform Controls (Scheme B)
+    const transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.setMode('rotate');
+    transformControls.size = 0.85;
+    transformControls.visible = false;
+    transformControls.enabled = false;
+    scene.add(transformControls);
+    transformControlsRef.current = transformControls;
+
+    transformControls.addEventListener('dragging-changed', (event: any) => {
+      isDraggingGizmoRef.current = Boolean(event.value);
+      if (controlsRef.current) {
+        controlsRef.current.enabled = !event.value;
+      }
+    });
+
+    transformControls.addEventListener('change', () => {
+      if (currentMeshRef.current && isDraggingGizmoRef.current) {
+        const rx = Math.round(THREE.MathUtils.radToDeg(currentMeshRef.current.rotation.x) * 10) / 10;
+        const ry = Math.round(THREE.MathUtils.radToDeg(currentMeshRef.current.rotation.y) * 10) / 10;
+        const rz = Math.round(THREE.MathUtils.radToDeg(currentMeshRef.current.rotation.z) * 10) / 10;
+        onChangeRotationRef.current?.({ x: rx, y: ry, z: rz });
+      }
+    });
+
     let animId: number;
     const animate = () => {
       animId = requestAnimationFrame(animate);
@@ -139,6 +175,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
+      transformControls.dispose();
       renderer.dispose();
     };
   }, []);
@@ -161,6 +198,9 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
     // Clean previous model
     if (currentMeshRef.current) {
+      if (transformControlsRef.current) {
+        transformControlsRef.current.detach();
+      }
       scene.remove(currentMeshRef.current);
       currentMeshRef.current = null;
     }
@@ -178,11 +218,25 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
         object.scale.setScalar(scale);
       }
 
+      if (rotation) {
+        object.rotation.set(
+          THREE.MathUtils.degToRad(rotation.x),
+          THREE.MathUtils.degToRad(rotation.y),
+          THREE.MathUtils.degToRad(rotation.z)
+        );
+      }
+
       scene.add(object);
       currentMeshRef.current = object;
       setCadPlaceholder(null);
       setIsLoading(false);
       onModelLoaded?.(object);
+
+      if (showRotationGizmo && transformControlsRef.current) {
+        transformControlsRef.current.attach(object);
+        transformControlsRef.current.visible = true;
+        transformControlsRef.current.enabled = true;
+      }
 
       if (cameraRef.current && controlsRef.current) {
         cameraRef.current.position.set(40, 35, 60);
@@ -336,6 +390,33 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
       setIsLoading(false);
     }
   }, [modelUrl, modelFile, highlightColor]);
+
+  // Sync mesh rotation from rotation prop (e.g. Scheme A quick flips / input)
+  useEffect(() => {
+    if (!currentMeshRef.current || isDraggingGizmoRef.current) return;
+    if (rotation) {
+      currentMeshRef.current.rotation.set(
+        THREE.MathUtils.degToRad(rotation.x),
+        THREE.MathUtils.degToRad(rotation.y),
+        THREE.MathUtils.degToRad(rotation.z)
+      );
+    }
+  }, [rotation?.x, rotation?.y, rotation?.z]);
+
+  // Sync TransformControls Gizmo attachment (Scheme B)
+  useEffect(() => {
+    const tc = transformControlsRef.current;
+    if (!tc) return;
+    if (showRotationGizmo && currentMeshRef.current) {
+      tc.attach(currentMeshRef.current);
+      tc.visible = true;
+      tc.enabled = true;
+    } else {
+      tc.detach();
+      tc.visible = false;
+      tc.enabled = false;
+    }
+  }, [showRotationGizmo]);
 
   // Update Materials based on DisplayMode
   useEffect(() => {

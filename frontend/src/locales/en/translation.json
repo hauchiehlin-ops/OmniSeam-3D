@@ -142,7 +142,15 @@
     "cad_placeholder_badge": "📐 CAD / BIM Proprietary Geometry",
     "cad_placeholder_title": "Detected {{ext}} CAD Model / Drawing",
     "cad_placeholder_desc": "This format contains advanced B-Rep boundary surfaces or CAD drawing entities requiring geometric kernel tessellation and topological sewing.",
-    "cad_placeholder_hint": "Click \"Start Conversion & Auto-Healing\" on the right to parse and render the true 3D solid geometry."
+    "cad_placeholder_hint": "Click \"Start Conversion & Auto-Healing\" on the right to parse and render the true 3D solid geometry.",
+    "transform_tool": "Rotate & Orient",
+    "transform_tool_tip": "Adjust 3D model orientation & rotation angles (supports numerical adjustments and interactive 3D rotation gizmo)"
+  },
+  "transform": {
+    "title": "Model Orientation & Rotation",
+    "gizmo_btn": "3D Interactive Gizmo",
+    "bake_hint": "Rotation angles will be automatically baked into the 3D solid mesh vertices upon export",
+    "reset": "Reset Orientation"
   },
   "audit": {
     "title": "Geometric Health Audit Report",
