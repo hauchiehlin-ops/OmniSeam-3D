@@ -8,6 +8,7 @@ import { Toolbar } from './components/Toolbar';
 import { Viewer3D } from './components/Viewer3D';
 import { SplitViewer3D } from './components/SplitViewer3D';
 import { SettingsPanel } from './components/SettingsPanel';
+import { TargetFormatCard } from './components/TargetFormatCard';
 import { AuditReport } from './components/AuditReport';
 import { TaskHistory } from './components/TaskHistory';
 import { MeasureTool } from './components/MeasureTool';
@@ -592,8 +593,6 @@ export const App: React.FC = () => {
       />
 
       <Navbar 
-        onOpenAudit={() => setShowAuditModal(true)} 
-        hasAudit={Boolean(activeTask?.report || inspectData)}
         engineMode={engineMode}
         onOpenBackendSettings={() => setShowBackendModal(true)}
         onOpenManual={() => setShowManualModal(true)}
@@ -706,6 +705,12 @@ export const App: React.FC = () => {
               isLoading={isProcessing}
             />
 
+            <TargetFormatCard
+              targetFormat={config.target_format}
+              onChangeTargetFormat={(fmt) => handleConfigChange({ ...config, target_format: fmt })}
+              disabled={isProcessing}
+            />
+
             <SettingsPanel
               config={config}
               onChangeConfig={handleConfigChange}
@@ -718,6 +723,7 @@ export const App: React.FC = () => {
               adaptiveIntent={adaptiveIntent}
               isAutoAdaptiveActive={isAutoAdaptiveActive}
               onResetToAdaptive={handleResetToAdaptive}
+              selectedFile={selectedFile}
               onChangeEngineMode={(m) => {
                 setIsAutoAdaptiveActive(false);
                 setEngineMode(m);

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UploadCloud, FileType, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
-import { apiClient } from '../api/client';
+import { UploadCloud } from 'lucide-react';
 
 interface DropzoneProps {
   onFileSelected: (file: File) => void;
@@ -59,15 +58,6 @@ export const Dropzone: React.FC<DropzoneProps> = ({
     }
   };
 
-  const handleLoadSample = async (type: 'broken' | 'bracket') => {
-    try {
-      const { file } = await apiClient.getSampleModel(type);
-      onFileSelected(file);
-    } catch (err) {
-      console.error("Failed to load sample:", err);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-3">
       <div
@@ -121,59 +111,6 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               {fmt}
             </span>
           ))}
-        </div>
-      </div>
-
-      {/* Benchmark samples guide */}
-      <div className="flex flex-col gap-2 p-3 bg-dark-surface border border-dark-border rounded-xl">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-300 font-semibold flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            {t('dropzone.sample_models')}
-          </span>
-          <span className="text-[11px] text-slate-500">{t('dropzone.click_to_load_test')}</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {/* Sample 1: Defective */}
-          <button
-            type="button"
-            onClick={() => handleLoadSample('broken')}
-            disabled={isLoading}
-            className="group flex flex-col items-start p-2.5 rounded-lg bg-dark-panel border border-dark-border hover:border-rose-500/50 hover:bg-rose-500/5 text-left transition-all"
-          >
-            <div className="flex items-center justify-between w-full mb-1">
-              <span className="text-xs font-bold text-rose-300 group-hover:text-rose-200 flex items-center gap-1">
-                🔴 {t('dropzone.sample_broken')}
-              </span>
-              <span className="px-1.5 py-0.5 text-[9px] rounded bg-rose-500/10 border border-rose-500/30 text-rose-300">
-                {t('dropzone.sample_broken_tag')}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 leading-snug">
-              {t('dropzone.sample_broken_desc')}
-            </p>
-          </button>
-
-          {/* Sample 2: Bracket */}
-          <button
-            type="button"
-            onClick={() => handleLoadSample('bracket')}
-            disabled={isLoading}
-            className="group flex flex-col items-start p-2.5 rounded-lg bg-dark-panel border border-dark-border hover:border-brand-500/50 hover:bg-brand-500/5 text-left transition-all"
-          >
-            <div className="flex items-center justify-between w-full mb-1">
-              <span className="text-xs font-bold text-brand-300 group-hover:text-brand-200 flex items-center gap-1">
-                ⚙️ {t('dropzone.sample_bracket')}
-              </span>
-              <span className="px-1.5 py-0.5 text-[9px] rounded bg-brand-500/10 border border-brand-500/30 text-brand-300">
-                {t('dropzone.sample_bracket_tag')}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 leading-snug">
-              {t('dropzone.sample_bracket_desc')}
-            </p>
-          </button>
         </div>
       </div>
     </div>

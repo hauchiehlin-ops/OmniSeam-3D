@@ -38,36 +38,8 @@ interface SettingsPanelProps {
   adaptiveIntent?: AdaptiveIntentResult | null;
   isAutoAdaptiveActive?: boolean;
   onResetToAdaptive?: () => void;
+  selectedFile?: File | null;
 }
-
-const getFormatGroups = (t: (key: string) => string): { groupName: string; options: { value: TargetFormat; label: string; desc: string }[] }[] => [
-  {
-    groupName: t('settings.format_group_cad'),
-    options: [
-      { value: 'step', label: 'STEP (.step / .stp)', desc: t('settings.fmt_step_desc') },
-      { value: 'iges', label: 'IGES (.iges / .igs)', desc: t('settings.fmt_iges_desc') },
-      { value: 'brep', label: 'BREP (.brep)', desc: t('settings.fmt_brep_desc') },
-      { value: 'dxf', label: 'DXF (.dxf)', desc: t('settings.fmt_dxf_desc') },
-    ]
-  },
-  {
-    groupName: t('settings.format_group_web'),
-    options: [
-      { value: 'glb', label: 'GLB (Binary glTF)', desc: t('settings.fmt_glb_desc') },
-      { value: 'gltf', label: 'glTF (JSON + Bin)', desc: t('settings.fmt_gltf_desc') },
-    ]
-  },
-  {
-    groupName: t('settings.format_group_mesh'),
-    options: [
-      { value: '3mf', label: '3MF (3D Manufacturing)', desc: t('settings.fmt_3mf_desc') },
-      { value: 'stl', label: 'STL (Stereolithography)', desc: t('settings.fmt_stl_desc') },
-      { value: 'obj', label: 'OBJ (Wavefront)', desc: t('settings.fmt_obj_desc') },
-      { value: 'ply', label: 'PLY (Polygon File)', desc: t('settings.fmt_ply_desc') },
-      { value: 'off', label: 'OFF (Object File)', desc: t('settings.fmt_off_desc') },
-    ]
-  }
-];
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   config,
@@ -83,9 +55,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   adaptiveIntent,
   isAutoAdaptiveActive = true,
   onResetToAdaptive,
+  selectedFile,
 }) => {
   const { t } = useTranslation();
-  const formatGroups = getFormatGroups(t);
   const [isExpertOpen, setIsExpertOpen] = useState(false);
 
   const update = <K extends keyof ConversionConfig>(key: K, value: ConversionConfig[K]) => {
@@ -207,50 +179,54 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
 
         {/* Auto Engine Notice Banner */}
-        {autoEngineNotice && (
-          <div className="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-2 text-xs">
-            <span className="p-1 rounded bg-indigo-500/20 text-indigo-300 shrink-0 mt-0.5">💡</span>
-            <div className="space-y-0.5">
-              <div className="font-semibold text-indigo-200">
-                {t('settings.auto_engine_title', { 
-                  mode: autoEngineNotice.mode === 'server' ? t('settings.auto_engine_mode_server') : t('settings.auto_engine_mode_client') 
-                })}
-              </div>
-              <p className="text-[11px] text-slate-400">
-                {autoEngineNotice.reason}
-              </p>
+        <div className={`p-2.5 rounded-lg border flex items-start gap-2 text-xs transition-all ${
+          engineMode === 'server'
+            ? 'bg-indigo-950/40 border-indigo-500/30'
+            : 'bg-amber-950/20 border-amber-500/30'
+        }`}>
+          <span className={`p-1 rounded shrink-0 mt-0.5 text-xs ${
+            engineMode === 'server' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-amber-500/20 text-amber-300'
+          }`}>
+            {engineMode === 'server' ? '☁️' : '⚡'}
+          </span>
+          <div className="space-y-0.5">
+            <div className={`font-semibold ${engineMode === 'server' ? 'text-indigo-200' : 'text-amber-200'}`}>
+              {t('settings.auto_engine_title', { 
+                mode: engineMode === 'server' ? t('settings.auto_engine_mode_server') : t('settings.auto_engine_mode_client') 
+              })}
             </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              {(() => {
+                const ext = selectedFile?.name.split('.').pop()?.toLowerCase() || '';
+                if (engineMode === 'server') {
+                  if (['step', 'stp', 'iges', 'igs', 'brep', 'dxf'].includes(ext)) {
+                    return t('settings.auto_engine_cad_std_server_reason', { ext });
+                  }
+                  if (['sldprt', 'sldasm', 'ipt', 'iam', 'catpart', 'catproduct', 'prt', 'x_t', 'x_b', 'ifc'].includes(ext)) {
+                    return t('settings.auto_engine_cad_prop_reason', { ext });
+                  }
+                  if (ext) {
+                    return t('settings.auto_engine_server_mesh_reason', { ext });
+                  }
+                  return t('settings.auto_engine_server_general_reason');
+                } else {
+                  if (['step', 'stp', 'iges', 'igs', 'brep', 'dxf'].includes(ext)) {
+                    return t('settings.auto_engine_cad_std_client_reason', { ext });
+                  }
+                  if (ext) {
+                    return t('settings.auto_engine_mesh_reason', { ext });
+                  }
+                  return t('settings.auto_engine_client_general_reason');
+                }
+              })()}
+            </p>
           </div>
-        )}
+        </div>
 
         {/* Engine mode concise hint */}
         <p className="text-[11px] text-slate-400 leading-relaxed">
           {engineMode === 'client' ? t('settings.mode_client_tip') : t('settings.mode_server_tip')}
         </p>
-      </div>
-
-      {/* Target Export Format */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-          <span>{t('settings.target_format')}</span>
-          <span className="text-[10px] text-brand-400 font-medium">{t('settings.target_format_hint')}</span>
-        </label>
-        <select
-          value={config.target_format}
-          onChange={(e) => update('target_format', e.target.value as TargetFormat)}
-          disabled={disabled}
-          className="w-full bg-dark-panel border border-dark-border rounded-xl px-3 py-2.5 text-xs font-medium text-slate-100 focus:outline-none focus:border-brand-500 transition-all cursor-pointer shadow-inner"
-        >
-          {formatGroups.map((group) => (
-            <optgroup key={group.groupName} label={group.groupName} className="bg-dark-panel text-slate-400 font-bold">
-              {group.options.map((fmt) => (
-                <option key={fmt.value} value={fmt.value} className="bg-dark-surface text-slate-100 font-normal">
-                  {fmt.label} — {fmt.desc}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
       </div>
 
       {/* AI Smart Adaptive Intent Card */}

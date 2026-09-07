@@ -1,14 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Activity, Zap, Cloud, Settings, Server } from 'lucide-react';
+import { Zap, Cloud, Settings, Server } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import logoImg from '../assets/logo.png';
 import { EngineMode, apiClient } from '../api/client';
 import { APP_VERSION } from '../version';
 
 interface NavbarProps {
-  onOpenAudit?: () => void;
-  hasAudit?: boolean;
   engineMode: EngineMode;
   onOpenBackendSettings: () => void;
   onOpenManual: () => void;
@@ -16,8 +14,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  onOpenAudit,
-  hasAudit,
   engineMode,
   onOpenBackendSettings,
   onOpenManual,
@@ -113,16 +109,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="hidden sm:inline">{getBackendDisplayName()}</span>
           <Settings className="w-3 h-3 text-slate-400 group-hover:text-slate-200 group-hover:rotate-45 transition-all" />
         </button>
-
-        {hasAudit && (
-          <button
-            onClick={onOpenAudit}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600/20 border border-brand-500/40 text-brand-300 text-xs font-medium hover:bg-brand-600/30 transition-all"
-          >
-            <Activity className="w-3.5 h-3.5 text-brand-400" />
-            <span className="hidden sm:inline">{t('audit.title')}</span>
-          </button>
-        )}
 
         <LanguageSwitcher />
       </div>
