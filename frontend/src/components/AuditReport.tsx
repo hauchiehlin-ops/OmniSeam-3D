@@ -118,8 +118,8 @@ export const AuditReport: React.FC<AuditReportProps> = ({
                   {report
                     ? isZh ? report.status_summary_zh_TW : report.status_summary_en
                     : isWatertight
-                    ? "Model topology is completely closed without holes."
-                    : "Boundary holes or non-manifold edges detected."}
+                    ? t('audit.topology_clean_desc', 'Model topology is completely closed without holes.')
+                    : t('audit.topology_defects_desc', 'Boundary holes or non-manifold edges detected.')}
                 </p>
               </div>
             </div>
@@ -148,10 +148,10 @@ export const AuditReport: React.FC<AuditReportProps> = ({
                   <span>{t('audit.zero_thickness_solutions_title', '🛠️ 徹底解決方案（2 種途徑）：')}</span>
                 </div>
                 <div className="text-slate-300 pl-1">
-                  1. <b>切換至雲端伺服器 (Cloud Server)</b>：於右上角切換至【Cloud Server】（免費 16GB 節點），後端將自動調用 Tier 3 體積 Marching Cubes 深度實體化演算法，強制重構為 100% 封閉水密實體。
+                  {t('audit.zero_thickness_sol1', '1. 切換至雲端伺服器 (Cloud Server)：於右上角切換至【Cloud Server】（免費 16GB 節點），後端將自動調用 Tier 3 體積 Marching Cubes 深度實體化演算法，強制重構為 100% 封閉水密實體。')}
                 </div>
                 <div className="text-slate-300 pl-1">
-                  2. <b>CAD 原模加厚</b>：在原始建模軟體（SolidWorks, Rhino, Blender 等）中為葉片執行「加厚 (Thicken)」或「實體化 (Solidify)」並指定厚度（如 1.0mm）後重新匯出。
+                  {t('audit.zero_thickness_sol2', '2. CAD 原模加厚：在原始建模軟體（SolidWorks, Rhino, Blender 等）中為葉片執行「加厚 (Thicken)」或「實體化 (Solidify)」並指定厚度（如 1.0mm）後重新匯出。')}
                 </div>
               </div>
             </div>
@@ -304,9 +304,12 @@ export const AuditReport: React.FC<AuditReportProps> = ({
 
               {((report?.slicer_readiness?.warnings?.length ?? inspectData?.slicer_readiness?.warnings?.length ?? 0) > 0) && (
                 <div className="text-[11px] text-amber-300/90 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
-                  {(report?.slicer_readiness?.warnings ?? inspectData?.slicer_readiness?.warnings ?? []).map((w, idx) => (
-                    <p key={idx}>⚠️ {w}</p>
-                  ))}
+                  {(report?.slicer_readiness?.warnings ?? inspectData?.slicer_readiness?.warnings ?? []).map((w, idx) => {
+                    const translatedW = w.includes('Non-Watertight') || w.includes('非水密')
+                      ? t('slicer.warning_non_watertight', w)
+                      : w;
+                    return <p key={idx}>⚠️ {translatedW}</p>;
+                  })}
                 </div>
               )}
             </div>

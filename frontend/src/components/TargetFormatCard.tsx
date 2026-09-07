@@ -50,11 +50,11 @@ export const TargetFormatCard: React.FC<TargetFormatCardProps> = ({
 
   // Quick shortcuts for most popular formats
   const quickFormats: { value: TargetFormat; label: string; badge: string }[] = [
-    { value: 'stl', label: 'STL', badge: '3D 列印' },
-    { value: 'step', label: 'STEP', badge: '工業 CAD' },
-    { value: '3mf', label: '3MF', badge: '彩色/結構' },
-    { value: 'glb', label: 'GLB', badge: '網頁/AR' },
-    { value: 'obj', label: 'OBJ', badge: '通用網格' },
+    { value: 'stl', label: 'STL', badge: t('settings.quick_badge_3dprint', '3D 列印') },
+    { value: 'step', label: 'STEP', badge: t('settings.quick_badge_cad', '工業 CAD') },
+    { value: '3mf', label: '3MF', badge: t('settings.quick_badge_color_struct', '彩色/結構') },
+    { value: 'glb', label: 'GLB', badge: t('settings.quick_badge_web_ar', '網頁/AR') },
+    { value: 'obj', label: 'OBJ', badge: t('settings.quick_badge_mesh', '通用網格') },
   ];
 
   // Find currently selected option description
@@ -98,13 +98,13 @@ export const TargetFormatCard: React.FC<TargetFormatCardProps> = ({
 
           <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-brand-300 bg-brand-900/30 border border-brand-500/30 rounded-lg">
             <Sparkles className="w-3 h-3 text-amber-400" />
-            <span>全格式互轉</span>
+            <span>{t('settings.all_formats_interchangeable', '全格式互轉')}</span>
           </span>
         </div>
 
         {/* Quick Format Pills */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-slate-400 font-medium mr-1">快捷切換：</span>
+          <span className="text-[11px] text-slate-400 font-medium mr-1">{t('settings.quick_switch', '快捷切換：')}</span>
           {quickFormats.map((qf) => {
             const isSelected = targetFormat === qf.value;
             return (

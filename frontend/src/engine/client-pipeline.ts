@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { FormatParsers } from './format-parsers';
 import { FormatExporters } from './format-exporters';
 import { GeometricKernel } from './geometric-kernel';
@@ -12,15 +13,13 @@ import {
   TargetFormat
 } from '../types';
 
-
-
 export class ClientPipeline {
   private static createdObjectUrls: string[] = [];
 
   /**
    * Inspects 3D model geometry directly in-browser.
    */
-  static async inspectModel(file: File, lang: string = 'en'): Promise<InspectResponse> {
+  static async inspectModel(file: File, _lang: string = 'en'): Promise<InspectResponse> {
     const mesh = await FormatParsers.parseFile(file);
     const metrics = GeometricKernel.computeMetrics(mesh);
     const defects = GeometricKernel.detectDefects(mesh);
@@ -32,18 +31,17 @@ export class ClientPipeline {
     if (defects.degenerate_faces > 0) score -= Math.min(15, defects.degenerate_faces);
     score = Math.max(0, Math.min(100, score));
 
-    const isZh = lang.startsWith('zh');
     const suggestions = [];
     if (!metrics.is_watertight || defects.open_boundary_loops > 0) {
       suggestions.push({
         action: 'fill_holes',
-        label: isZh ? '建議啟用自動邊界孔洞補平以建構封閉實體' : 'Enable auto-hole filling to achieve watertight solid',
+        label: i18n.t('audit.suggest_fill_holes', '建議啟用自動邊界孔洞補平以建構封閉實體'),
       });
     }
     if (defects.non_manifold_edges > 0) {
       suggestions.push({
         action: 'fix_non_manifold',
-        label: isZh ? '建議修復非流形幾何缺陷' : 'Resolve non-manifold edges for 3D slicing',
+        label: i18n.t('audit.suggest_fix_non_manifold', '建議修復非流形幾何缺陷'),
       });
     }
 
@@ -85,7 +83,6 @@ export class ClientPipeline {
   ): Promise<TaskResponse> {
     const startTime = performance.now();
     const taskId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const isZh = lang.startsWith('zh');
 
     const update = (status: TaskStatus, progress: number, stepText: string): TaskResponse => {
       const task: TaskResponse = {
@@ -102,7 +99,7 @@ export class ClientPipeline {
     };
 
     // Stage 1: Analyzing
-    update('analyzing', 25, isZh ? '正在分析幾何拓撲 (純前端本機)...' : 'Analyzing geometry (Local Worker)...');
+    update('analyzing', 25, i18n.t('tasks.step_analyzing', '正在分析幾何拓撲 (純前端本機)...'));
     await sleep(60);
 
     const rawMesh = await FormatParsers.parseFile(file);
@@ -110,7 +107,7 @@ export class ClientPipeline {
     const defectsFound = GeometricKernel.detectDefects(rawMesh);
 
     // Stage 2: Repairing (with Pass-Through Gating)
-    update('repairing', 50, isZh ? '正在執行拓撲診斷與保護修復...' : 'Topological diagnosis & fidelity repair...');
+    update('repairing', 50, i18n.t('tasks.step_repairing', '正在執行拓撲診斷與保護修復...'));
     await sleep(60);
 
     const isAlreadyClean = origMetrics.is_watertight && 
@@ -161,7 +158,7 @@ export class ClientPipeline {
     }
 
     // Stage 3: Converting to Target Format
-    update('converting', 75, isZh ? '正在封裝目標格式...' : 'Exporting target 3D asset...');
+    update('converting', 75, i18n.t('tasks.step_converting', '正在封裝目標格式...'));
     await sleep(40);
 
     const targetBlob = FormatExporters.exportBlob(repairedMesh, config.target_format);
@@ -169,7 +166,7 @@ export class ClientPipeline {
     this.createdObjectUrls.push(downloadUrl);
 
     // Stage 4: WebGL Preview GLB Generation
-    update('optimizing', 90, isZh ? '正在生成 WebGL 預覽串流...' : 'Generating WebGL Preview GLB...');
+    update('optimizing', 90, i18n.t('tasks.step_optimizing', '正在生成 WebGL 預覽串流...'));
     await sleep(30);
 
     const previewBlob = FormatExporters.exportGLB(repairedMesh);
@@ -219,7 +216,7 @@ export class ClientPipeline {
       filename: file.name,
       status: 'completed',
       progress: 100,
-      current_step: isZh ? '轉換與幾何修復完成 (純本機)' : 'Conversion & Auto-Healing Completed (Local)',
+      current_step: i18n.t('tasks.step_completed', '轉換與幾何修復完成 (純本機)'),
       target_format: config.target_format,
       created_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),

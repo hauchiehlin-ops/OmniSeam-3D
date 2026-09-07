@@ -161,9 +161,9 @@ export const WindTunnelModal: React.FC<WindTunnelModalProps> = ({
                 className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500">
-                <span>0.5x (緊密)</span>
-                <span>2.0x (標準)</span>
-                <span>10.0x (充裕)</span>
+                <span>0.5x ({t('wind_tunnel.tight', '緊密')})</span>
+                <span>2.0x ({t('wind_tunnel.standard', '標準')})</span>
+                <span>10.0x ({t('wind_tunnel.generous', '充裕')})</span>
               </div>
             </div>
 
@@ -186,7 +186,7 @@ export const WindTunnelModal: React.FC<WindTunnelModalProps> = ({
               />
               <div className="flex justify-between text-[10px] text-slate-500">
                 <span>1.0x</span>
-                <span>5.0x (標準尾流)</span>
+                <span>5.0x ({t('wind_tunnel.standard_wake', '標準尾流')})</span>
                 <span>20.0x</span>
               </div>
             </div>
@@ -210,7 +210,7 @@ export const WindTunnelModal: React.FC<WindTunnelModalProps> = ({
               />
               <div className="flex justify-between text-[10px] text-slate-500">
                 <span>0.5x</span>
-                <span>2.0x (標準無干擾)</span>
+                <span>2.0x ({t('wind_tunnel.standard_no_interf', '標準無干擾')})</span>
                 <span>6.0x</span>
               </div>
             </div>

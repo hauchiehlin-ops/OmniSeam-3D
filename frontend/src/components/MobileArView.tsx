@@ -60,7 +60,7 @@ export const MobileArView: React.FC<MobileArViewProps> = ({
           const url = task.preview_url || apiClient.getPreviewUrl(taskId);
           setModelUrl(url);
         } else {
-          setError("未提供有效的 AR 會話或模型代碼");
+          setError(t('ar.invalid_session_error', '未提供有效的 AR 會話或模型代碼'));
         }
       } catch (err: any) {
         console.error("Failed to load AR session:", err);
@@ -163,7 +163,7 @@ export const MobileArView: React.FC<MobileArViewProps> = ({
             {/* Gesture Hint Overlay */}
             <div className="absolute top-4 left-4 pointer-events-none px-3 py-1.5 rounded-xl bg-dark-panel/80 backdrop-blur-md border border-dark-border text-[11px] text-slate-300 flex items-center gap-2 shadow-lg">
               <Eye className="w-3.5 h-3.5 text-brand-400" />
-              <span>單指旋轉 · 雙指縮放檢視</span>
+              <span>{t('ar.gesture_hint', '單指旋轉 · 雙指縮放檢視')}</span>
             </div>
           </div>
         )}
@@ -180,7 +180,7 @@ export const MobileArView: React.FC<MobileArViewProps> = ({
               className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:opacity-95 disabled:opacity-50 text-white text-sm font-bold shadow-xl shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-98"
             >
               <Sparkles className="w-4 h-4" />
-              <span>{isLaunchingAr ? '正在準備 AR 實境...' : t('ar.launch_ios')}</span>
+              <span>{isLaunchingAr ? t('ar.preparing_ar', '正在準備 AR 實境...') : t('ar.launch_ios')}</span>
             </button>
           )}
 

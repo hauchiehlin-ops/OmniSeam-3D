@@ -22,7 +22,10 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  RotateCw,
+  Smartphone,
+  Grid
 } from 'lucide-react';
 
 export type ManualTab = 'quickstart' | 'qa' | 'fidelity' | 'viewport' | 'engine' | 'slicer' | 'commands';
@@ -227,6 +230,8 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                         { id: 'qa-case-8', labelKey: 'manual.qa_case8_toc', badgeKey: 'manual.qa_case8_badge' },
                         { id: 'qa-case-9', labelKey: 'manual.qa_case9_toc', badgeKey: 'manual.qa_case9_badge' },
                         { id: 'qa-case-10', labelKey: 'manual.qa_case10_toc', badgeKey: 'manual.qa_case10_badge' },
+                        { id: 'qa-case-11', labelKey: 'manual.qa_case11_toc', badgeKey: 'manual.qa_case11_badge' },
+                        { id: 'qa-case-12', labelKey: 'manual.qa_case12_toc', badgeKey: 'manual.qa_case12_badge' },
                       ].map((item, idx) => (
                         <option key={item.id} value={item.id} className="bg-dark-surface text-slate-200 py-1.5">
                           {`Case ${idx + 1}: ${t(item.labelKey)} [${t(item.badgeKey)}]`}
@@ -730,6 +735,113 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* CASE 11: 3D Model Rotation & Permanent Vertex Baking */}
+              <div id="qa-case-11" className="p-4.5 rounded-2xl bg-dark-panel border border-teal-500/30 space-y-3.5 shadow-md scroll-mt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40">
+                    {t('manual.qa_case11_badge')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('qa-top')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[11px] text-slate-400 hover:text-brand-300 transition-colors"
+                  >
+                    {t('manual.qa_back_to_top')}
+                  </button>
+                </div>
+                <h4 className="font-bold text-slate-100 text-sm sm:text-base leading-snug text-teal-200">
+                  {t('manual.qa_case11_title')}
+                </h4>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-dark-border space-y-2">
+                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-teal-400 shrink-0" />
+                    <span>{t('manual.qa_case11_why_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-300">
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case11_reason1')}
+                    </p>
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case11_reason2')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.qa_case11_solutions_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case11_sol1')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case11_sol2')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case11_sol3')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CASE 12: Cross-Device AR Preview & Mobile Troubleshooting */}
+              <div id="qa-case-12" className="p-4.5 rounded-2xl bg-dark-panel border border-cyan-500/30 space-y-3.5 shadow-md scroll-mt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                    {t('manual.qa_case12_badge')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('qa-top')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-[11px] text-slate-400 hover:text-brand-300 transition-colors"
+                  >
+                    {t('manual.qa_back_to_top')}
+                  </button>
+                </div>
+                <h4 className="font-bold text-slate-100 text-sm sm:text-base leading-snug text-cyan-200">
+                  {t('manual.qa_case12_title')}
+                </h4>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-dark-border space-y-2">
+                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span>{t('manual.qa_case12_why_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-300">
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case12_reason1')}
+                    </p>
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case12_reason2')}
+                    </p>
+                    <p className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60 leading-relaxed">
+                      {t('manual.qa_case12_reason3')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{t('manual.qa_case12_solutions_title')}</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-200">
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case12_sol1')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case12_sol2')}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
+                      {t('manual.qa_case12_sol3')}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -903,6 +1015,39 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                   <li>• {t('manual.tool_measure_bullet')}</li>
                   <li>• {t('manual.tool_section_bullet')}</li>
                 </ul>
+              </div>
+
+              {/* NEW: Transform & Vertex Baking */}
+              <div className="p-4 rounded-2xl bg-dark-panel border border-teal-500/30 space-y-2">
+                <h3 className="font-bold text-sm text-teal-300 flex items-center gap-2">
+                  <RotateCw className="w-4 h-4 text-teal-400" />
+                  <span>{t('manual.tool_transform_title')}</span>
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('manual.tool_transform_desc')}
+                </p>
+              </div>
+
+              {/* NEW: Multi-Axis Coordinate Systems & Compass */}
+              <div className="p-4 rounded-2xl bg-dark-panel border border-indigo-500/30 space-y-2">
+                <h3 className="font-bold text-sm text-indigo-300 flex items-center gap-2">
+                  <Grid className="w-4 h-4 text-indigo-400" />
+                  <span>{t('manual.tool_coords_title')}</span>
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('manual.tool_coords_desc')}
+                </p>
+              </div>
+
+              {/* NEW: AR Preview */}
+              <div className="p-4 rounded-2xl bg-dark-panel border border-cyan-500/30 space-y-2">
+                <h3 className="font-bold text-sm text-cyan-300 flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-cyan-400" />
+                  <span>{t('manual.tool_ar_title')}</span>
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {t('manual.tool_ar_desc')}
+                </p>
               </div>
             </div>
           )}

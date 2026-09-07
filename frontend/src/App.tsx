@@ -158,20 +158,12 @@ export const App: React.FC = () => {
   // Dynamic SEO & Title Synchronization
   useEffect(() => {
     document.documentElement.lang = i18n.language;
-    const isZh = i18n.language.startsWith('zh');
-    document.title = isZh
-      ? 'OmniSeam 3D - 通用 3D 模型格式轉換與幾何自動修復引擎 (100% 離線隱私)'
-      : 'OmniSeam 3D - Universal 3D Model Converter & Auto-Healing Engine';
+    document.title = `${t('app_title', 'OmniSeam 3D')} | ${t('app_subtitle', 'Universal 3D Model Converter')}`;
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute(
-        'content',
-        isZh
-          ? '企業級 CAD (STEP, IGES, SolidWorks)、網格 (STL, 3MF, OBJ) 與 Web (GLB) 雙向互轉，零授權費（100% FOSS）與自動拓撲破面修復。'
-          : 'Free enterprise-grade bidirectional 3D conversion & automated mesh healing for CAD (STEP, IGES, SolidWorks), Web (GLB/glTF), and 3D Printing (STL, 3MF, OBJ) with 100% offline privacy and zero license fees.'
-      );
+      metaDesc.setAttribute('content', t('tagline'));
     }
-  }, [i18n.language]);
+  }, [i18n.language, t]);
 
   // AI Smart Adaptive Intent Synthesis
   useEffect(() => {

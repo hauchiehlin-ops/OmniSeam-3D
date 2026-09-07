@@ -9,7 +9,9 @@ import {
   FileCode, 
   CheckCircle2, 
   HeartHandshake,
-  Database
+  Database,
+  Smartphone,
+  RotateCw
 } from 'lucide-react';
 
 interface PrivacyPolicyModalProps {
@@ -65,7 +67,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             </p>
           </div>
 
-          {/* 4 Pillars of Security */}
+          {/* Pillars of Security */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-4 rounded-2xl bg-dark-panel border border-dark-border flex flex-col gap-2">
               <div className="flex items-center gap-2 text-brand-400 font-bold text-xs">
@@ -106,6 +108,27 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 {t('privacy.pillar4_desc')}
               </p>
             </div>
+
+            <div className="p-4 rounded-2xl bg-dark-panel border border-cyan-500/30 flex flex-col gap-2 sm:col-span-2">
+              <div className="flex items-center gap-2 text-cyan-400 font-bold text-xs">
+                <Smartphone className="w-4 h-4 shrink-0" />
+                <span>{t('privacy.pillar5_title')}</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                {t('privacy.pillar5_desc')}
+              </p>
+            </div>
+          </div>
+
+          {/* Local Transform & Orientation Baking Guarantee */}
+          <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-200 space-y-1">
+            <h4 className="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
+              <RotateCw className="w-4 h-4 text-teal-400" />
+              <span>{t('privacy.transform_privacy_title')}</span>
+            </h4>
+            <p className="text-xs text-teal-300/90 leading-relaxed">
+              {t('privacy.transform_privacy_desc')}
+            </p>
           </div>
 
           {/* Geometric Fidelity & Anti-Tampering Guarantee */}
@@ -144,6 +167,11 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_processing')}</td>
                     <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_proc_client')}</td>
                     <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_proc_server')}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_ar_relay')}</td>
+                    <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_ar_client')}</td>
+                    <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_ar_server')}</td>
                   </tr>
                   <tr>
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_retention')}</td>

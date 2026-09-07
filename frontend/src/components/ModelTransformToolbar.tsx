@@ -97,7 +97,7 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
             disabled={disabled}
             onClick={() => handleAxisStep(axis, -90)}
             className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
-            title={`將 ${axis.toUpperCase()} 軸逆時針翻轉 90°`}
+            title={t('transform.flip_ccw_90', { axis: axis.toUpperCase(), defaultValue: `將 ${axis.toUpperCase()} 軸逆時針翻轉 90°` })}
           >
             <RotateCcw className="w-2.5 h-2.5 text-slate-400" />
             <span>-90°</span>
@@ -107,7 +107,7 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
             disabled={disabled}
             onClick={() => handleAxisStep(axis, 90)}
             className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
-            title={`將 ${axis.toUpperCase()} 軸順時針翻轉 90°`}
+            title={t('transform.flip_cw_90', { axis: axis.toUpperCase(), defaultValue: `將 ${axis.toUpperCase()} 軸順時針翻轉 90°` })}
           >
             <RotateCw className="w-2.5 h-2.5 text-slate-400" />
             <span>+90°</span>
@@ -117,7 +117,7 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
             disabled={disabled}
             onClick={() => handleAxisStep(axis, 180)}
             className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
-            title={`將 ${axis.toUpperCase()} 軸翻轉 180°`}
+            title={t('transform.flip_180', { axis: axis.toUpperCase(), defaultValue: `將 ${axis.toUpperCase()} 軸翻轉 180°` })}
           >
             <span>180°</span>
           </button>
@@ -180,7 +180,7 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
               type="button"
               onClick={onClose}
               className="p-1 rounded-lg hover:bg-dark-panel text-slate-400 hover:text-slate-200 transition-all ml-1"
-              title="關閉旋轉面板"
+              title={t('transform.close_panel', '關閉旋轉面板')}
             >
               <X className="w-4 h-4" />
             </button>

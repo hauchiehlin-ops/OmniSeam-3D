@@ -213,10 +213,10 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
                 <div className="w-full p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-left space-y-2">
                   <div className="flex items-center gap-1.5 text-amber-300 text-xs font-bold">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>本機連線提示 (Localhost)</span>
+                    <span>{t('ar.localhost_hint_title', '本機連線提示 (Localhost)')}</span>
                   </div>
                   <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                    手機無法直接讀取電腦的 <code className="bg-dark-bg px-1 py-0.5 rounded text-amber-300">localhost</code>。請輸入電腦在區網中的 IP（例如 <code className="bg-dark-bg px-1 py-0.5 rounded text-amber-300">192.168.1.100:5173</code>）更新 QR 碼：
+                    {t('ar.localhost_hint_desc', '手機無法直接讀取電腦的 localhost。請輸入電腦在區網中的 IP（例如 192.168.1.100:5173）更新 QR 碼：')}
                   </p>
                   <form onSubmit={handleSaveLanHost} className="flex gap-2">
                     <input
@@ -235,7 +235,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
                   </form>
                   {lanHost && (
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-amber-500/20">
-                      <span>目前目標：{lanHost}</span>
+                      <span>{t('ar.current_target', '目前目標：')}{lanHost}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -244,7 +244,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
                         }}
                         className="text-amber-400 hover:underline"
                       >
-                        重設為預設
+                        {t('ar.reset_default', '重設為預設')}
                       </button>
                     </div>
                   )}
