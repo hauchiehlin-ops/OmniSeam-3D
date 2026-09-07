@@ -45,6 +45,16 @@ graph TD
 
 ## 🛠️ 2. 版本演進與詳細修改歷程 (Version History)
 
+### `v4.3.0` (2026-09-08) - 轉換與修復參數自適應對齊、快速目標格式動態聯動與雙核心運算模式適用性提示增強
+- **改動重點**：
+  - **幾何修復策略精確對齊（消除無效自訂狀態）**：
+    - 修正 `frontend/src/engine/adaptive-intent.ts`：確保 `AdaptiveIntentEngine` 推薦之 `smart`、`watertight` 與 `passthrough` 參數組合 100% 精確匹配 `SettingsPanel.tsx` 之判定定義，徹底解決切換格式時卡片掉入「自訂參數 (Custom)」而未高亮之問題。
+  - **快速目標格式動態聯動與自適應重啟**：
+    - 更新 `frontend/src/App.tsx`：當使用者於 `TargetFormatCard` 點選快速目標格式（如 STL, STEP, 3MF, GLB, OBJ）或匯入新模型時，自動重啟 AI 自適應最佳化（`isAutoAdaptiveActive: true`），即時套用專屬目標格式之最佳修復參數與推薦核心。
+  - **雙核心運算適用性與 CAD 引擎行為標明**：
+    - 更新 `frontend/src/components/SettingsPanel.tsx`：於幾何處理策略與 CAD 參數標題旁新增「⚡ 本機離線 與 ☁️ 雲端算力 雙核心皆支援此設定」標籤，並清楚說明 Pure Client（生成 AP214 B-Rep 實體）與 Cloud Server（調用 OpenCASCADE 工業級曲面縫合）之執行差異。
+  - **多語系支援**：同步更新 `zh-TW` 與 `en` 語系字典。
+
 ### `v4.2.0` (2026-09-07) - 操作說明手冊與隱私權政策全面同步、全域多語系徹底在地化（新增旋轉烘焙、多軸座標系、跨端 AR、獨立目標格式卡、純檢視防覆蓋與 Q&A 12 大排查 SOP，消滅硬編碼文字，六國語系完整支援）
 - **改動重點**：
   - **全域多語系在地化徹底稽核與硬編碼文字根除**：

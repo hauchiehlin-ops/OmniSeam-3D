@@ -189,7 +189,8 @@ export const App: React.FC = () => {
 
   const handleConfigChange = (newConfig: ConversionConfig) => {
     if (newConfig.target_format !== config.target_format) {
-      // User changed target format -> keep adaptive mode active and adopt new format
+      // User changed target format -> re-enable adaptive mode and adopt new format
+      setIsAutoAdaptiveActive(true);
       setConfig(newConfig);
     } else {
       // User manually toggled expert checkboxes or strategies
@@ -219,6 +220,7 @@ export const App: React.FC = () => {
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
     setSelectedFiles([file]);
+    setIsAutoAdaptiveActive(true);
     setIsSplitView(false);
     setActiveTask(null);
     setMeasuredDistance(null);

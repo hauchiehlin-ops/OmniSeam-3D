@@ -295,11 +295,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       {/* 3 Unified Geometric Strategy Cards */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {t('settings.strategy_heading')}
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t('settings.strategy_heading')}
+            </span>
+            <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/80">
+              {t('settings.params_applicability_hint')}
+            </span>
+          </div>
           <span className="text-[10px] text-slate-400">{t('settings.strategy_hint')}</span>
         </div>
 
@@ -500,10 +505,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
               {/* CAD Deflection & Sewing Tolerance Settings */}
               <div className="space-y-2 pt-1 border-t border-dark-border/60">
-                <span className="text-xs font-semibold text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
-                  <Wrench className="w-3.5 h-3.5" />
-                  {t('settings.cad_heading')}
-                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-indigo-300 flex items-center gap-1.5 uppercase tracking-wider">
+                    <Wrench className="w-3.5 h-3.5" />
+                    {t('settings.cad_heading')}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {t('settings.cad_engine_tip')}
+                  </span>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div className="flex flex-col gap-1 bg-dark-surface p-2.5 rounded-xl border border-dark-border">

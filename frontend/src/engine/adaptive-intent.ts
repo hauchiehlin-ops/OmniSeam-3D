@@ -223,6 +223,31 @@ export class AdaptiveIntentEngine {
       }
     }
 
+    // Standardize strategy parameters to ensure 1:1 match with UI strategy cards
+    if (recommendedStrategy === 'watertight') {
+      autoFillHoles = true;
+      fixNonManifold = true;
+      unifyNormals = true;
+      removeDegenerate = true;
+      weldVertices = true;
+      enableSewing = targetCategory === 'cad_solid';
+    } else if (recommendedStrategy === 'passthrough') {
+      autoFillHoles = false;
+      fixNonManifold = false;
+      unifyNormals = false;
+      removeDegenerate = false;
+      weldVertices = false;
+      enableSewing = false;
+    } else {
+      // 'smart'
+      autoFillHoles = false;
+      fixNonManifold = true;
+      unifyNormals = true;
+      removeDegenerate = true;
+      weldVertices = true;
+      enableSewing = targetCategory === 'cad_solid';
+    }
+
     const adaptedConfig: ConversionConfig = {
       target_format: targetFormat,
       cad_linear_deflection: adaptiveLinearDeflection,

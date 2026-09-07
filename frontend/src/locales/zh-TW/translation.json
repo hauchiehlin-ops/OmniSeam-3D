@@ -69,6 +69,8 @@
     "auto_engine_client_general_reason": "已配置【純前端離線模式】，100% 於瀏覽器內部極速運算，模型不離開電腦，隱私最高且 $0 成本。",
     "strategy_heading": "幾何處理策略與應用適配",
     "strategy_hint": "自動兼顧幾何精度與軟體相容",
+    "params_applicability_hint": "⚡ 本機離線 與 ☁️ 雲端算力 雙核心皆支援此設定",
+    "cad_engine_tip": "純前端生成 AP214 B-Rep 網格實體；雲端節點調用 OpenCASCADE 工業級曲面縫合",
     "strategy_smart_title": "智慧無損保真",
     "strategy_smart_badge": "推薦 · 預設",
     "strategy_smart_desc": "保護設計開口與流體管道，僅修復非流形與法線缺陷，健康模型 100% 零修改直通。",
