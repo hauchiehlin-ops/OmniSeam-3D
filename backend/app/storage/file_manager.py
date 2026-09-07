@@ -89,5 +89,10 @@ class FileManager:
     def get_preview_file_path(self, task_id: str) -> Path:
         return self.get_task_dir(task_id) / "preview.glb"
 
+    def get_ar_dir(self, session_id: str) -> Path:
+        ar_dir = self.processed_dir / "ar_sessions" / session_id
+        ar_dir.mkdir(parents=True, exist_ok=True)
+        return ar_dir
+
 
 file_manager = FileManager()

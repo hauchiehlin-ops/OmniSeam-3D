@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import * as THREE from 'three';
 import { Viewer3D } from './Viewer3D';
 import { DisplayMode } from '../types';
 
@@ -15,6 +16,7 @@ interface SplitViewer3DProps {
     holes?: [number, number, number][];
     nonManifold?: [number, number, number][];
   };
+  onModelLoaded?: (object: THREE.Object3D) => void;
 }
 
 export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
@@ -25,7 +27,8 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
   sectionOffset = 0,
   measureToolActive = false,
   onMeasureDistance,
-  defectPoints
+  defectPoints,
+  onModelLoaded
 }) => {
   const { t } = useTranslation();
 
@@ -61,6 +64,7 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
           title={t('viewer.repaired_label')}
           badge="Watertight"
           badgeColor="emerald"
+          onModelLoaded={onModelLoaded}
         />
       </div>
     </div>

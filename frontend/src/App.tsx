@@ -17,6 +17,7 @@ import { PublicLimitModal } from './components/PublicLimitModal';
 import { UserManualModal } from './components/UserManualModal';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { ArPreviewModal } from './components/ArPreviewModal';
+import { MobileArView } from './components/MobileArView';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
 
@@ -87,6 +88,21 @@ export const App: React.FC = () => {
   const [inspectData, setInspectData] = useState<InspectResponse | null>(null);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
+  const [currentModelMesh, setCurrentModelMesh] = useState<THREE.Object3D | null>(null);
+  const [activeArSessionId, setActiveArSessionId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ar_session');
+    }
+    return null;
+  });
+  const [activeArTaskId, setActiveArTaskId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ar_task');
+    }
+    return null;
+  });
 
 
   // 3D Viewport Controls
@@ -485,12 +501,15 @@ export const App: React.FC = () => {
       ? (activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id))
       : undefined;
 
-    const scene = new THREE.Scene();
-    const geom = new THREE.BoxGeometry(1, 1, 1);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x6366f1 });
-    scene.add(new THREE.Mesh(geom, mat));
-
-    await ArManager.launchAr(scene, previewUrl);
+    if (currentModelMesh) {
+      await ArManager.launchAr(currentModelMesh, previewUrl, selectedFile?.name);
+    } else {
+      const scene = new THREE.Scene();
+      const geom = new THREE.BoxGeometry(1, 1, 1);
+      const mat = new THREE.MeshStandardMaterial({ color: 0x6366f1 });
+      scene.add(new THREE.Mesh(geom, mat));
+      await ArManager.launchAr(scene, previewUrl, selectedFile?.name);
+    }
   };
 
   // Inspect Only
@@ -541,6 +560,22 @@ export const App: React.FC = () => {
     ? activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id)
     : null);
 
+
+  if (activeArSessionId || activeArTaskId) {
+    return (
+      <MobileArView
+        sessionId={activeArSessionId}
+        taskId={activeArTaskId}
+        onExit={() => {
+          setActiveArSessionId(null);
+          setActiveArTaskId(null);
+          if (typeof window !== 'undefined') {
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-slate-100 selection:bg-brand-500 selection:text-white">
@@ -628,6 +663,7 @@ export const App: React.FC = () => {
                     setMeasureP2(p2);
                   }}
                   defectPoints={defectPoints}
+                  onModelLoaded={(mesh) => setCurrentModelMesh(mesh)}
                 />
               ) : (
                 <Viewer3D
@@ -644,6 +680,7 @@ export const App: React.FC = () => {
                   }}
                   defectPoints={defectPoints}
                   title={selectedFile ? selectedFile.name : undefined}
+                  onModelLoaded={(mesh) => setCurrentModelMesh(mesh)}
                 />
               )}
             </div>
@@ -728,6 +765,10 @@ export const App: React.FC = () => {
         isOpen={showArModal}
         onClose={() => setShowArModal(false)}
         modelName={selectedFile?.name}
+        currentModelMesh={currentModelMesh}
+        modelFile={selectedFile}
+        previewUrl={repairedPreviewUrl}
+        activeTaskId={activeTask?.task_id}
         onLaunchDirectAr={handleLaunchDirectAr}
         isMobileDevice={ArManager.getArPlatform() !== 'desktop'}
       />

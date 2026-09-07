@@ -67,6 +67,14 @@ graph TD
 - **修復方案**：
   - 在 `app.py` 加入 `@spaces.GPU` 預熱函式，並在 `requirements.txt` 導入 `spaces`，同時相容 ZeroGPU 與純 CPU 環境。
 
+### `v3.6.0` (2026-09-07) - AR 擴增實境即時預覽全鏈路重構（同端 1:1 投影 + 跨端掃碼中繼）
+- **功能突破與問題修復**：
+  - **解決 QR 碼指向空白首頁問題**：重構 `ArPreviewModal.tsx`，加入自動導出 GLB 並上傳至後端 AR Session 機制，QR 碼精準綁定 `?ar_session={session_id}`。
+  - **替換測試紫方塊**：重寫 `App.tsx` 中的 `handleLaunchDirectAr`，串接 `Viewer3D` 與 `SplitViewer3D` 的 `onModelLoaded`，傳遞真實 3D 模型物件進行 AR 投影。
+  - **後端 AR 臨時會話 API**：新增 `backend/app/api/v1/ar.py`，提供 `/api/v1/ar/session` 臨時儲存、中繼查詢與 GLB / USDZ 串流傳輸（含 2 小時 TTL 自動清理機制）。
+  - **手機專屬全螢幕 AR 控制台**：新增 `MobileArView.tsx`，手機掃碼即刻載入 3D 模型旋轉預覽，一鍵支援 Apple AR Quick Look (USDZ) 與 Google ARCore Scene Viewer。
+  - **內網 Localhost 助手**：偵測到本機環境時主動提示 Wi-Fi IP 填寫與動態更新 QR 碼，確保手機在同 Wi-Fi 下能順利連入。
+
 ### `v1.0.26` (2026-09-04) - 鎖定 `starlette<0.36.0` 修復 Gradio TemplateResponse 字典哈希錯誤
 - **問題根因**：
   - Starlette v0.36+ 變更了 `TemplateResponse` 的參數簽名，導致 Gradio 4.44 的內部渲染路由在 Starlette 0.37+ 下觸發 `TypeError: unhashable type: 'dict'` 崩潰。
@@ -312,7 +320,7 @@ OmniSeam-3D/
 ---
 
 ## 🚀 5. 未來迭代規劃 (Backlog)
-
+ 
 1. **WebAssembly FreeCAD / OpenCASCADE 深度移植**：評估將 `opencascade.js` 整合入前端 Web Worker，進一步減少對後端節點的依賴。
 2. **多檔案批次轉換佇列**：支援同時拖放多個 3D 模型進行並行轉換與批次下載 ZIP。
-3. **AR / WebXR 即時預覽**：支援手機端直接以 AR 投影放置修復後的實體模型。
+3. ~~**AR / WebXR 即時預覽**~~（✅ 已於 v3.6.0 完整實作，支援同端與跨端掃碼 1:1 原生 AR 投影）。

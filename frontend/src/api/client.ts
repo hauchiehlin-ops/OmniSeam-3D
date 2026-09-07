@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ConversionConfig, InspectResponse, TaskResponse, FluidDomainResponse } from '../types';
+import { ConversionConfig, InspectResponse, TaskResponse, FluidDomainResponse, ArSessionResponse } from '../types';
 import { ClientPipeline } from '../engine/client-pipeline';
 
 export type EngineMode = 'client' | 'server';
@@ -309,6 +309,62 @@ export const apiClient = {
       console.warn('Server API failed or not found, falling back to 100% in-browser extraction:', serverErr);
       return await ClientPipeline.extractFluidDomain(file, params);
     }
+  },
+
+  /**
+   * Creates a temporary AR streaming session on the backend.
+   */
+  async createArSession(
+    payload: { file?: File | Blob; filename?: string; taskId?: string }
+  ): Promise<ArSessionResponse> {
+    const formData = new FormData();
+    if (payload.file) {
+      const name = payload.filename || (payload.file instanceof File ? payload.file.name : 'model.glb');
+      formData.append('file', payload.file, name);
+    }
+    if (payload.taskId) {
+      formData.append('task_id', payload.taskId);
+    }
+    if (payload.filename) {
+      formData.append('filename', payload.filename);
+    }
+
+    const response = await axios.post<ArSessionResponse>(
+      `${this.getApiBase()}/ar/session`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    const result = response.data;
+    if (this.customBackendUrl && result.glb_url && !result.glb_url.startsWith('http')) {
+      result.glb_url = `${this.customBackendUrl}${result.glb_url}`;
+    }
+    if (this.customBackendUrl && result.usdz_url && !result.usdz_url.startsWith('http')) {
+      result.usdz_url = `${this.customBackendUrl}${result.usdz_url}`;
+    }
+    return result;
+  },
+
+  /**
+   * Retrieves an existing AR session.
+   */
+  async getArSession(sessionId: string): Promise<ArSessionResponse> {
+    const response = await axios.get<ArSessionResponse>(
+      `${this.getApiBase()}/ar/${sessionId}`
+    );
+    const result = response.data;
+    if (this.customBackendUrl && result.glb_url && !result.glb_url.startsWith('http')) {
+      result.glb_url = `${this.customBackendUrl}${result.glb_url}`;
+    }
+    if (this.customBackendUrl && result.usdz_url && !result.usdz_url.startsWith('http')) {
+      result.usdz_url = `${this.customBackendUrl}${result.usdz_url}`;
+    }
+    return result;
+  },
+
+  getArGlbUrl(sessionId: string): string {
+    const base = this.customBackendUrl || (this.isPublicDemoNode() ? OFFICIAL_PUBLIC_BACKEND_URL : '');
+    return `${base}/api/v1/ar/${sessionId}/model.glb`;
   }
 };
 

@@ -4,6 +4,7 @@ from backend.app.api.v1.convert import router as convert_router
 from backend.app.api.v1.inspect import router as inspect_router
 from backend.app.api.v1.tasks import router as tasks_router
 from backend.app.api.v1.wind_tunnel import router as wind_tunnel_router
+from backend.app.api.v1.ar import router as ar_router
 
 api_v1_router = APIRouter()
 
@@ -12,4 +13,5 @@ api_v1_router.include_router(inspect_router, tags=["Inspect"])
 api_v1_router.include_router(convert_router, tags=["Convert"])
 api_v1_router.include_router(tasks_router, tags=["Tasks"])
 api_v1_router.include_router(wind_tunnel_router, prefix="/wind-tunnel", tags=["WindTunnel"])
+api_v1_router.include_router(ar_router, prefix="/ar", tags=["AR"])
 

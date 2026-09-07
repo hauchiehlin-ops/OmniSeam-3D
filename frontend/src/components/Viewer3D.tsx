@@ -27,6 +27,7 @@ interface Viewer3DProps {
   title?: string;
   badge?: string;
   badgeColor?: 'red' | 'emerald' | 'indigo';
+  onModelLoaded?: (object: THREE.Object3D) => void;
 }
 
 interface CadPlaceholderInfo {
@@ -47,7 +48,8 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   highlightColor = 0x6366f1,
   title,
   badge,
-  badgeColor = 'indigo'
+  badgeColor = 'indigo',
+  onModelLoaded
 }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -180,6 +182,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
       currentMeshRef.current = object;
       setCadPlaceholder(null);
       setIsLoading(false);
+      onModelLoaded?.(object);
 
       if (cameraRef.current && controlsRef.current) {
         cameraRef.current.position.set(40, 35, 60);
