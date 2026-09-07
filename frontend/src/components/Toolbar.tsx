@@ -49,6 +49,9 @@ interface ToolbarProps {
   transformToolActive?: boolean;
   onToggleTransformTool?: () => void;
   hasRotation?: boolean;
+  coordSystemMode?: 'auto' | 'cartesian' | 'polar' | 'cylindrical' | 'spherical' | 'none';
+  onChangeCoordSystemMode?: (mode: 'auto' | 'cartesian' | 'polar' | 'cylindrical' | 'spherical' | 'none') => void;
+  detectedCoordSystemLabel?: string;
 }
 
 
@@ -81,6 +84,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   transformToolActive = false,
   onToggleTransformTool,
   hasRotation = false,
+  coordSystemMode = 'auto',
+  onChangeCoordSystemMode,
+  detectedCoordSystemLabel,
 }) => {
 
   const { t } = useTranslation();
@@ -353,6 +359,48 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <span>📱</span>
               <span className="hidden md:inline">{t('ar.nav_btn')}</span>
             </button>
+          )}
+
+          {/* Coordinate System Selector */}
+          {onChangeCoordSystemMode && (
+            <div className="relative flex items-center">
+              <select
+                value={coordSystemMode}
+                disabled={!hasLoadedModel}
+                onChange={(e) => onChangeCoordSystemMode(e.target.value as any)}
+                title={t('coord.select_tooltip', '空間座標系（智慧推薦 / 笛卡爾 / 極座標 / 圓柱 / 球座標）')}
+                className={`text-xs py-1.5 pl-2.5 pr-6 rounded-xl border appearance-none focus:outline-none focus:border-brand-500 transition-all cursor-pointer font-medium ${
+                  !hasLoadedModel
+                    ? 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
+                    : coordSystemMode !== 'auto'
+                    ? 'bg-brand-500/10 border-brand-500/40 text-brand-300'
+                    : 'bg-dark-panel border-dark-border text-slate-300 hover:text-white hover:border-slate-500'
+                }`}
+              >
+                <option value="auto" className="bg-dark-surface text-slate-200">
+                  🤖 {t('coord.auto_adaptive', '智慧座標 (Auto)')}
+                  {detectedCoordSystemLabel ? ` · ${detectedCoordSystemLabel}` : ''}
+                </option>
+                <option value="cartesian" className="bg-dark-surface text-slate-200">
+                  📐 {t('coord.cartesian', '笛卡爾 (XYZ)')}
+                </option>
+                <option value="polar" className="bg-dark-surface text-slate-200">
+                  🎯 {t('coord.polar', '極座標 (Polar)')}
+                </option>
+                <option value="cylindrical" className="bg-dark-surface text-slate-200">
+                  🥫 {t('coord.cylindrical', '圓柱座標 (Cylindrical)')}
+                </option>
+                <option value="spherical" className="bg-dark-surface text-slate-200">
+                  🌐 {t('coord.spherical', '球座標 (Spherical)')}
+                </option>
+                <option value="none" className="bg-dark-surface text-slate-200">
+                  🚫 {t('coord.none', '隱藏網格 (Off)')}
+                </option>
+              </select>
+              <div className="pointer-events-none absolute right-2 text-slate-400 text-[9px]">
+                ▼
+              </div>
+            </div>
           )}
 
           {/* Reset Camera */}

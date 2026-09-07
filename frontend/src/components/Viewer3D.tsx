@@ -11,6 +11,72 @@ import { PCDLoader } from 'three/examples/jsm/loaders/PCDLoader.js';
 import { ThreeMFLoader } from 'three/examples/jsm/loaders/3MFLoader.js';
 import { Compass, FileCode2, Sparkles } from 'lucide-react';
 import { DisplayMode } from '../types';
+import {
+  CoordinateSystemManager,
+  CoordinateSystemSelection,
+  CoordinateSystemType,
+} from '../engine/coordinate-system-manager';
+
+function drawOrientationGizmo(canvas: HTMLCanvasElement, camera: THREE.Camera) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const cx = w / 2;
+  const cy = h / 2;
+  const radius = w * 0.36;
+
+  const m = new THREE.Matrix4();
+  m.extractRotation(camera.matrixWorldInverse);
+
+  const axes = [
+    { dir: new THREE.Vector3(1, 0, 0), label: 'X', color: '#ef4444' },
+    { dir: new THREE.Vector3(0, 1, 0), label: 'Y', color: '#22c55e' },
+    { dir: new THREE.Vector3(0, 0, 1), label: 'Z', color: '#3b82f6' },
+  ];
+
+  const transformed = axes.map((a) => {
+    const v = a.dir.clone().applyMatrix4(m);
+    return {
+      ...a,
+      x: cx + v.x * radius,
+      y: cy - v.y * radius,
+      z: v.z,
+    };
+  });
+
+  transformed.sort((a, b) => a.z - b.z);
+
+  // Subtle compass background
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  for (const item of transformed) {
+    ctx.strokeStyle = item.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(item.x, item.y);
+    ctx.stroke();
+
+    ctx.fillStyle = item.color;
+    ctx.beginPath();
+    ctx.arc(item.x, item.y, 6.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.label, item.x, item.y);
+  }
+}
 
 interface Viewer3DProps {
   modelUrl?: string | null;
@@ -32,6 +98,8 @@ interface Viewer3DProps {
   rotation?: { x: number; y: number; z: number };
   onChangeRotation?: (rot: { x: number; y: number; z: number }) => void;
   showRotationGizmo?: boolean;
+  coordSystemMode?: CoordinateSystemSelection;
+  onDetectedCoordSystem?: (type: CoordinateSystemType) => void;
 }
 
 interface CadPlaceholderInfo {
@@ -57,6 +125,8 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   rotation = { x: 0, y: 0, z: 0 },
   onChangeRotation,
   showRotationGizmo = false,
+  coordSystemMode = 'auto',
+  onDetectedCoordSystem,
 }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,8 +138,14 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   const isDraggingGizmoRef = useRef(false);
   const onChangeRotationRef = useRef(onChangeRotation);
   onChangeRotationRef.current = onChangeRotation;
+  const onDetectedCoordSystemRef = useRef(onDetectedCoordSystem);
+  onDetectedCoordSystemRef.current = onDetectedCoordSystem;
+
   const currentMeshRef = useRef<THREE.Object3D | null>(null);
   const clippingPlaneRef = useRef<THREE.Plane | null>(null);
+  const coordVisualsRef = useRef<THREE.Group | null>(null);
+  const currentBoundingBoxRef = useRef<THREE.Box3>(new THREE.Box3());
+  const orientationCanvasRef = useRef<HTMLCanvasElement | null>(null);
   
   const measurePointsRef = useRef<THREE.Vector3[]>([]);
   const measureMarkersRef = useRef<THREE.Mesh[]>([]);
@@ -77,6 +153,37 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [cadPlaceholder, setCadPlaceholder] = useState<CadPlaceholderInfo | null>(null);
+
+  const updateCoordinateVisuals = (mode: CoordinateSystemSelection) => {
+    if (!sceneRef.current) return;
+    const scene = sceneRef.current;
+    if (coordVisualsRef.current) {
+      scene.remove(coordVisualsRef.current);
+      coordVisualsRef.current = null;
+    }
+
+    if (mode === 'none') return;
+
+    const box = currentBoundingBoxRef.current;
+    let activeType: CoordinateSystemType;
+
+    if (mode === 'auto') {
+      const detection = CoordinateSystemManager.detectSystem(box);
+      activeType = detection.recommended;
+      onDetectedCoordSystemRef.current?.(detection.recommended);
+    } else {
+      activeType = mode;
+    }
+
+    const visuals = CoordinateSystemManager.buildCoordinateVisuals(activeType, box);
+    coordVisualsRef.current = visuals;
+    scene.add(visuals);
+  };
+
+  // Sync coordinate system on mode change
+  useEffect(() => {
+    updateCoordinateVisuals(coordSystemMode);
+  }, [coordSystemMode]);
 
   // Initialize Three.js Scene
   useEffect(() => {
@@ -120,10 +227,8 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
     dirLight2.position.set(-50, -40, -50);
     scene.add(dirLight2);
 
-    // Subtle Grid Floor
-    const grid = new THREE.GridHelper(200, 40, 0x312e81, 0x1e293b);
-    grid.position.y = -25;
-    scene.add(grid);
+    // Dynamic Coordinate System Grid & Axes
+    updateCoordinateVisuals(coordSystemMode);
 
     // Section Clipping Plane
     const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), sectionOffset);
@@ -159,6 +264,9 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
       animId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
+      if (orientationCanvasRef.current && camera) {
+        drawOrientationGizmo(orientationCanvasRef.current, camera);
+      }
     };
     animate();
 
@@ -228,6 +336,10 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
       scene.add(object);
       currentMeshRef.current = object;
+      const normalizedBox = new THREE.Box3().setFromObject(object);
+      currentBoundingBoxRef.current = normalizedBox;
+      updateCoordinateVisuals(coordSystemMode);
+
       setCadPlaceholder(null);
       setIsLoading(false);
       onModelLoaded?.(object);
@@ -654,9 +766,19 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
         className="w-full h-full cursor-grab active:cursor-grabbing"
       />
 
+      {/* Corner 3D Viewport Orientation Gizmo */}
+      <div className="absolute bottom-3 right-3 z-10 pointer-events-none flex flex-col items-center">
+        <canvas
+          ref={orientationCanvasRef}
+          width={64}
+          height={64}
+          className="w-16 h-16 drop-shadow-md"
+        />
+      </div>
+
       {/* Heatmap Tolerance Spectrum Legend */}
       {displayMode === 'heatmap' && (
-        <div className="absolute bottom-4 right-4 z-10 p-2.5 rounded-xl bg-dark-surface/90 border border-dark-border/80 backdrop-blur-md shadow-xl flex flex-col gap-1 text-[10px] pointer-events-none">
+        <div className="absolute bottom-4 left-4 z-10 p-2.5 rounded-xl bg-dark-surface/90 border border-dark-border/80 backdrop-blur-md shadow-xl flex flex-col gap-1 text-[10px] pointer-events-none">
           <span className="font-semibold text-slate-200">{t('viewer.heatmap_legend_title')}</span>
           <div className="w-36 h-2 rounded bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 shadow-inner" />
           <div className="flex justify-between text-[9px] text-slate-400 font-mono">

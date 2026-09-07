@@ -35,6 +35,7 @@ import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES } from './api/client'
 import { ArManager } from './engine/ar-manager';
 import { ZipPackager, ZipEntry } from './engine/zip-packager';
 import { AdaptiveIntentEngine, AdaptiveIntentResult } from './engine/adaptive-intent';
+import { CoordinateSystemSelection, CoordinateSystemType } from './engine/coordinate-system-manager';
 
 
 const DEFAULT_CONFIG: ConversionConfig = {
@@ -89,6 +90,8 @@ export const App: React.FC = () => {
   const [rotation, setRotation] = useState<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 });
   const [transformToolActive, setTransformToolActive] = useState<boolean>(false);
   const [showRotationGizmo, setShowRotationGizmo] = useState<boolean>(false);
+  const [coordSystemMode, setCoordSystemMode] = useState<CoordinateSystemSelection>('auto');
+  const [detectedCoordSystem, setDetectedCoordSystem] = useState<CoordinateSystemType | null>(null);
 
   const handleRotationChange = (newRot: { x: number; y: number; z: number }) => {
     setRotation(newRot);
@@ -230,6 +233,8 @@ export const App: React.FC = () => {
     setMeasureP1(null);
     setMeasureP2(null);
     setRotation({ x: 0, y: 0, z: 0 });
+    setCoordSystemMode('auto');
+    setDetectedCoordSystem(null);
 
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
 
@@ -315,6 +320,8 @@ export const App: React.FC = () => {
         setRotation({ x: 0, y: 0, z: 0 });
         setTransformToolActive(false);
         setShowRotationGizmo(false);
+        setCoordSystemMode('auto');
+        setDetectedCoordSystem(null);
       }
     }
   };
@@ -678,8 +685,22 @@ export const App: React.FC = () => {
               transformToolActive={transformToolActive}
               onToggleTransformTool={() => setTransformToolActive(prev => !prev)}
               hasRotation={rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0}
+              coordSystemMode={coordSystemMode}
+              onChangeCoordSystemMode={setCoordSystemMode}
+              detectedCoordSystemLabel={detectedCoordSystem ? t(`coord.${detectedCoordSystem}_short`) : undefined}
             />
 
+            {/* Non-Overlapping Horizontal Model Transform Toolbar */}
+            {transformToolActive && selectedFile && (
+              <ModelTransformToolbar
+                rotation={rotation}
+                onChangeRotation={handleRotationChange}
+                showRotationGizmo={showRotationGizmo}
+                onToggleRotationGizmo={() => setShowRotationGizmo((prev) => !prev)}
+                onResetRotation={handleResetRotation}
+                onClose={() => setTransformToolActive(false)}
+              />
+            )}
 
             {/* 3D Canvas Area */}
             <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px] relative">
@@ -701,6 +722,8 @@ export const App: React.FC = () => {
                   rotation={rotation}
                   onChangeRotation={handleRotationChange}
                   showRotationGizmo={showRotationGizmo}
+                  coordSystemMode={coordSystemMode}
+                  onDetectedCoordSystem={setDetectedCoordSystem}
                 />
               ) : (
                 <Viewer3D
@@ -721,18 +744,8 @@ export const App: React.FC = () => {
                   rotation={rotation}
                   onChangeRotation={handleRotationChange}
                   showRotationGizmo={showRotationGizmo}
-                />
-              )}
-
-              {/* Model Transform Toolbar (Floating in 3D Canvas) */}
-              {transformToolActive && selectedFile && (
-                <ModelTransformToolbar
-                  rotation={rotation}
-                  onChangeRotation={handleRotationChange}
-                  showRotationGizmo={showRotationGizmo}
-                  onToggleRotationGizmo={() => setShowRotationGizmo((prev) => !prev)}
-                  onResetRotation={handleResetRotation}
-                  onClose={() => setTransformToolActive(false)}
+                  coordSystemMode={coordSystemMode}
+                  onDetectedCoordSystem={setDetectedCoordSystem}
                 />
               )}
             </div>

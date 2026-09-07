@@ -152,6 +152,24 @@
     "bake_hint": "回転角度はエクスポート時に 3D 幾何頂点へ自動ベイク（Bake）されます",
     "reset": "姿勢リセット"
   },
+  "coord": {
+    "select_tooltip": "空間座標系（スマート推奨 / 直交デカルト / 極座標 / 円柱 / 球面）",
+    "auto_adaptive": "自動適応 (Auto)",
+    "cartesian": "デカルト (XYZ)",
+    "cartesian_short": "デカルト",
+    "polar": "極座標 (Polar)",
+    "polar_short": "極座標",
+    "cylindrical": "円柱座標 (Cylindrical)",
+    "cylindrical_short": "円柱座標",
+    "spherical": "球面座標 (Spherical)",
+    "spherical_short": "球面座標",
+    "none": "非表示 (Off)",
+    "reason_default_cartesian": "標準のデカルト直交空間座標系",
+    "reason_spherical_symmetric": "等方性球体対称特徴を検出し、球面座標系を自動設定しました",
+    "reason_polar_planar": "平坦な回転円盤特徴を検出し、極座標系を自動設定しました",
+    "reason_cylindrical_rotational": "軸対称円柱特徴を検出し、円柱座標系を自動設定しました",
+    "reason_cartesian_general": "非対称な複雑機械構造を検出し、デカルト座標系を自動設定しました"
+  },
   "audit": {
     "title": "幾何診断・ヘルスレポート (Health Audit)",
     "health_score": "幾何健全度スコア",

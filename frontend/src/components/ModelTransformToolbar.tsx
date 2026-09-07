@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RotateCw, RotateCcw, Compass, RefreshCw, X, Sliders, CheckCircle2 } from 'lucide-react';
+import { RotateCw, RotateCcw, Compass, RefreshCw, X, CheckCircle2 } from 'lucide-react';
 
 interface ModelTransformToolbarProps {
   rotation: { x: number; y: number; z: number };
@@ -25,7 +25,6 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
 
   const handleAxisStep = (axis: 'x' | 'y' | 'z', deltaDeg: number) => {
     const nextVal = (rotation[axis] + deltaDeg) % 360;
-    // Normalize to [-180, 180] or [0, 360)
     const normalized = Math.round(nextVal * 10) / 10;
     onChangeRotation({
       ...rotation,
@@ -44,205 +43,168 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
 
   const hasRotation = rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0;
 
+  const renderAxisControl = (
+    axis: 'x' | 'y' | 'z',
+    colorClasses: { badge: string; border: string; text: string }
+  ) => {
+    const val = rotation[axis];
+    return (
+      <div className={`flex flex-col gap-1.5 p-2 rounded-xl bg-dark-panel/80 border ${colorClasses.border}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className={`w-5 h-5 rounded-md ${colorClasses.badge} font-bold text-[11px] flex items-center justify-center border shadow-xs`}>
+              {axis.toUpperCase()}
+            </span>
+            <div className="flex items-center">
+              <input
+                type="number"
+                disabled={disabled}
+                value={val}
+                onChange={(e) => handleInputChange(axis, e.target.value)}
+                step="5"
+                className="w-16 bg-dark-surface px-1.5 py-0.5 rounded border border-dark-border text-slate-100 font-mono text-center text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              />
+              <span className="text-slate-400 ml-1 text-xs">°</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => handleAxisStep(axis, -15)}
+              className="p-1 rounded bg-dark-surface hover:bg-dark-border text-slate-400 hover:text-slate-200 text-[10px] font-mono transition-all"
+              title="-15°"
+            >
+              -15°
+            </button>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => handleAxisStep(axis, 15)}
+              className="p-1 rounded bg-dark-surface hover:bg-dark-border text-slate-400 hover:text-slate-200 text-[10px] font-mono transition-all"
+              title="+15°"
+            >
+              +15°
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Flips */}
+        <div className="grid grid-cols-3 gap-1 pt-1 border-t border-dark-border/40">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => handleAxisStep(axis, -90)}
+            className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
+            title={`將 ${axis.toUpperCase()} 軸逆時針翻轉 90°`}
+          >
+            <RotateCcw className="w-2.5 h-2.5 text-slate-400" />
+            <span>-90°</span>
+          </button>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => handleAxisStep(axis, 90)}
+            className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
+            title={`將 ${axis.toUpperCase()} 軸順時針翻轉 90°`}
+          >
+            <RotateCw className="w-2.5 h-2.5 text-slate-400" />
+            <span>+90°</span>
+          </button>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => handleAxisStep(axis, 180)}
+            className="flex items-center justify-center gap-0.5 py-0.5 rounded bg-dark-surface/90 hover:bg-dark-surface text-slate-300 hover:text-white text-[10px] font-medium border border-dark-border/50 hover:border-slate-600 transition-all"
+            title={`將 ${axis.toUpperCase()} 軸翻轉 180°`}
+          >
+            <span>180°</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="absolute top-3 left-3 z-30 flex flex-col gap-2.5 p-3.5 rounded-2xl bg-dark-surface/95 border border-brand-500/40 shadow-2xl backdrop-blur-md max-w-sm w-[340px] text-xs transition-all animate-in fade-in slide-in-from-top-2">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-dark-border">
-        <div className="flex items-center gap-2 font-bold text-slate-100">
+    <div className="w-full bg-dark-surface/95 border border-brand-500/40 rounded-2xl p-3 shadow-xl backdrop-blur-md text-xs transition-all animate-in fade-in slide-in-from-top-2">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between pb-2 mb-2 border-b border-dark-border">
+        <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-brand-500/20 border border-brand-400/30 flex items-center justify-center text-brand-300">
             <Compass className="w-3.5 h-3.5" />
           </div>
-          <span>{t('transform.title', '模型空間旋轉 (Transform)')}</span>
+          <span className="font-bold text-slate-100 text-xs">
+            {t('transform.title', '模型空間姿態與旋轉控制')}
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>{t('transform.bake_hint', '旋轉角度將於匯出時自動烘焙至幾何頂點')}</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* Gizmo toggle button (Scheme B) */}
+          {/* Scheme B: Gizmo toggle */}
           <button
             type="button"
             onClick={onToggleRotationGizmo}
             title={showRotationGizmo ? t('transform.hide_gizmo', '隱藏 3D 旋轉環') : t('transform.show_gizmo', '顯示 3D 旋轉環')}
-            className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${
               showRotationGizmo
                 ? 'bg-brand-500/20 border-brand-400 text-brand-300 shadow-sm shadow-brand-500/30 ring-1 ring-brand-400/40'
-                : 'bg-dark-panel border-dark-border text-slate-400 hover:text-slate-200'
+                : 'bg-dark-panel border-dark-border text-slate-300 hover:text-white'
             }`}
           >
             <span>🎛️</span>
             <span>{t('transform.gizmo_btn', '3D 旋轉環')}</span>
           </button>
 
+          {/* Reset button */}
+          <button
+            type="button"
+            disabled={disabled || !hasRotation}
+            onClick={onResetRotation}
+            title={t('transform.reset', '重置為 0°')}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-xs transition-all ${
+              hasRotation
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                : 'bg-dark-panel/40 border-dark-border/40 text-slate-500 cursor-not-allowed'
+            }`}
+          >
+            <RefreshCw className={`w-3 h-3 ${hasRotation ? 'text-amber-400' : ''}`} />
+            <span className="hidden sm:inline">{t('transform.reset', '重置')}</span>
+          </button>
+
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-dark-panel text-slate-400 hover:text-slate-200 transition-all"
+              className="p-1 rounded-lg hover:bg-dark-panel text-slate-400 hover:text-slate-200 transition-all ml-1"
+              title="關閉旋轉面板"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Axis Controls (Scheme A) */}
-      <div className="flex flex-col gap-2">
-        {/* X Axis */}
-        <div className="flex items-center justify-between bg-dark-panel/60 p-1.5 px-2 rounded-xl border border-rose-500/20">
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-rose-500/20 text-rose-300 font-bold text-[10px] flex items-center justify-center border border-rose-500/30">
-              X
-            </span>
-            <div className="flex items-center">
-              <input
-                type="number"
-                disabled={disabled}
-                value={rotation.x}
-                onChange={(e) => handleInputChange('x', e.target.value)}
-                step="15"
-                className="w-14 bg-dark-surface border border-dark-border rounded px-1.5 py-0.5 text-center text-xs font-mono text-slate-100 focus:outline-none focus:border-rose-400"
-              />
-              <span className="ml-1 text-[11px] text-slate-400">°</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('x', -90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-rose-500/20 border border-dark-border hover:border-rose-500/40 text-[10px] text-slate-300 hover:text-rose-200 transition-all"
-            >
-              -90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('x', 90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-rose-500/20 border border-dark-border hover:border-rose-500/40 text-[10px] text-slate-300 hover:text-rose-200 transition-all"
-            >
-              +90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('x', 180)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-rose-500/20 border border-dark-border hover:border-rose-500/40 text-[10px] text-slate-300 hover:text-rose-200 transition-all"
-            >
-              180°
-            </button>
-          </div>
-        </div>
-
-        {/* Y Axis */}
-        <div className="flex items-center justify-between bg-dark-panel/60 p-1.5 px-2 rounded-xl border border-emerald-500/20">
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center justify-center border border-emerald-500/30">
-              Y
-            </span>
-            <div className="flex items-center">
-              <input
-                type="number"
-                disabled={disabled}
-                value={rotation.y}
-                onChange={(e) => handleInputChange('y', e.target.value)}
-                step="15"
-                className="w-14 bg-dark-surface border border-dark-border rounded px-1.5 py-0.5 text-center text-xs font-mono text-slate-100 focus:outline-none focus:border-emerald-400"
-              />
-              <span className="ml-1 text-[11px] text-slate-400">°</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('y', -90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-emerald-500/20 border border-dark-border hover:border-emerald-500/40 text-[10px] text-slate-300 hover:text-emerald-200 transition-all"
-            >
-              -90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('y', 90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-emerald-500/20 border border-dark-border hover:border-emerald-500/40 text-[10px] text-slate-300 hover:text-emerald-200 transition-all"
-            >
-              +90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('y', 180)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-emerald-500/20 border border-dark-border hover:border-emerald-500/40 text-[10px] text-slate-300 hover:text-emerald-200 transition-all"
-            >
-              180°
-            </button>
-          </div>
-        </div>
-
-        {/* Z Axis */}
-        <div className="flex items-center justify-between bg-dark-panel/60 p-1.5 px-2 rounded-xl border border-sky-500/20">
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-sky-500/20 text-sky-300 font-bold text-[10px] flex items-center justify-center border border-sky-500/30">
-              Z
-            </span>
-            <div className="flex items-center">
-              <input
-                type="number"
-                disabled={disabled}
-                value={rotation.z}
-                onChange={(e) => handleInputChange('z', e.target.value)}
-                step="15"
-                className="w-14 bg-dark-surface border border-dark-border rounded px-1.5 py-0.5 text-center text-xs font-mono text-slate-100 focus:outline-none focus:border-sky-400"
-              />
-              <span className="ml-1 text-[11px] text-slate-400">°</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('z', -90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-sky-500/20 border border-dark-border hover:border-sky-500/40 text-[10px] text-slate-300 hover:text-sky-200 transition-all"
-            >
-              -90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('z', 90)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-sky-500/20 border border-dark-border hover:border-sky-500/40 text-[10px] text-slate-300 hover:text-sky-200 transition-all"
-            >
-              +90°
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => handleAxisStep('z', 180)}
-              className="px-1.5 py-0.5 rounded bg-dark-surface hover:bg-sky-500/20 border border-dark-border hover:border-sky-500/40 text-[10px] text-slate-300 hover:text-sky-200 transition-all"
-            >
-              180°
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Info & Reset */}
-      <div className="flex items-center justify-between pt-2 border-t border-dark-border/60">
-        <div className="flex items-center gap-1 text-[10px] text-amber-300/90">
-          <CheckCircle2 className="w-3 h-3 text-amber-400" />
-          <span>{t('transform.bake_hint', '匯出時將自動烘焙此姿態至檔案實體幾何')}</span>
-        </div>
-
-        <button
-          type="button"
-          disabled={disabled || !hasRotation}
-          onClick={onResetRotation}
-          className="flex items-center gap-1 px-2 py-0.5 rounded bg-dark-panel hover:bg-dark-panel/80 border border-dark-border hover:border-slate-500 text-[10px] text-slate-400 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <RefreshCw className="w-2.5 h-2.5" />
-          <span>{t('transform.reset', '重設 (0°)')}</span>
-        </button>
+      {/* 3 Horizontal Axis Columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {renderAxisControl('x', {
+          badge: 'bg-rose-500/20 border-rose-500/40 text-rose-300',
+          border: 'border-rose-500/20',
+          text: 'text-rose-400',
+        })}
+        {renderAxisControl('y', {
+          badge: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300',
+          border: 'border-emerald-500/20',
+          text: 'text-emerald-400',
+        })}
+        {renderAxisControl('z', {
+          badge: 'bg-sky-500/20 border-sky-500/40 text-sky-300',
+          border: 'border-sky-500/20',
+          text: 'text-sky-400',
+        })}
       </div>
     </div>
   );

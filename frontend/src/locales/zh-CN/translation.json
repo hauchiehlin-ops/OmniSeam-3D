@@ -152,6 +152,24 @@
     "bake_hint": "旋转角度将于导出时自动烘焙（Bake）至 3D 几何实体顶点中",
     "reset": "重置姿态"
   },
+  "coord": {
+    "select_tooltip": "空间坐标系（智慧推荐 / 笛卡尔 / 极坐标 / 圆柱 / 球坐标）",
+    "auto_adaptive": "智慧坐标 (Auto)",
+    "cartesian": "笛卡尔 (XYZ)",
+    "cartesian_short": "笛卡尔",
+    "polar": "极坐标 (Polar)",
+    "polar_short": "极坐标",
+    "cylindrical": "圆柱坐标 (Cylindrical)",
+    "cylindrical_short": "圆柱坐标",
+    "spherical": "球坐标 (Spherical)",
+    "spherical_short": "球坐标",
+    "none": "隐藏网格 (Off)",
+    "reason_default_cartesian": "默认笛卡尔直角空间坐标系",
+    "reason_spherical_symmetric": "检测到三轴等向球体对称特征，已自动配置球坐标系 (Spherical)",
+    "reason_polar_planar": "检测到扁平旋转盘面特征，已自动配置极坐标系 (Polar)",
+    "reason_cylindrical_rotational": "检测到轴对称柱状特征，已自动配置圆柱坐标系 (Cylindrical)",
+    "reason_cartesian_general": "检测到非对称复杂机械结构，已自动配置笛卡尔直角坐标系 (Cartesian)"
+  },
   "audit": {
     "title": "几何健康度体检报告 (Health Audit)",
     "health_score": "几何健康评分",

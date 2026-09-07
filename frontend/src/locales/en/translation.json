@@ -152,6 +152,24 @@
     "bake_hint": "Rotation angles will be automatically baked into the 3D solid mesh vertices upon export",
     "reset": "Reset Orientation"
   },
+  "coord": {
+    "select_tooltip": "Coordinate System (Auto / Cartesian / Polar / Cylindrical / Spherical)",
+    "auto_adaptive": "Auto Adaptive",
+    "cartesian": "Cartesian (XYZ)",
+    "cartesian_short": "Cartesian",
+    "polar": "Polar",
+    "polar_short": "Polar",
+    "cylindrical": "Cylindrical",
+    "cylindrical_short": "Cylindrical",
+    "spherical": "Spherical",
+    "spherical_short": "Spherical",
+    "none": "Off (No Grid)",
+    "reason_default_cartesian": "Default Cartesian Orthogonal Coordinate System",
+    "reason_spherical_symmetric": "Detected triaxial spherical symmetry; automatically configured Spherical Coordinate System",
+    "reason_polar_planar": "Detected planar rotational disk feature; automatically configured Polar Coordinate System",
+    "reason_cylindrical_rotational": "Detected rotational cylindrical feature; automatically configured Cylindrical Coordinate System",
+    "reason_cartesian_general": "Detected complex asymmetric geometry; automatically configured Cartesian Coordinate System"
+  },
   "audit": {
     "title": "Geometric Health Audit Report",
     "health_score": "Health Score",

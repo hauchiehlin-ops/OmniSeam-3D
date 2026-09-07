@@ -152,6 +152,24 @@
     "bake_hint": "旋轉角度將於匯出時自動烘焙（Bake）至 3D 幾何實體頂點中",
     "reset": "重置姿態"
   },
+  "coord": {
+    "select_tooltip": "空間座標系（智慧推薦 / 笛卡爾 / 極座標 / 圓柱 / 球座標）",
+    "auto_adaptive": "智慧座標 (Auto)",
+    "cartesian": "笛卡爾 (XYZ)",
+    "cartesian_short": "笛卡爾",
+    "polar": "極座標 (Polar)",
+    "polar_short": "極座標",
+    "cylindrical": "圓柱座標 (Cylindrical)",
+    "cylindrical_short": "圓柱座標",
+    "spherical": "球座標 (Spherical)",
+    "spherical_short": "球座標",
+    "none": "隱藏網格 (Off)",
+    "reason_default_cartesian": "預設笛卡爾直角空間座標系",
+    "reason_spherical_symmetric": "檢測到三軸等向球體對稱特徵，已自動配置球座標系 (Spherical)",
+    "reason_polar_planar": "檢測到扁平旋轉盤面特徵，已自動配置極座標系 (Polar)",
+    "reason_cylindrical_rotational": "檢測到軸對稱柱狀特徵，已自動配置圓柱座標系 (Cylindrical)",
+    "reason_cartesian_general": "檢測到非對稱複雜機械結構，已自動配置笛卡爾直角座標系 (Cartesian)"
+  },
   "audit": {
     "title": "幾何健康體檢報告",
     "health_score": "模型健康評分",

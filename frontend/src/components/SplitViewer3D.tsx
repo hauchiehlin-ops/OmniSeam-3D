@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { Viewer3D } from './Viewer3D';
 import { DisplayMode } from '../types';
+import { CoordinateSystemSelection, CoordinateSystemType } from '../engine/coordinate-system-manager';
 
 interface SplitViewer3DProps {
   originalFile?: File | null;
@@ -20,6 +21,8 @@ interface SplitViewer3DProps {
   rotation?: { x: number; y: number; z: number };
   onChangeRotation?: (rot: { x: number; y: number; z: number }) => void;
   showRotationGizmo?: boolean;
+  coordSystemMode?: CoordinateSystemSelection;
+  onDetectedCoordSystem?: (type: CoordinateSystemType) => void;
 }
 
 export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
@@ -35,6 +38,8 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
   rotation,
   onChangeRotation,
   showRotationGizmo,
+  coordSystemMode = 'auto',
+  onDetectedCoordSystem,
 }) => {
   const { t } = useTranslation();
 
@@ -57,6 +62,8 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
           rotation={rotation}
           onChangeRotation={onChangeRotation}
           showRotationGizmo={showRotationGizmo}
+          coordSystemMode={coordSystemMode}
+          onDetectedCoordSystem={onDetectedCoordSystem}
         />
       </div>
 
@@ -74,6 +81,7 @@ export const SplitViewer3D: React.FC<SplitViewer3DProps> = ({
           badge="Watertight"
           badgeColor="emerald"
           onModelLoaded={onModelLoaded}
+          coordSystemMode={coordSystemMode}
         />
       </div>
     </div>

@@ -152,6 +152,24 @@
     "bake_hint": "회전 각도는 내보낼 때 3D 지오메트리 꼭짓점에 자동으로 베이크(Bake)됩니다",
     "reset": "자세 초기화"
   },
+  "coord": {
+    "select_tooltip": "공간 좌표계 (스마트 추천 / 직교 데카르트 / 극좌표 / 원통 / 구면)",
+    "auto_adaptive": "자동 적응 (Auto)",
+    "cartesian": "데카르트 (XYZ)",
+    "cartesian_short": "데카르트",
+    "polar": "극좌표 (Polar)",
+    "polar_short": "극좌표",
+    "cylindrical": "원통 좌표 (Cylindrical)",
+    "cylindrical_short": "원통 좌표",
+    "spherical": "구면 좌표 (Spherical)",
+    "spherical_short": "구면 좌표",
+    "none": "격자 숨김 (Off)",
+    "reason_default_cartesian": "기본 직교 데카르트 좌표계",
+    "reason_spherical_symmetric": "등방성 구형 대칭 특징 감지, 구면 좌표계가 자동으로 구성되었습니다",
+    "reason_polar_planar": "평평한 회전 디스크 특징 감지, 극좌표계가 자동으로 구성되었습니다",
+    "reason_cylindrical_rotational": "축대칭 원통형 특징 감지, 원통 좌표계가 자동으로 구성되었습니다",
+    "reason_cartesian_general": "비대칭 복합 기계 구조 감지, 직교 데카르트 좌표계가 자동으로 구성되었습니다"
+  },
   "audit": {
     "title": "지오메트리 건전성 진단 보고서 (Health Audit)",
     "health_score": "지오메트리 건전성 점수",
