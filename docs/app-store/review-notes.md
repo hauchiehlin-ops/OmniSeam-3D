@@ -40,7 +40,7 @@ GitHub variable `REVIEW_NODE_URL` = `https://hauchieh-omniseam-engine.hf.space` 
 - [x] Set GitHub repository variable `REVIEW_NODE_URL`.
 - [x] Fill in the review node URL and test file link above.
 - [ ] Merge the PR into `main` (the test-file link and the keep-alive workflow only work from `main`).
-- [ ] Deploy the backend to the Space and set `IS_PUBLIC_DEMO_NODE=true` (see `docs/hf-node.md`).
+- [ ] Add repository secret `HF_TOKEN` (HF Write token); merging into `main` then deploys the Space and sets `IS_PUBLIC_DEMO_NODE=true` automatically (`deploy-hf.yml`, see `docs/hf-node.md`).
 - [ ] Confirm `/api/v1/health` shows `"version":"4.3.0"` or later and a non-empty `"step_readers"` list
       (on 2026-11-14 the node reported v1.0.24, which the app flags as outdated).
       `cascadio` alone is enough for STEP/IGES; FreeCAD is only needed for native CAD such as SolidWorks.
