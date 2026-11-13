@@ -70,9 +70,15 @@ class CADEngine:
         if occt_mesh is not None:
             return occt_mesh
 
-        # 3. Direct Trimesh loader
+        # 3. Direct Trimesh loader (STEP/IGES via the `cascadio` OpenCASCADE wheel)
         try:
             loaded = trimesh.load(str(file_path))
+            # cascadio tessellates CAD files into glTF, which is in meters; CAD
+            # files and the rest of the pipeline work in millimeters.
+            if ext in ("step", "stp", "iges", "igs", "brep") and getattr(loaded, "units", None) in ("meters", "meter", "m"):
+                converted = loaded.convert_units("millimeters")
+                if converted is not None:
+                    loaded = converted
             if isinstance(loaded, trimesh.Scene):
                 mesh = trimesh.util.concatenate(loaded.dump())
             elif isinstance(loaded, trimesh.Trimesh):

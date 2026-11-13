@@ -24,6 +24,12 @@ The public node URL, duplicate link and minimum node version are served by
 
 CORS always allows `https://omniseam-3d.vercel.app` (web) and `capacitor://localhost` (iOS app).
 
+## STEP/IGES readers
+The converter tries, in order: FreeCAD (`freecadcmd`, apt package) → pythonocc → trimesh + `cascadio`
+(pinned in `requirements.txt`, ships its own OpenCASCADE). `/api/v1/health` lists what is installed
+in `engine_features.step_readers`. `backend/tests/test_step_conversion.py` converts the App Review
+test plate end-to-end with cascadio only.
+
 ## Keeping nodes awake
 `.github/workflows/keep-alive.yml` pings the public node every 6 hours (free Spaces sleep after ~48 h idle).
 Set repository variable `REVIEW_NODE_URL` to also ping the review node.
