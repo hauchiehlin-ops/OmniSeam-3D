@@ -6,7 +6,7 @@ import trimesh
 import numpy as np
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Any, Optional, Tuple, List
 from backend.app.models.schemas import CADOptions
 
 
