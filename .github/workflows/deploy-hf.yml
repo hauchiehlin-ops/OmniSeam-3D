@@ -1,0 +1,112 @@
+name: Deploy engine to Hugging Face Space
+
+# Pushes the backend to the public Hugging Face Space whenever `main` changes
+# (after a PR is merged), so Vercel (web) and the HF node stay in sync.
+#
+# One-time setup (GitHub → Settings → Secrets and variables → Actions):
+#   Secret   HF_TOKEN   Hugging Face access token with *Write* permission
+#   Variable HF_SPACE   optional, defaults to hauchieh/omniseam-engine
+#
+# Only the files the Space needs are pushed (no images or iOS project), because
+# Hugging Face rejects binary files that are not stored with Git LFS/Xet.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app.py"
+      - "backend/**"
+      - "requirements.txt"
+      - "constraints.txt"
+      - "packages.txt"
+      - "README.md"
+      - "package.json"
+      - ".github/workflows/deploy-hf.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hf
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HF_SPACE: ${{ vars.HF_SPACE || 'hauchieh/omniseam-engine' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check HF_TOKEN
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::Repository secret HF_TOKEN is not set (Hugging Face token with Write permission)."
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Backend tests (pinned dependencies)
+        run: |
+          pip install -r backend/requirements.txt -c constraints.txt
+          PYTHONPATH=. pytest -q backend/tests
+
+      - name: Build Space tree
+        run: |
+          mkdir -p /tmp/space
+          cp app.py requirements.txt constraints.txt packages.txt README.md /tmp/space/
+          rsync -a --exclude '__pycache__' --exclude 'tests' --exclude '._*' backend /tmp/space/
+          echo "Space files:"; (cd /tmp/space && find . -type f | sort)
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          OWNER="${HF_SPACE%%/*}"
+          VERSION="$(python -c "import json;print(json.load(open('package.json'))['version'])")"
+          cd /tmp/space
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy v${VERSION} from ${GITHUB_REPOSITORY}@${GITHUB_SHA::7}"
+          git push --force "https://${OWNER}:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main:main
+
+      - name: Mark as public demo node
+        # Enables the 25 MB limit and shared-node behaviour (IS_PUBLIC_DEMO_NODE=true).
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install -q "huggingface_hub==0.24.7"
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ["HF_TOKEN"]).add_space_variable(
+              os.environ["HF_SPACE"], "IS_PUBLIC_DEMO_NODE", "true",
+              description="Set by GitHub Actions deploy-hf.yml")
+          print("IS_PUBLIC_DEMO_NODE=true")
+          PY
+
+      - name: Wait for the new version to be live
+        run: |
+          OWNER="${HF_SPACE%%/*}"; NAME="${HF_SPACE##*/}"
+          URL="https://${OWNER}-${NAME//_/-}.hf.space/api/v1/health"
+          WANT="$(python -c "import json;print(json.load(open('package.json'))['version'])")"
+          echo "Waiting for $URL to report version $WANT (Space rebuild can take 10+ minutes)"
+          for i in $(seq 1 40); do
+            BODY="$(curl -s --max-time 30 "$URL" || true)"
+            VER="$(echo "$BODY" | python -c "import sys,json
+          try: print(json.load(sys.stdin).get('version',''))
+          except Exception: print('')")"
+            echo "attempt $i: version='${VER}'"
+            if [ "$VER" = "$WANT" ]; then echo "$BODY"; exit 0; fi
+            sleep 30
+          done
+          echo "::warning::Space did not report version $WANT within 20 minutes; check the Space build logs on Hugging Face."

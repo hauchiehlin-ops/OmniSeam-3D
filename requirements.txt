@@ -7,6 +7,8 @@ pydantic==2.14.3
 pydantic-settings==2.16.3
 python-multipart==0.0.33
 trimesh[easy]==5.2.1
+# OpenCASCADE-based STEP/IGES reader for trimesh (works without FreeCAD).
+cascadio==0.1.1
 numpy==2.4.6
 scipy==1.17.1
 networkx==3.6.1

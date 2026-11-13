@@ -24,6 +24,25 @@ The public node URL, duplicate link and minimum node version are served by
 
 CORS always allows `https://omniseam-3d.vercel.app` (web) and `capacitor://localhost` (iOS app).
 
+## Deploying to the Space
+Automatic: `.github/workflows/deploy-hf.yml` runs on every push to `main` that touches the backend
+(i.e. after a PR is merged). It runs the backend tests, pushes only the Space files
+(`app.py`, `backend/`, `requirements.txt`, `constraints.txt`, `packages.txt`, `README.md`), sets
+`IS_PUBLIC_DEMO_NODE=true` on the Space, then waits until `/api/v1/health` reports the new version.
+It can also be started by hand: GitHub → Actions → "Deploy engine to Hugging Face Space" → Run workflow.
+
+One-time setup: repository secret `HF_TOKEN` (Hugging Face token with **Write** permission);
+optional variable `HF_SPACE` (default `hauchieh/omniseam-engine`).
+
+Manual fallback: `./scripts/deploy_to_hf.sh hauchieh/omniseam-engine` (pushes the whole repo; may be
+rejected if Hugging Face requires LFS for the PNG files).
+
+## STEP/IGES readers
+The converter tries, in order: FreeCAD (`freecadcmd`, apt package) → pythonocc → trimesh + `cascadio`
+(pinned in `requirements.txt`, ships its own OpenCASCADE). `/api/v1/health` lists what is installed
+in `engine_features.step_readers`. `backend/tests/test_step_conversion.py` converts the App Review
+test plate end-to-end with cascadio only.
+
 ## Keeping nodes awake
 `.github/workflows/keep-alive.yml` pings the public node every 6 hours (free Spaces sleep after ~48 h idle).
 Set repository variable `REVIEW_NODE_URL` to also ping the review node.
