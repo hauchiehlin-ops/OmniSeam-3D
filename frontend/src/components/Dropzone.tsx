@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, Box } from 'lucide-react';
 
 interface DropzoneProps {
   onFileSelected: (file: File) => void;
@@ -9,6 +9,13 @@ interface DropzoneProps {
   batchFilesCount?: number;
   isLoading?: boolean;
 }
+
+/** Small models bundled in public/samples (see scripts/generate_samples.py). */
+const SAMPLE_MODELS = [
+  { file: 'holey_box.stl', labelKey: 'samples.holey_box' },
+  { file: 'l_bracket.obj', labelKey: 'samples.bracket' },
+  { file: 'stepped_block.step', labelKey: 'samples.step_block' },
+];
 
 const SUPPORTED_FORMATS = [
   'STEP / IGES', 'SolidWorks', 'Rhino 3dm', 'STL / OBJ', '3MF', 'BIM (IFC)', 'DXF', 'Point Cloud', 'FBX / GLB'
@@ -24,6 +31,22 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   const { t } = useTranslation();
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadingSample, setLoadingSample] = useState<string | null>(null);
+
+  const loadSample = async (name: string) => {
+    if (isLoading || loadingSample) return;
+    setLoadingSample(name);
+    try {
+      const resp = await fetch(`./samples/${name}`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      onFileSelected(new File([blob], name, { type: 'application/octet-stream' }));
+    } catch (err) {
+      console.error('Failed to load sample model:', err);
+    } finally {
+      setLoadingSample(null);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -113,6 +136,30 @@ export const Dropzone: React.FC<DropzoneProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Bundled sample models (processed on-device) */}
+      {!selectedFile && batchFilesCount <= 1 && (
+        <div className="rounded-xl border border-dark-border bg-dark-surface/60 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[11px] font-semibold text-slate-300">{t('samples.title')}</span>
+            <span className="text-[10px] text-slate-500 hidden sm:inline">{t('samples.hint')}</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {SAMPLE_MODELS.map((sample) => (
+              <button
+                key={sample.file}
+                type="button"
+                disabled={isLoading || !!loadingSample}
+                onClick={() => loadSample(sample.file)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-dark-panel border border-dark-border hover:border-brand-500/50 text-[11px] text-slate-200 transition-colors disabled:opacity-50"
+              >
+                <Box className="w-3.5 h-3.5 text-brand-400" />
+                <span>{loadingSample === sample.file ? t('samples.loading') : t(sample.labelKey)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

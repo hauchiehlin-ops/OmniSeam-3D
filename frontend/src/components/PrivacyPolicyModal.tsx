@@ -1,5 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { PRIVACY_POLICY_URL } from '../platform/links';
+import { openExternal } from '../platform/native';
 import { 
   ShieldCheck, 
   X, 
@@ -185,7 +187,14 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-dark-border flex justify-end bg-dark-surface/95">
+        <div className="p-4 border-t border-dark-border flex items-center justify-between gap-3 bg-dark-surface/95">
+          <button
+            type="button"
+            onClick={() => openExternal(PRIVACY_POLICY_URL)}
+            className="text-xs text-brand-300 hover:underline"
+          >
+            {t('privacy.public_policy_link')}
+          </button>
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-500/20 transition-all"

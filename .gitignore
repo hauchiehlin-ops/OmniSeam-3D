@@ -25,3 +25,13 @@ Thumbs.db
 
 # Environment
 .env
+
+# macOS AppleDouble files (exFAT volume)
+._*
+
+# Capacitor iOS build output
+frontend/ios/App/App/public/
+frontend/ios/App/Pods/
+frontend/ios/App/output/
+frontend/ios/DerivedData/
+xcuserdata/

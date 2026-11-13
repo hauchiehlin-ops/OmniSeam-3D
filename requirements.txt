@@ -1,20 +1,23 @@
-fastapi>=0.100.0,<0.109.0
-starlette<0.36.0
-uvicorn[standard]>=0.28.0
-pydantic>=2.6.0
-pydantic-settings>=2.2.0
-python-multipart>=0.0.9
-trimesh[easy]>=4.2.0
-numpy>=1.26.0,<3.0.0
-scipy>=1.12.0
-networkx>=3.2.0
-pygltflib>=1.16.0
-ezdxf>=1.2.0
-aiofiles>=23.2.0
-requests>=2.31.0
-gradio>=4.44.0
-huggingface_hub<0.25.0
-spaces
-pytest>=8.0.0
-pytest-asyncio>=0.23.0
-httpx>=0.27.0
+# Pinned so that every "Duplicate this Space" build is reproducible.
+# Update deliberately, run the test suite, then bump NODE_VERSION.
+fastapi==0.108.0
+starlette==0.32.0.post1
+uvicorn[standard]==0.50.1
+pydantic==2.14.3
+pydantic-settings==2.16.3
+python-multipart==0.0.33
+trimesh[easy]==5.2.1
+numpy==2.4.6
+scipy==1.17.1
+networkx==3.6.1
+pygltflib==1.16.5
+ezdxf==1.4.5
+aiofiles==23.2.1
+requests==2.34.2
+gradio==4.44.1
+huggingface_hub==0.24.7
+spaces==0.52.0
+pytest==9.2.0
+pytest-asyncio==1.5.0
+# httpx 0.28 removed the `app=` argument used by Starlette 0.32's TestClient.
+httpx==0.27.2

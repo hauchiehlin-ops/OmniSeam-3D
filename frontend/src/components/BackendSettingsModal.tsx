@@ -17,7 +17,9 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
-import { apiClient, ConnectionTestResult, normalizeBackendUrl } from '../api/client';
+import { apiClient, ConnectionTestResult, normalizeBackendUrl, getDuplicateUrl, getPublicNodeUrl } from '../api/client';
+import { remoteConfig } from '../platform/remote-config';
+import { IS_NATIVE } from '../platform/native';
 
 interface BackendSettingsModalProps {
   isOpen: boolean;
@@ -25,8 +27,6 @@ interface BackendSettingsModalProps {
   onBackendConnected?: (url: string) => void;
 }
 
-const OFFICIAL_DUPLICATE_URL = "https://huggingface.co/spaces/hauchieh/omniseam-engine?duplicate=true";
-const OFFICIAL_DEMO_NODE_URL = "https://hauchieh-omniseam-engine.hf.space";
 
 export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   isOpen,
@@ -96,8 +96,8 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   };
 
   const handleUseOfficialDemo = () => {
-    setBackendUrl(OFFICIAL_DEMO_NODE_URL);
-    handleTest(OFFICIAL_DEMO_NODE_URL);
+    setBackendUrl(getPublicNodeUrl());
+    handleTest(getPublicNodeUrl());
   };
 
   const copyDockerCommand = () => {
@@ -148,7 +148,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
             <span>{t('backend_modal.tab_hf')}</span>
           </button>
-          <button
+          {!IS_NATIVE && <button
             onClick={() => setActiveTab('local')}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
               activeTab === 'local'
@@ -158,7 +158,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
           >
             <Server className="w-3.5 h-3.5 text-brand-400" />
             <span>{t('backend_modal.tab_local')}</span>
-          </button>
+          </button>}
           <button
             onClick={() => setActiveTab('client')}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
@@ -226,7 +226,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
 
                 <div className="pt-1">
                   <a
-                    href={OFFICIAL_DUPLICATE_URL}
+                    href={getDuplicateUrl()}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all group"
@@ -434,11 +434,16 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                       <div>{t('backend_modal.service_ver')}: <span className="font-mono text-emerald-400">v{testResult.data.version}</span> ({testResult.data.service})</div>
                       <div>{t('backend_modal.freecad_support')}: <span className="text-white font-medium">{testResult.data.engine_features?.freecad_available ? t('backend_modal.freecad_enabled') : t('backend_modal.freecad_light')}</span></div>
                       <div>{t('backend_modal.supported_formats_label')}: <span className="text-slate-400">{testResult.data.supported_formats.slice(0, 10).join(', ')}... (+{testResult.data.supported_formats.length - 10} formats)</span></div>
+                      {testResult.outdated && (
+                        <div className="mt-1.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200">
+                          {t('backend_modal.outdated_node', { version: testResult.data.version, min: remoteConfig.minNodeVersion })}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="text-[11px] text-rose-300/90 pt-1">
-                      {testResult.error}
-                      {backendUrl.includes('hf.space') && t('backend_modal.hf_sleep_tip')}
+                      {testResult.errorKey === 'node.waking' ? t('node.waking') : testResult.error}
+                      {testResult.errorKey !== 'node.waking' && backendUrl.includes('hf.space') && t('backend_modal.hf_sleep_tip')}
                     </p>
                   )}
                 </div>

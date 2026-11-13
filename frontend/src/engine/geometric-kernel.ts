@@ -50,6 +50,10 @@ export class GeometricKernel {
 
     // 2. Volume & Surface Area
     let totalVolume = 0;
+    // Signed volume about the bbox centre: origin-independent, so for an open
+    // mesh it tells "solid with holes" (large) apart from a flat/thin sheet (~0).
+    const cx0 = (minX + maxX) / 2, cy0 = (minY + maxY) / 2, cz0 = (minZ + maxZ) / 2;
+    let centredVolume = 0;
     let totalArea = 0;
     const edgeMap = new Map<string, number>();
 
@@ -80,6 +84,11 @@ export class GeometricKernel {
       const cross12_z = p1[0] * p2[1] - p1[1] * p2[0];
       totalVolume += (p0[0] * cross12_x + p0[1] * cross12_y + p0[2] * cross12_z) / 6.0;
 
+      const q0x = p0[0] - cx0, q0y = p0[1] - cy0, q0z = p0[2] - cz0;
+      const q1x = p1[0] - cx0, q1y = p1[1] - cy0, q1z = p1[2] - cz0;
+      const q2x = p2[0] - cx0, q2y = p2[1] - cy0, q2z = p2[2] - cz0;
+      centredVolume += (q0x * (q1y * q2z - q1z * q2y) + q0y * (q1z * q2x - q1x * q2z) + q0z * (q1x * q2y - q1y * q2x)) / 6.0;
+
       // Collect edges for topology analysis
       addEdge(edgeMap, i0, i1);
       addEdge(edgeMap, i1, i2);
@@ -106,6 +115,7 @@ export class GeometricKernel {
       faces_count: fCount,
       edges_count: uniqueEdgesCount,
       volume: isWatertight ? Math.abs(round(totalVolume)) : 0,
+      approx_open_volume: isWatertight ? undefined : Math.abs(round(centredVolume)),
       surface_area: round(totalArea),
       bounding_box: bbox,
       is_watertight: isWatertight,
