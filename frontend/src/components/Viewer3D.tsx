@@ -153,6 +153,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [cadPlaceholder, setCadPlaceholder] = useState<CadPlaceholderInfo | null>(null);
+  const [contextLost, setContextLost] = useState(false);
 
   const updateCoordinateVisuals = (mode: CoordinateSystemSelection) => {
     if (!sceneRef.current) return;
@@ -209,6 +210,14 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
+
+    // Mobile WebViews drop the WebGL context when a model exhausts GPU memory.
+    // Show a clear message instead of a silent black canvas.
+    renderer.domElement.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      setContextLost(true);
+    });
+    renderer.domElement.addEventListener('webglcontextrestored', () => setContextLost(false));
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -693,6 +702,11 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
 
   return (
     <div className="relative w-full h-full min-h-[360px] sm:min-h-[440px] rounded-2xl overflow-hidden bg-gradient-to-b from-[#0D121F] to-[#080B13] border border-dark-border">
+      {contextLost && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-6 bg-dark-bg/90 text-center">
+          <p className="text-xs text-amber-300 max-w-xs leading-relaxed">{t('native.webgl_context_lost')}</p>
+        </div>
+      )}
       {/* Title & Badge */}
       {(title || badge) && (
         <div className="absolute top-4 left-4 z-10 flex items-center gap-2 pointer-events-none">

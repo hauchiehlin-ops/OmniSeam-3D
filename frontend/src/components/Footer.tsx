@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Share } from '@capacitor/share';
+import { IS_NATIVE } from '../platform/native';
+import { WEB_APP_URL } from '../platform/links';
 import { 
   BookOpen, 
   ShieldCheck, 
@@ -10,7 +13,8 @@ import {
   Heart,
   Share2,
   Check,
-  Mail
+  Mail,
+  Scale
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { APP_VERSION } from '../version';
@@ -19,12 +23,14 @@ interface FooterProps {
   onOpenManual: () => void;
   onOpenPrivacy: () => void;
   onOpenBackendSettings: () => void;
+  onOpenLicenses?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenManual,
   onOpenPrivacy,
-  onOpenBackendSettings
+  onOpenBackendSettings,
+  onOpenLicenses,
 }) => {
   const { t } = useTranslation();
   const [copiedShare, setCopiedShare] = useState(false);
@@ -51,7 +57,15 @@ export const Footer: React.FC<FooterProps> = ({
       // Fallback
     }
 
-    // 2. If Web Share API is supported (e.g. mobile Safari/Chrome), pass url cleanly
+    // 2. iOS app: native share sheet. Web: Web Share API when available.
+    if (IS_NATIVE) {
+      try {
+        await Share.share({ title: 'OmniSeam 3D', url: WEB_APP_URL });
+      } catch {
+        // User dismissed share sheet
+      }
+      return;
+    }
     if (navigator.share) {
       try {
         await navigator.share({
@@ -122,6 +136,16 @@ export const Footer: React.FC<FooterProps> = ({
               <Settings className="w-3.5 h-3.5 text-indigo-400" />
               <span>{t('backend_modal.title').split('(')[0]}</span>
             </button>
+
+            {onOpenLicenses && (
+              <button
+                onClick={onOpenLicenses}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-panel border border-dark-border text-slate-200 hover:text-white hover:border-slate-500 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+              >
+                <Scale className="w-3.5 h-3.5 text-slate-400" />
+                <span>{t('licenses.nav_btn')}</span>
+              </button>
+            )}
           </div>
         </div>
 

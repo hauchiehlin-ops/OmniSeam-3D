@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 
 from backend.app.models.schemas import TaskResponse, TaskStatus
 from backend.app.storage.file_manager import file_manager
+from backend.app.hardening import apply_task_timeout
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ router = APIRouter()
 @router.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_task_status(task_id: str):
     """Retrieves conversion task status, progress percentage, and health audit report."""
-    task = file_manager.get_task(task_id)
+    task = apply_task_timeout(file_manager.get_task(task_id))
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     return task

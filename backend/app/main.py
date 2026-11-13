@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from backend.app.config import settings
 from backend.app.api.v1.router import api_v1_router
+from backend.app.hardening import install_hardening
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -25,14 +25,8 @@ app = FastAPI(
     ]
 )
 
-# CORS Middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS allow-list, per-IP rate limiting and 1-hour file cleanup
+install_hardening(app)
 
 # Include API v1 Router
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)

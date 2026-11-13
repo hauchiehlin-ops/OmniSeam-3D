@@ -1,15 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Lock, 
-  Sparkles, 
+  Zap, 
   Cloud, 
   FileCode, 
   CheckCircle, 
   ArrowRight,
   X
 } from 'lucide-react';
-import { apiClient, OFFICIAL_PUBLIC_BACKEND_URL } from '../api/client';
+import { apiClient } from '../api/client';
 
 interface CadUnlockModalProps {
   isOpen: boolean;
@@ -40,7 +39,7 @@ export const CadUnlockModal: React.FC<CadUnlockModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border bg-dark-panel/60">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400">
-              <Lock className="w-5 h-5" />
+              <Cloud className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
@@ -77,7 +76,7 @@ export const CadUnlockModal: React.FC<CadUnlockModalProps> = ({
             {/* Option 0: 1-Click Official Public Node (Instant) */}
             <div 
               onClick={() => {
-                apiClient.setBackendUrl(OFFICIAL_PUBLIC_BACKEND_URL);
+                apiClient.setBackendUrl(''); // empty = public demo node
                 apiClient.setEngineMode('server');
                 onClose();
               }}
@@ -86,7 +85,7 @@ export const CadUnlockModal: React.FC<CadUnlockModalProps> = ({
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-300 mt-0.5">
-                    <Sparkles className="w-4 h-4" />
+                    <Zap className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
                     <div className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
@@ -157,13 +156,13 @@ export const CadUnlockModal: React.FC<CadUnlockModalProps> = ({
 
           <button
             onClick={() => {
-              apiClient.setBackendUrl(OFFICIAL_PUBLIC_BACKEND_URL);
+              apiClient.setBackendUrl(''); // empty = public demo node
               apiClient.setEngineMode('server');
               onClose();
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-500/20 transition-all"
           >
-            <Sparkles className="w-4 h-4" />
+            <Zap className="w-4 h-4" />
             <span>{t('cad_unlock.go_public')}</span>
           </button>
         </div>

@@ -26,6 +26,8 @@ export interface GeometricMetrics {
   is_watertight: boolean;
   euler_number: number;
   connected_components: number;
+  /** Client engine only: approximate enclosed volume of an open (non-watertight) mesh. */
+  approx_open_volume?: number;
 }
 
 export interface GeometricDefectInfo {

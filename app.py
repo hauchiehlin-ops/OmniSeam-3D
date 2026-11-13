@@ -7,7 +7,7 @@ current_dir = Path(__file__).resolve().parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
-from fastapi.middleware.cors import CORSMiddleware
+from backend.app.hardening import install_hardening
 import gradio as gr
 from gradio.routes import App
 from backend.app.config import settings
@@ -43,14 +43,8 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     dummy_btn = gr.Button("GPU Warmup", visible=False)
     dummy_btn.click(fn=zerogpu_event)
 
-# 3. Add CORS & Mount REST API Router (/api/v1) onto Gradio's FastAPI App
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 3. CORS allow-list, rate limiting, 1-hour file cleanup; mount REST API Router (/api/v1)
+install_hardening(demo.app)
 demo.app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 # 4. Launch with Gradio's Queue (Compatible with Hugging Face ZeroGPU and CPU Basic)

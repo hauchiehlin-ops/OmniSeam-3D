@@ -22,6 +22,7 @@ import { ArPreviewModal } from './components/ArPreviewModal';
 import { MobileArView } from './components/MobileArView';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
+import { IS_NATIVE, NATIVE_LOCAL_MAX_SIZE_BYTES, NATIVE_LOCAL_MAX_SIZE_MB, OPEN_FILE_EVENT, saveOrShareFile, saveOrShareUrl } from './platform/native';
 
 
 import * as THREE from 'three';
@@ -31,7 +32,10 @@ import {
   InspectResponse, 
   TaskResponse 
 } from './types';
-import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES } from './api/client';
+import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES, describeNodeError, UploadDeclinedError } from './api/client';
+import { UploadConsentModal } from './components/UploadConsentModal';
+import { LicensesModal } from './components/LicensesModal';
+import { loadRemoteConfig } from './platform/remote-config';
 import { ArManager } from './engine/ar-manager';
 import { ZipPackager, ZipEntry } from './engine/zip-packager';
 import { AdaptiveIntentEngine, AdaptiveIntentResult } from './engine/adaptive-intent';
@@ -75,6 +79,7 @@ export const App: React.FC = () => {
   const [publicLimitFile, setPublicLimitFile] = useState<File | null>(null);
   const [showManualModal, setShowManualModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showLicensesModal, setShowLicensesModal] = useState(false);
   const [showArModal, setShowArModal] = useState(false);
   const [showWindTunnelModal, setShowWindTunnelModal] = useState(false);
   const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
@@ -150,6 +155,30 @@ export const App: React.FC = () => {
 
   const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  /** Shows a readable message for a failed cloud request (silent if the user declined the upload). */
+  const reportNodeError = (err: unknown) => {
+    if (err instanceof UploadDeclinedError) return;
+    const { key, params } = describeNodeError(err);
+    if (key) window.alert(t(key, params));
+  };
+
+  // Remote config (public node URL, min node version, optional notice)
+  useEffect(() => {
+    loadRemoteConfig().then((cfg) => {
+      const lang = i18n.language;
+      const text = cfg.notice?.[lang] || cfg.notice?.[lang.split('-')[0]] || cfg.notice?.en;
+      if (!text) return;
+      try {
+        if (localStorage.getItem('omniseam_notice_seen') === text) return;
+        localStorage.setItem('omniseam_notice_seen', text);
+      } catch {
+        /* ignore */
+      }
+      window.alert(`${t('node.notice_title')}\n\n${text}`);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Sync initial engine mode
   useEffect(() => {
     apiClient.setEngineMode(engineMode);
@@ -218,6 +247,14 @@ export const App: React.FC = () => {
 
   // Handle File Selection: Auto Engine Routing & Auto-Inspect
   const handleFileSelect = async (file: File) => {
+    // iOS WebView memory guard: very large models crash on-device WebGL.
+    if (IS_NATIVE && file.size > NATIVE_LOCAL_MAX_SIZE_BYTES) {
+      window.alert(t('native.file_too_large', {
+        max: NATIVE_LOCAL_MAX_SIZE_MB,
+        size: (file.size / 1024 / 1024).toFixed(1),
+      }));
+      return;
+    }
     setSelectedFile(file);
     setSelectedFiles([file]);
     setIsAutoAdaptiveActive(true);
@@ -325,11 +362,10 @@ export const App: React.FC = () => {
     if (!canvas) return;
     try {
       const dataUrl = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
       const baseName = selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'model';
-      a.download = `OmniSeam_Snapshot_${baseName}_${Date.now()}.png`;
-      a.href = dataUrl;
-      a.click();
+      saveOrShareUrl(dataUrl, `OmniSeam_Snapshot_${baseName}_${Date.now()}.png`).catch((err) =>
+        console.error('Snapshot save failed:', err)
+      );
       confetti({
         particleCount: 40,
         spread: 60,
@@ -412,6 +448,7 @@ export const App: React.FC = () => {
       } catch (err) {
         console.error("Batch conversion error:", err);
         setIsProcessing(false);
+        reportNodeError(err);
       }
       return;
     }
@@ -463,6 +500,9 @@ export const App: React.FC = () => {
               clearInterval(pollInterval);
               setIsProcessing(false);
 
+              if (updated.status === 'failed' && updated.error?.message) {
+                window.alert(t('node.failed', { message: updated.error.message }));
+              }
               if (updated.status === 'completed') {
                 setIsSplitView(true);
                 setShowAuditModal(true);
@@ -477,6 +517,7 @@ export const App: React.FC = () => {
             console.error("Polling error:", pollErr);
             clearInterval(pollInterval);
             setIsProcessing(false);
+            reportNodeError(pollErr);
           }
         }, 1000);
         activePollingRef.current = pollInterval;
@@ -484,6 +525,7 @@ export const App: React.FC = () => {
     } catch (err) {
       console.error("Conversion failed:", err);
       setIsProcessing(false);
+      reportNodeError(err);
     }
   };
 
@@ -511,12 +553,7 @@ export const App: React.FC = () => {
       }
 
       const zipBlob = await ZipPackager.createZip(entries);
-      const zipUrl = URL.createObjectURL(zipBlob);
-      const a = document.createElement('a');
-      a.href = zipUrl;
-      a.download = `OmniSeam3D_Batch_Export_${Date.now()}.zip`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(zipUrl), 3000);
+      await saveOrShareFile(zipBlob, `OmniSeam3D_Batch_Export_${Date.now()}.zip`);
       confetti({
         particleCount: 50,
         spread: 60,
@@ -524,6 +561,7 @@ export const App: React.FC = () => {
       });
     } catch (err) {
       console.error("ZIP packaging error:", err);
+      reportNodeError(err);
     } finally {
       setIsDownloadingZip(false);
     }
@@ -555,6 +593,7 @@ export const App: React.FC = () => {
       setShowAuditModal(true);
     } catch (err) {
       console.error("Inspect error:", err);
+      reportNodeError(err);
     }
   };
 
@@ -583,6 +622,18 @@ export const App: React.FC = () => {
     return () => {
       if (activePollingRef.current) clearInterval(activePollingRef.current);
     };
+  }, []);
+
+  // Files opened from the iOS Files app / Share Sheet ("Open in OmniSeam 3D")
+  const handleFileSelectRef = useRef(handleFileSelect);
+  handleFileSelectRef.current = handleFileSelect;
+  useEffect(() => {
+    const onOpenFile = (e: Event) => {
+      const file = (e as CustomEvent<File>).detail;
+      if (file) handleFileSelectRef.current(file);
+    };
+    window.addEventListener(OPEN_FILE_EVENT, onOpenFile);
+    return () => window.removeEventListener(OPEN_FILE_EVENT, onOpenFile);
   }, []);
 
   const defectPoints = inspectData ? {
@@ -811,6 +862,7 @@ export const App: React.FC = () => {
         onOpenManual={() => setShowManualModal(true)}
         onOpenPrivacy={() => setShowPrivacyModal(true)}
         onOpenBackendSettings={() => setShowBackendModal(true)}
+        onOpenLicenses={() => setShowLicensesModal(true)}
       />
 
       {/* User Manual Modal */}
@@ -869,6 +921,9 @@ export const App: React.FC = () => {
       />
 
       {/* Public Demo Node File Limit Guardrail Modal */}
+      <UploadConsentModal />
+      <LicensesModal isOpen={showLicensesModal} onClose={() => setShowLicensesModal(false)} />
+
       <PublicLimitModal
         isOpen={showPublicLimitModal}
         fileSizeMb={publicLimitFile ? publicLimitFile.size / (1024 * 1024) : 0}

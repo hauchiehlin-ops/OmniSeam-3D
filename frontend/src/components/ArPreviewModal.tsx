@@ -13,6 +13,7 @@ import {
   Wifi
 } from 'lucide-react';
 import { ArManager } from '../engine/ar-manager';
+import { IS_NATIVE } from '../platform/native';
 import { apiClient } from '../api/client';
 
 interface ArPreviewModalProps {
@@ -36,8 +37,11 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
   previewUrl,
   activeTaskId,
   onLaunchDirectAr,
-  isMobileDevice = false,
+  isMobileDevice: isMobileDeviceProp = false,
 }) => {
+  // Inside the iOS app AR always runs on-device via native Quick Look:
+  // no cloud AR session, no QR code, no LAN host helper.
+  const isMobileDevice = isMobileDeviceProp || IS_NATIVE;
   const { t } = useTranslation();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -45,7 +49,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   
   // Localhost helper state
-  const isLocalhost = typeof window !== 'undefined' && 
+  const isLocalhost = !IS_NATIVE && typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const [lanHost, setLanHost] = useState<string>(() => {
     return localStorage.getItem('omniseam_lan_host') || '';
@@ -54,7 +58,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
 
   // Generate AR Session on modal open
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || IS_NATIVE) {
       return;
     }
 
@@ -274,14 +278,14 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-dark-border flex items-center justify-between bg-dark-surface/95">
-          <button
+          {IS_NATIVE ? <span /> : <button
             onClick={handleCopyLink}
             disabled={!sessionId && !previewUrl}
             className="px-3.5 py-2 rounded-xl bg-dark-panel hover:bg-dark-hover border border-dark-border text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? t('ar.copied') : t('ar.copy_link')}</span>
-          </button>
+          </button>}
           
           <button
             onClick={onClose}

@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+import { IS_IOS_APP, presentUsdzQuickLook } from '../platform/native';
 
 export class ArManager {
   /**
    * Detects client operating system / browser capabilities for AR.
    */
   static getArPlatform(): 'ios' | 'android' | 'desktop' {
+    // Inside the iOS app (incl. iPad, whose WebView reports a desktop UA).
+    if (IS_IOS_APP) return 'ios';
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
     if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
       return 'ios';
@@ -25,6 +28,25 @@ export class ArManager {
     const group = new THREE.Group();
     const clone = object.clone(true);
     group.add(clone);
+
+    // USDZExporter only exports meshes with MeshStandardMaterial. Loaders (e.g.
+    // OBJLoader -> MeshPhongMaterial) and viewer display modes (wireframe,
+    // normals) use other materials, which would produce an empty AR scene.
+    clone.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      const first = materials[0] as THREE.Material & { color?: THREE.Color };
+      if (!Array.isArray(mesh.material) && (first as THREE.MeshStandardMaterial)?.isMeshStandardMaterial && !first.transparent) {
+        return;
+      }
+      mesh.material = new THREE.MeshStandardMaterial({
+        color: first?.color ? first.color.clone() : new THREE.Color(0x9ca3af),
+        roughness: 0.4,
+        metalness: 0.2,
+        vertexColors: !!mesh.geometry?.getAttribute?.('color'),
+      });
+    });
 
     const box = new THREE.Box3().setFromObject(clone);
     const size = box.getSize(new THREE.Vector3());
@@ -85,6 +107,11 @@ export class ArManager {
   static async launchIosAr(sceneOrMesh: THREE.Object3D): Promise<boolean> {
     try {
       const usdzBlob = await this.exportUsdz(sceneOrMesh);
+      if (IS_IOS_APP) {
+        // WKWebView ignores <a rel="ar">; use native QLPreviewController instead.
+        await presentUsdzQuickLook(usdzBlob, 'OmniSeam_AR.usdz');
+        return true;
+      }
       const usdzUrl = URL.createObjectURL(usdzBlob);
 
       const anchor = document.createElement('a');

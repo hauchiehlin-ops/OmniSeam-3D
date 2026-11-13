@@ -1,5 +1,6 @@
 # OmniSeam 3D - Backend Dockerfile (Hugging Face Spaces & Docker compatible)
-FROM python:3.11-slim
+# Debian codename pinned so apt packages (FreeCAD 0.20.x) stay stable across rebuilds.
+FROM python:3.11-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -20,9 +21,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/requirements.txt
+COPY requirements.txt constraints.txt /app/
+RUN pip install --no-cache-dir --upgrade "pip==25.3" && \
+    pip install --no-cache-dir -r /app/requirements.txt -c /app/constraints.txt
 
 # Copy application source
 COPY backend /app/backend

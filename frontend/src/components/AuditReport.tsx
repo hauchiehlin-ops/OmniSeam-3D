@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { saveOrShareFile } from '../platform/native';
 import { 
   Activity, 
   ShieldCheck, 
@@ -36,15 +37,17 @@ export const AuditReport: React.FC<AuditReportProps> = ({
   const defects = report ? report.defects_found : inspectData?.defects;
   const isWatertight = report ? report.watertight_achieved : (inspectData?.is_watertight ?? false);
 
+  // An open mesh that still encloses a substantial volume is a solid with holes,
+  // not a zero-thickness sheet (only known for client-side metrics).
+  const approxOpenVolume = (repairedMetrics ?? origMetrics)?.approx_open_volume;
+  const bboxSize = (repairedMetrics ?? origMetrics)?.bounding_box?.size;
+  const bboxVolume = bboxSize ? bboxSize[0] * bboxSize[1] * bboxSize[2] : 0;
+  const isSolidWithHoles = approxOpenVolume !== undefined && bboxVolume > 0 && approxOpenVolume > bboxVolume * 0.05;
+
   const handleExportJson = () => {
     const dataToExport = report || inspectData;
     const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `audit_report_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    saveOrShareFile(blob, `audit_report_${Date.now()}.json`).catch((err) => console.error('Export JSON failed:', err));
   };
 
   const handlePrint = () => {
@@ -133,7 +136,7 @@ export const AuditReport: React.FC<AuditReportProps> = ({
           </div>
 
           {/* Zero-Thickness Surface Sheet Diagnostic Alert */}
-          {!isWatertight && ((repairedMetrics && repairedMetrics.volume === 0) || origMetrics.volume === 0) && (
+          {!isWatertight && ((repairedMetrics && repairedMetrics.volume === 0) || origMetrics.volume === 0) && !isSolidWithHoles && (
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-2.5 animate-fadeIn">
               <div className="flex items-center gap-2 font-bold text-amber-300">
                 <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-amber-400" />

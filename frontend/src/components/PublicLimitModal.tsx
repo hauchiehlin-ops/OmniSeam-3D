@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldAlert, Sparkles, ExternalLink, Settings, X } from 'lucide-react';
-import { OFFICIAL_DUPLICATE_URL, PUBLIC_DEMO_MAX_SIZE_MB } from '../api/client';
+import { ShieldAlert, Cloud, ExternalLink, Settings, X } from 'lucide-react';
+import { getDuplicateUrl, PUBLIC_DEMO_MAX_SIZE_MB } from '../api/client';
 
 interface PublicLimitModalProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ export const PublicLimitModal: React.FC<PublicLimitModalProps> = ({
           {/* Benefits Grid */}
           <div className="p-4 rounded-xl bg-dark-panel border border-indigo-500/30 space-y-2.5">
             <div className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <Cloud className="w-4 h-4 text-indigo-400" />
               <span>{t('public_limit.benefit_title')}</span>
             </div>
             <ul className="text-[11px] text-slate-300 space-y-1.5 pl-1">
@@ -87,12 +87,12 @@ export const PublicLimitModal: React.FC<PublicLimitModalProps> = ({
           {/* Action Buttons */}
           <div className="pt-2 space-y-2.5">
             <a
-              href={OFFICIAL_DUPLICATE_URL}
+              href={getDuplicateUrl()}
               target="_blank"
               rel="noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/25 transition-all group"
             >
-              <Sparkles className="w-4 h-4" />
+              <Cloud className="w-4 h-4" />
               <span>{t('public_limit.duplicate_btn')}</span>
               <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
