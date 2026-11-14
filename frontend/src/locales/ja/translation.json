@@ -764,6 +764,8 @@
     "chip_trial": "体験・残り{{days}}日",
     "chip_upgrade": "ベーシック",
     "secondary_first_file": "最初のファイルだけ開く",
-    "secondary_convert_as_is": "修復せずに変換（ベーシック）"
+    "secondary_convert_as_is": "修復せずに変換（ベーシック）",
+    "status_trial_verify": "Pro 体験を一時停止中：インターネットに接続して日付を確認してください",
+    "trial_verify_desc": "端末の日付が、このアプリが以前に記録した日付より前になっているため体験を一時停止しています。インターネットに接続してアプリを開き直してください。日付と時刻を自動設定にすることもおすすめします。"
   }
 }

@@ -764,6 +764,8 @@
     "chip_trial": "试用・{{days}} 天",
     "chip_upgrade": "基础版",
     "secondary_first_file": "只打开第一个文件",
-    "secondary_convert_as_is": "直接转换，不修复（基础版）"
+    "secondary_convert_as_is": "直接转换，不修复（基础版）",
+    "status_trial_verify": "专业版试用暂停：请联网确认日期",
+    "trial_verify_desc": "设备日期早于 App 之前记录过的日期，因此暂停试用。请联网后重新打开 App；将日期与时间设为自动也有帮助。"
   }
 }

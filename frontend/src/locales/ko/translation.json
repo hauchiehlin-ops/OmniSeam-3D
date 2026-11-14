@@ -764,6 +764,8 @@
     "chip_trial": "체험 · {{days}}일",
     "chip_upgrade": "베이직",
     "secondary_first_file": "첫 번째 파일만 열기",
-    "secondary_convert_as_is": "복구 없이 변환 (베이직)"
+    "secondary_convert_as_is": "복구 없이 변환 (베이직)",
+    "status_trial_verify": "Pro 체험 일시 중지: 인터넷에 연결해 날짜를 확인하세요",
+    "trial_verify_desc": "기기 날짜가 앱이 이전에 기록한 날짜보다 이르기 때문에 체험이 일시 중지되었습니다. 인터넷에 연결한 후 앱을 다시 여세요. 날짜와 시간을 자동으로 설정하는 것도 도움이 됩니다."
   }
 }
