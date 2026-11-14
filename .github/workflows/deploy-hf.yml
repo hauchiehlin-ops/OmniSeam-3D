@@ -100,13 +100,23 @@ jobs:
           URL="https://${OWNER}-${NAME//_/-}.hf.space/api/v1/health"
           WANT="$(python -c "import json;print(json.load(open('package.json'))['version'])")"
           echo "Waiting for $URL to report version $WANT (Space rebuild can take 10+ minutes)"
-          for i in $(seq 1 40); do
+          sleep 60
+          for i in $(seq 1 50); do
+            STAGE="$(curl -s --max-time 20 "https://huggingface.co/api/spaces/${HF_SPACE}/runtime" | python -c "import sys,json
+          try: print(json.load(sys.stdin).get('stage',''))
+          except Exception: print('')")"
+            if [ "$STAGE" = "BUILD_ERROR" ] || [ "$STAGE" = "RUNTIME_ERROR" ] || [ "$STAGE" = "CONFIG_ERROR" ]; then
+              echo "::error::Space stage is $STAGE. Open https://huggingface.co/spaces/${HF_SPACE}?logs=build for details."
+              curl -s --max-time 20 "https://huggingface.co/api/spaces/${HF_SPACE}/runtime" | head -c 3000; echo
+              exit 1
+            fi
             BODY="$(curl -s --max-time 30 "$URL" || true)"
             VER="$(echo "$BODY" | python -c "import sys,json
           try: print(json.load(sys.stdin).get('version',''))
           except Exception: print('')")"
-            echo "attempt $i: version='${VER}'"
+            echo "attempt $i: stage='${STAGE}' version='${VER}'"
             if [ "$VER" = "$WANT" ]; then echo "$BODY"; exit 0; fi
             sleep 30
           done
-          echo "::warning::Space did not report version $WANT within 20 minutes; check the Space build logs on Hugging Face."
+          echo "::error::Space did not report version $WANT within ~26 minutes; check https://huggingface.co/spaces/${HF_SPACE}?logs=build"
+          exit 1

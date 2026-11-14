@@ -18,7 +18,7 @@ aiofiles==23.2.1
 requests==2.34.2
 gradio==4.44.1
 huggingface_hub==0.24.7
-spaces==0.52.0
+# `spaces` (ZeroGPU) is installed by Hugging Face itself; app.py imports it optionally.
 pytest==9.2.0
 pytest-asyncio==1.5.0
 # httpx 0.28 removed the `app=` argument used by Starlette 0.32's TestClient.
