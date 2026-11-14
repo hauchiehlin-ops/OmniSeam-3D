@@ -23,6 +23,8 @@ import {
 import { ConversionConfig, TargetFormat } from '../types';
 import { EngineMode, apiClient } from '../api/client';
 import { AdaptiveIntentResult } from '../engine/adaptive-intent';
+import { ProBadge } from './PaywallModal';
+import { ProFeature, can } from '../platform/entitlements';
 
 interface SettingsPanelProps {
   config: ConversionConfig;
@@ -39,6 +41,8 @@ interface SettingsPanelProps {
   isAutoAdaptiveActive?: boolean;
   onResetToAdaptive?: () => void;
   selectedFile?: File | null;
+  /** Returns true if the Pro feature is available; otherwise opens the paywall. */
+  onRequirePro?: (feature: ProFeature) => boolean;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -56,15 +60,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   isAutoAdaptiveActive = true,
   onResetToAdaptive,
   selectedFile,
+  onRequirePro,
 }) => {
+  const gate = (feature: ProFeature) => (onRequirePro ? onRequirePro(feature) : can(feature));
   const { t } = useTranslation();
   const [isExpertOpen, setIsExpertOpen] = useState(false);
 
+  const REPAIR_KEYS: (keyof ConversionConfig)[] = ['auto_fill_holes', 'fix_non_manifold', 'unify_normals', 'remove_degenerate'];
   const update = <K extends keyof ConversionConfig>(key: K, value: ConversionConfig[K]) => {
+    // Turning a repair step on is a Pro feature; turning it off is always allowed.
+    if (value === true && REPAIR_KEYS.includes(key) && !gate('auto_repair')) return;
     onChangeConfig({ ...config, [key]: value });
   };
 
   const handleCloudServerClick = () => {
+    if (!gate('cloud_node')) return;
     onChangeEngineMode('server');
     if (!apiClient.getStoredBackendUrl()) {
       onOpenBackendSettings();
@@ -104,6 +114,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   })();
 
   const handleStrategyApply = (strategy: 'smart' | 'watertight' | 'passthrough') => {
+    if (strategy !== 'passthrough' && !gate('auto_repair')) return;
     if (strategy === 'smart') {
       onChangeConfig({
         ...config,
@@ -174,6 +185,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             >
               <Cloud className="w-3 h-3 text-indigo-400" />
               <span>Cloud Server</span>
+              <ProBadge className="ml-0.5" />
             </button>
           </div>
         </div>
@@ -327,8 +339,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <Sparkles className="w-3.5 h-3.5 text-brand-400" />
                   <span>{t('settings.strategy_smart_title')}</span>
                 </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 shrink-0">
-                  {t('settings.strategy_smart_badge')}
+                <span className="flex items-center gap-1">
+                  <ProBadge />
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 shrink-0">
+                    {t('settings.strategy_smart_badge')}
+                  </span>
                 </span>
               </div>
               <p className="text-[10px] text-slate-300/90 leading-tight">
@@ -359,8 +374,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <Droplets className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{t('settings.strategy_watertight_title')}</span>
                 </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                  {t('settings.strategy_watertight_badge')}
+                <span className="flex items-center gap-1">
+                  <ProBadge />
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                    {t('settings.strategy_watertight_badge')}
+                  </span>
                 </span>
               </div>
               <p className="text-[10px] text-slate-300/90 leading-tight">
@@ -417,6 +435,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="flex items-center gap-2">
               <Sliders className="w-3.5 h-3.5 text-indigo-400" />
               <span className="font-semibold text-slate-200">{t('settings.expert_drawer_title')}</span>
+              <ProBadge />
               {currentStrategy === 'custom' && (
                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   {t('settings.expert_custom_badge')}

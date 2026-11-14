@@ -8,16 +8,29 @@ No sign-in required. (Leave "Sign-in required" unchecked.)
 ```
 OmniSeam 3D does not require an account.
 
+PLANS AND IN-APP PURCHASES
+- Basic is free: open/inspect mesh models, defect heatmap, measure, section,
+  AR, and convert mesh formats without repair.
+- Pro is a one-time Non-Consumable purchase (…omniseam3d.pro).
+- A free 7-day Pro trial is offered as a price-tier-0 Non-Consumable named
+  "7-Day Pro Trial" (…omniseam3d.trial7d), per Guideline 3.1.1. It does not
+  renew or charge; the app returns to Basic afterwards.
+- The plan screen opens on first launch and from the crown button at the
+  top right. It shows the price, trial terms, Restore Purchases, the EULA and
+  the privacy policy. Locked controls carry a "PRO" label and open the same screen.
+- To review Pro features, tap "Start 7-day free trial" (sandbox account).
+
 Core features run entirely on the device and work offline:
 1. Scroll to "No model at hand? Try a sample" and tap "Box with holes (STL)".
    Holes are highlighted in red in the 3D view.
-2. Tap "Start conversion & auto-repair". A health report opens.
-   Tap the download icon to save the report or result via the Share sheet ("Save to Files").
+2. Tap "Start conversion & auto-repair". On Basic the plan screen appears;
+   choose "Convert without repair (Basic)" or start the trial. A health report opens.
+   With Pro/trial, tap the download icon to save the report via the Share sheet ("Save to Files").
 3. Load "L-bracket (OBJ)" and tap the 📱 AR button in the toolbar → "Project in AR"
    to open native AR Quick Look (requires a real device with ARKit).
 Files can also be opened from the Files app via Share → OmniSeam 3D.
 
-Optional cloud processing (only for parametric STEP/IGES and native CAD/BIM formats):
+Optional cloud processing (Pro; only for parametric STEP/IGES and native CAD/BIM formats):
 - The app uses the OmniSeam public demo node by default; no setup is needed:
   https://hauchieh-omniseam-engine.hf.space  (health: /api/v1/health)
 - Before any upload, the app shows a consent dialog; choosing Cancel uploads nothing.
@@ -30,7 +43,8 @@ Optional cloud processing (only for parametric STEP/IGES and native CAD/BIM form
   please wait 1–3 minutes and try again.
 
 The "Create your own free node" guide links to Hugging Face's free CPU Basic
-hardware only. The app contains no paid content, purchases or subscriptions.
+hardware only. All paid features are sold only through In-App Purchase;
+the app has no subscriptions and no links to external payment.
 ```
 
 ## Before you submit
@@ -47,3 +61,4 @@ GitHub variable `REVIEW_NODE_URL` = `https://hauchieh-omniseam-engine.hf.space` 
 - [ ] Open the test file link in a browser and convert it once yourself through the app.
 - [ ] During review, temporarily change `.github/workflows/keep-alive.yml` cron to every 2 hours (`17 */2 * * *`).
 - [ ] Contact info: name, phone, email of the person Apple can reach.
+- [ ] Both IAPs (`.pro`, `.trial7d`) are created, have a review screenshot, and are attached to this app version (see `in-app-purchases.md`).

@@ -14,7 +14,7 @@ Character limits: Name 30 · Subtitle 30 · Promotional text 170 · Keywords 100
 | Primary category | Productivity |
 | Secondary category | Graphics & Design |
 | Age rating | 4+ (no objectionable content; unrestricted web access: **No**) |
-| Price | Free · no in-app purchases |
+| Price | Free download · In-App Purchases: Pro one-time unlock + free 7-Day Pro Trial (see `in-app-purchases.md`) |
 | Privacy Policy URL | https://omniseam-3d.vercel.app/privacy.html |
 | Support URL | https://omniseam-3d.vercel.app/support.html |
 | Marketing URL | https://omniseam-3d.vercel.app |
@@ -41,7 +41,11 @@ ON-DEVICE (works offline)
 • Section plane, distance measurement, wireframe, normals and X-ray views
 • View any model in your room with AR Quick Look
 
-OPTIONAL CLOUD NODE
+PLANS
+Basic is free forever: open, inspect and diagnose mesh models, measure, section, AR and convert mesh formats as-is.
+Pro (one-time purchase, no subscription) adds one-tap auto-repair to watertight solids, STEP/IGES and CAD/BIM import, wind-tunnel fluid domains, batch processing with ZIP export, Draco compression and report export. Try Pro free for 7 days.
+
+OPTIONAL CLOUD NODE (Pro)
 Parametric STEP/IGES and native CAD/BIM files (compatible with SolidWorks, Inventor, Rhino, IFC and DWG files) need a processing node. Use the free public demo node (files up to 25 MB, deleted within 1 hour) or create your own free node on Hugging Face in a few minutes. The app always asks before uploading a file.
 
 PRIVACY
@@ -69,7 +73,11 @@ OmniSeam 3D 直接在你的裝置上檢查、修復與轉換 3D 模型。
 • 剖面、距離量測、線框、法向量與 X 光檢視
 • 透過 AR Quick Look 把模型放進你的空間
 
-可選的雲端節點
+方案
+基礎版永久免費：開啟、檢查與診斷網格模型，量測、剖面、AR，以及網格格式直接互轉。
+專業版（一次買斷、非訂閱）加入一鍵自動修復成水密實體、STEP/IGES 與 CAD/BIM 匯入、風洞流體域、批次處理與 ZIP 匯出、Draco 壓縮及報告匯出。可免費試用 7 天。
+
+可選的雲端節點（專業版）
 參數化 STEP/IGES 與原生 CAD/BIM 檔（相容 SolidWorks、Inventor、Rhino、IFC、DWG 檔案）需要處理節點。可使用免費的公用示範節點（25 MB 以下，1 小時內刪除），或在 Hugging Face 免費建立自己的節點。上傳前 App 一定會先徵求你的同意。
 
 隱私

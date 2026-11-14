@@ -1,0 +1,55 @@
+{
+  "identifier" : "6C1F2A10",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : true,
+      "internalID" : "6C1F2A11",
+      "localizations" : [
+        {
+          "description" : "One-time purchase: auto-repair, CAD import, wind tunnel, batch export and full reports.",
+          "displayName" : "OmniSeam 3D Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "io.github.hauchiehlinops.omniseam3d.pro",
+      "referenceName" : "Pro Unlock",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "0.0",
+      "familyShareable" : false,
+      "internalID" : "6C1F2A12",
+      "localizations" : [
+        {
+          "description" : "Try every Pro feature free for 7 days. No charge; the app returns to Basic afterwards.",
+          "displayName" : "7-Day Pro Trial",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "io.github.hauchiehlinops.omniseam3d.trial7d",
+      "referenceName" : "7-Day Pro Trial",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

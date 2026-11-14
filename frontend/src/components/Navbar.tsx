@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Zap, Cloud, Settings, Server } from 'lucide-react';
+import { Zap, Cloud, Settings, Server, Crown } from 'lucide-react';
+import type { Tier } from '../platform/entitlements';
+import { trialDaysLeft, getEntitlementState } from '../platform/entitlements';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import logoImg from '../assets/logo.png';
 import { EngineMode, apiClient } from '../api/client';
@@ -11,6 +13,9 @@ interface NavbarProps {
   onOpenBackendSettings: () => void;
   onOpenManual: () => void;
   onOpenPrivacy: () => void;
+  /** Opens the Basic / Pro plan screen (iOS app only). */
+  onOpenPlan?: () => void;
+  planTier?: Tier;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -18,6 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenBackendSettings,
   onOpenManual,
   onOpenPrivacy,
+  onOpenPlan,
+  planTier = 'basic',
 }) => {
   const { t } = useTranslation();
   const backendUrl = apiClient.getStoredBackendUrl();
@@ -90,6 +97,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-emerald-400">🛡️</span>
           <span>{t('privacy.nav_btn')}</span>
         </button>
+
+        {/* Plan chip: Basic / Trial / Pro -> opens plan screen */}
+        {onOpenPlan && (
+          <button
+            type="button"
+            onClick={onOpenPlan}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
+              planTier === 'basic'
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-200 hover:bg-amber-500/25'
+                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/20'
+            }`}
+            title={t('plan.title')}
+          >
+            <Crown className="w-3.5 h-3.5" />
+            <span>
+              {planTier === 'pro'
+                ? t('plan.chip_pro')
+                : planTier === 'trial'
+                  ? t('plan.chip_trial', { days: trialDaysLeft(getEntitlementState()) })
+                  : t('plan.chip_upgrade')}
+            </span>
+          </button>
+        )}
 
         {/* Engine Node Status Button -> Opens Backend Modal */}
         <button
