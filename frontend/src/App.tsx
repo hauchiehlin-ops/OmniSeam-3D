@@ -22,7 +22,7 @@ import { ArPreviewModal } from './components/ArPreviewModal';
 import { MobileArView } from './components/MobileArView';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
-import { IS_NATIVE, NATIVE_LOCAL_MAX_SIZE_BYTES, NATIVE_LOCAL_MAX_SIZE_MB, OPEN_FILE_EVENT, saveOrShareFile, saveOrShareUrl } from './platform/native';
+import { IS_NATIVE, NATIVE_LOCAL_MAX_SIZE_BYTES, NATIVE_LOCAL_MAX_SIZE_MB, OPEN_FILE_EVENT, recordSuccessfulConversion, saveOrShareFile, saveOrShareUrl } from './platform/native';
 
 
 import * as THREE from 'three';
@@ -34,6 +34,7 @@ import {
 } from './types';
 import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES, describeNodeError, UploadDeclinedError } from './api/client';
 import { UploadConsentModal } from './components/UploadConsentModal';
+import { APP_VERSION } from './version';
 import { LicensesModal } from './components/LicensesModal';
 import { loadRemoteConfig } from './platform/remote-config';
 import { ArManager } from './engine/ar-manager';
@@ -479,6 +480,7 @@ export const App: React.FC = () => {
         setIsProcessing(false);
         setIsSplitView(true);
         setShowAuditModal(true);
+        if (resultTask.status === 'completed') recordSuccessfulConversion(APP_VERSION);
         confetti({
           particleCount: 80,
           spread: 70,
@@ -506,6 +508,7 @@ export const App: React.FC = () => {
               if (updated.status === 'completed') {
                 setIsSplitView(true);
                 setShowAuditModal(true);
+                recordSuccessfulConversion(APP_VERSION);
                 confetti({
                   particleCount: 80,
                   spread: 70,
@@ -687,9 +690,9 @@ export const App: React.FC = () => {
         {/* Top Hero / Tagline */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <span>{t('app_title')}</span>
-              <span className="text-brand-400 text-sm font-normal">| {t('app_subtitle')}</span>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+              <span className="whitespace-nowrap">{t('app_title')}</span>
+              <span className="text-brand-400 text-sm font-normal"><span className="hidden sm:inline">| </span>{t('app_subtitle')}</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               {t('tagline')}

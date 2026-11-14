@@ -91,7 +91,7 @@
 | 欄位 | 填入 | 說明 |
 |---|---|---|
 | Platforms | ✅ **iOS** | iPad、Apple silicon Mac、Vision Pro 都由同一個 iOS 版本提供，不必勾其他平台 |
-| Name | `OmniSeam 3D` | 30 字內；若已被使用，改用 `OmniSeam 3D Repair` |
+| Name | `OmniSeam 3D: STL Mesh Repair` | 30 字內；名稱中的關鍵字對搜尋排名權重最高（ASO 策略見 `metadata.md`） |
 | Primary Language | **English (U.S.)** | 其他 5 種語言稍後再新增 |
 | Bundle ID | 選 `OmniSeam 3D - io.github.hauchiehlinops.omniseam3d` | 第 4 步註冊的 ID |
 | SKU | `omniseam3d-ios` | 內部用，使用者看不到 |
@@ -151,7 +151,7 @@ App Store Connect → 你的 App → **General → App Information**：
 
 | 欄位 | 填入 |
 |---|---|
-| Name／Subtitle | 依 `docs/app-store/metadata.md`，每個語言各填一次 |
+| Name／Subtitle | 依 `docs/app-store/metadata.md`，每個語言各填一次（已依 ASO 最佳化；**先存名稱與副標題，再另外存主要語言等其他欄位**） |
 | Category | Primary **Productivity**（生產力工具）、Secondary **Graphics & Design**（圖形與設計） |
 | Content Rights | **No, it does not contain, show, or access third-party content**（使用者處理自己的檔案） |
 | Age Rating | 點 **Edit** 填問卷，見下表 |

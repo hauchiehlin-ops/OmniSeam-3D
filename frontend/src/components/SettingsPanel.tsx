@@ -141,14 +141,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     <div className="flex flex-col gap-5 p-5 bg-dark-surface border border-dark-border rounded-2xl shadow-xl">
       {/* Header & Engine Mode */}
       <div className="flex flex-col gap-2 pb-3 border-b border-dark-border">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
             <Settings className="w-4 h-4 text-brand-400" />
             <span>{t('settings.title')}</span>
           </div>
 
           {/* Engine Mode selector */}
-          <div className="flex items-center bg-dark-panel p-0.5 rounded-lg border border-dark-border text-xs">
+          <div className="flex shrink-0 items-center bg-dark-panel p-0.5 rounded-lg border border-dark-border text-xs whitespace-nowrap">
             <button
               type="button"
               onClick={() => onChangeEngineMode('client')}
@@ -309,7 +309,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
 
         {/* 3 Strategy Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-3 gap-2.5">
           {/* 1. Smart Lossless (Default · Recommended) */}
           <button
             type="button"

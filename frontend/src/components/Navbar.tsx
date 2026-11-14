@@ -48,29 +48,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
 
   return (
-    <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <header className="h-16 border-b border-dark-border bg-dark-surface/80 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <img
           src={logoImg}
           alt="OmniSeam 3D Logo"
-          className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.35)] hover:scale-105 transition-transform duration-200"
+          className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.35)] hover:scale-105 transition-transform duration-200"
         />
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            <h1 className="whitespace-nowrap text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
               {t('app_title')}
             </h1>
-            <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/30 rounded">
+            <span className="hidden sm:inline whitespace-nowrap px-1.5 py-0.5 text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/30 rounded">
               v{APP_VERSION} FOSS
             </span>
           </div>
-          <p className="text-xs text-slate-400 font-normal hidden sm:block">
+          <p className="text-xs text-slate-400 font-normal hidden sm:block truncate">
             {t('app_subtitle')}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {/* User Manual Button */}
         <button
           onClick={onOpenManual}
@@ -94,7 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Engine Node Status Button -> Opens Backend Modal */}
         <button
           onClick={onOpenBackendSettings}
-          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 group shadow-sm ${
+          className={`flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 group shadow-sm ${
             engineMode === 'client'
               ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
               : 'bg-indigo-500/15 border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/25 shadow-indigo-500/10'

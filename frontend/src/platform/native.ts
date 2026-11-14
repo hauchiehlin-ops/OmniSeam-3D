@@ -25,6 +25,37 @@ interface QuickLookPlugin {
 /** Native Swift plugin (ios/App/App/QuickLookPlugin.swift) wrapping QLPreviewController. */
 const QuickLook = registerPlugin<QuickLookPlugin>('QuickLook');
 
+interface AppReviewPlugin {
+  requestReview(): Promise<void>;
+}
+/** Native Swift plugin (OmniSeamBridgeViewController.swift) for Apple's rating prompt. */
+const AppReview = registerPlugin<AppReviewPlugin>('AppReview');
+
+const REVIEW_SUCCESS_KEY = 'omniseam_successful_conversions';
+const REVIEW_ASKED_KEY = 'omniseam_review_requested_version';
+/** Ask after this many successful conversions (ASO: ratings drive App Store ranking). */
+const REVIEW_AFTER_SUCCESSES = 3;
+
+/**
+ * Call after a conversion finished successfully. On the 3rd success, asks iOS to
+ * show the system rating prompt once per app version. iOS itself limits the
+ * prompt to 3 times a year, so this never nags. No-op on the web.
+ */
+export function recordSuccessfulConversion(appVersion: string): void {
+  if (!IS_NATIVE) return;
+  try {
+    const count = (parseInt(localStorage.getItem(REVIEW_SUCCESS_KEY) || '0', 10) || 0) + 1;
+    localStorage.setItem(REVIEW_SUCCESS_KEY, String(count));
+    if (count < REVIEW_AFTER_SUCCESSES) return;
+    if (localStorage.getItem(REVIEW_ASKED_KEY) === appVersion) return;
+    localStorage.setItem(REVIEW_ASKED_KEY, appVersion);
+    // Small delay so the prompt appears after the result UI has settled.
+    setTimeout(() => AppReview.requestReview().catch(() => {}), 1500);
+  } catch {
+    /* storage unavailable: skip */
+  }
+}
+
 export const OPEN_FILE_EVENT = 'omniseam:open-file';
 
 function blobToBase64(blob: Blob): Promise<string> {
