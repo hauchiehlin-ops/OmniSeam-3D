@@ -125,7 +125,9 @@
     "quick_badge_cad": "産業用CAD",
     "quick_badge_color_struct": "カラー/構造",
     "quick_badge_web_ar": "Web/AR",
-    "quick_badge_mesh": "汎用メッシュ"
+    "quick_badge_mesh": "汎用メッシュ",
+    "cad_engine_tip": "端末上では AP214 B-Rep を生成し、クラウドノードでは OpenCASCADE の産業用曲面縫合を使用します",
+    "params_applicability_hint": "⚡ 端末処理と ☁️ クラウド処理の両方に適用されます"
   },
   "viewer": {
     "split_view": "デュアル分割比較",
@@ -161,7 +163,9 @@
     "flip_ccw_90": "反時計回りに90°回転",
     "flip_cw_90": "時計回りに90°回転",
     "flip_180": "180°反転",
-    "close_panel": "パネルを閉じる"
+    "close_panel": "パネルを閉じる",
+    "show_gizmo": "3D 回転リングを表示",
+    "hide_gizmo": "3D 回転リングを非表示"
   },
   "coord": {
     "select_tooltip": "空間座標系（スマート推奨 / 直交デカルト / 極座標 / 円柱 / 球面）",
@@ -224,7 +228,10 @@
     "zero_thickness_sol1": "1. クラウドサーバーに切り替え：右上のモードを【Cloud Server】（無料16GBノード）に切り替えると、バックエンドがOpenCASCADE工業用ジオメトリカーネルを呼び出し、薄板を高品質なCADソリッド(STEP/IGES)に自動縫合変換します。",
     "zero_thickness_sol2": "2. 元CADモデルの厚み付け：元のモデリングソフトウェア（SolidWorks、Rhino、Blender等）でシートに「厚み付け (Thicken)」を実行して実体肉厚を与えた後、再度アップロードして修復変換を行ってください。",
     "suggest_fill_holes": "水密ソリッド構築のため、境界穴の自動埋めを有効にすることを推奨します",
-    "suggest_fix_non_manifold": "非多様体幾何欠陥の修復を推奨します"
+    "suggest_fix_non_manifold": "非多様体幾何欠陥の修復を推奨します",
+    "zero_thickness_alert_title": "厚みゼロの開いた面（シート）を検出",
+    "zero_thickness_alert_desc": "表面積は大きいのに体積が 0.00 mm³ です。このモデル（ファンの羽根や薄いシェルなど）は厚みのない 1 層の三角形でできています。端末上の処理では小さな穴は閉じられますが、壁の厚みは作れません。",
+    "zero_thickness_solutions_title": "🛠️ 解決方法（2 通り）："
   },
   "tasks": {
     "title": "変換タスクキュー＆履歴",
@@ -255,10 +262,9 @@
     "nav_btn": "AR プレビュー",
     "modal_title": "AR 拡張現実リアルタイムプレビュー",
     "launch_now_btn": "🚀 AR Quick Look を今すぐ起動",
-    "qr_hover_hint": "追加アプリ不要 · 標準の Safari Quick Look & Google Scene Viewer に対応",
     "preparing_ar": "ARモデルを準備中...",
     "unsupported_device": "AR プレビューは iPhone／iPad アプリ（または ARCore 対応の Android 端末）で利用できます。",
-    "close": "閉じる"
+    "ar_instructions": "上のボタンをタップしたら、平らな床や机に向けて端末をゆっくり動かし、モデルを配置してください。"
   },
   "nav": {
     "language": "言語 (Language)",
@@ -595,15 +601,12 @@
     "stage_upload": "ファイル転送",
     "stage_processing": "幾何修復・変換",
     "stage_retention": "データの保持・保存",
-    "stage_ar_relay": "AR 端末間中継セッション",
     "stage_upload_client": "ネットワーク送信ゼロ (ブラウザメモリ内のみ)",
     "stage_upload_server": "HTTPS でクラウドノードへアップロード",
     "stage_proc_client": "端末上（ブラウザエンジン / Web Worker）",
     "stage_proc_server": "ノード上の一時作業領域",
     "stage_ret_client": "プロジェクトまたはアプリを閉じると消去",
     "stage_ret_server": "1 時間以内に自動削除",
-    "stage_ar_client": "同一端末 WebXR メモリ直接送信 (0% ネットワーク)",
-    "stage_ar_server": "一時暗号化中継、2 時間 TTL 自動物理破棄",
     "close": "方針を閉じる",
     "public_policy_link": "プライバシーポリシー全文（Web）"
   },
@@ -737,5 +740,8 @@
     "secondary_convert_as_is": "修復せずに変換（ベーシック）",
     "status_trial_verify": "Pro 体験を一時停止中：インターネットに接続して日付を確認してください",
     "trial_verify_desc": "端末の日付が、このアプリが以前に記録した日付より前になっているため体験を一時停止しています。インターネットに接続してアプリを開き直してください。日付と時刻を自動設定にすることもおすすめします。"
+  },
+  "common": {
+    "close": "閉じる"
   }
 }

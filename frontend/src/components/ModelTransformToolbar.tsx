@@ -148,7 +148,7 @@ export const ModelTransformToolbar: React.FC<ModelTransformToolbarProps> = ({
           <button
             type="button"
             onClick={onToggleRotationGizmo}
-            title={showRotationGizmo ? t('transform.hide_gizmo', '隱藏 3D 旋轉環') : t('transform.show_gizmo', '顯示 3D 旋轉環')}
+            title={showRotationGizmo ? t('transform.hide_gizmo') : t('transform.show_gizmo')}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${
               showRotationGizmo
                 ? 'bg-brand-500/20 border-brand-400 text-brand-300 shadow-sm shadow-brand-500/30 ring-1 ring-brand-400/40'

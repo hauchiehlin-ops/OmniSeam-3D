@@ -51,7 +51,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label={t('ar.close')}
+            aria-label={t('common.close')}
             className="p-2 rounded-xl bg-dark-panel border border-dark-border text-slate-400 hover:text-white transition-all"
           >
             <X className="w-4 h-4" />
@@ -87,7 +87,7 @@ export const ArPreviewModal: React.FC<ArPreviewModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-dark-panel hover:bg-dark-hover border border-dark-border text-slate-300 hover:text-white text-xs font-semibold transition-all"
           >
-            {t('ar.close')}
+            {t('common.close')}
           </button>
         </div>
       </div>

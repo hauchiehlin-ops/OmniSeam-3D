@@ -125,7 +125,9 @@
     "quick_badge_cad": "산업용 CAD",
     "quick_badge_color_struct": "컬러/구조",
     "quick_badge_web_ar": "웹/AR",
-    "quick_badge_mesh": "범용 메시"
+    "quick_badge_mesh": "범용 메시",
+    "cad_engine_tip": "기기에서는 AP214 B-Rep을 생성하고, 클라우드 노드는 OpenCASCADE 산업용 곡면 봉합을 사용합니다",
+    "params_applicability_hint": "⚡ 기기 처리와 ☁️ 클라우드 처리 모두에 적용됩니다"
   },
   "viewer": {
     "split_view": "듀얼 분할 비교",
@@ -161,7 +163,9 @@
     "flip_ccw_90": "반시계 방향으로 90° 회전",
     "flip_cw_90": "시계 방향으로 90° 회전",
     "flip_180": "180° 뒤집기",
-    "close_panel": "패널 닫기"
+    "close_panel": "패널 닫기",
+    "show_gizmo": "3D 회전 링 표시",
+    "hide_gizmo": "3D 회전 링 숨기기"
   },
   "coord": {
     "select_tooltip": "공간 좌표계 (스마트 추천 / 직교 데카르트 / 극좌표 / 원통 / 구면)",
@@ -224,7 +228,10 @@
     "zero_thickness_sol1": "1. 클라우드 서버 전환: 우측 상단에서 【Cloud Server】(무료 16GB 노드)로 전환하면 백엔드가 OpenCASCADE 산업용 기하 커널을 호출하여 얇은 판을 고품질 CAD 솔리드(STEP/IGES)로 자동 봉합 변환합니다.",
     "zero_thickness_sol2": "2. 원본 CAD 모델 두께 부여: 원본 모델링 소프트웨어(SolidWorks, Rhino, Blender 등)에서 곡면에 '두께 주기(Thicken)'를 실행하여 실체 벽 두께를 부여한 후 다시 업로드하여 복구 및 변환하세요.",
     "suggest_fill_holes": "수밀 솔리드 구축을 위해 경계 구멍 자동 채우기 활성화를 권장합니다",
-    "suggest_fix_non_manifold": "비다양체 기하학적 결함 복구를 권장합니다"
+    "suggest_fix_non_manifold": "비다양체 기하학적 결함 복구를 권장합니다",
+    "zero_thickness_alert_title": "두께가 없는 열린 면(시트) 감지",
+    "zero_thickness_alert_desc": "표면적은 크지만 부피가 0.00 mm³입니다. 이 모델(팬 블레이드, 얇은 셸 등)은 두께 없는 한 겹의 삼각형으로 이루어져 있습니다. 기기 내 처리로 작은 구멍은 메울 수 있지만 벽 두께는 만들 수 없습니다.",
+    "zero_thickness_solutions_title": "🛠️ 해결 방법(2가지):"
   },
   "tasks": {
     "title": "변환 작업 대기열 및 히스토리",
@@ -255,10 +262,9 @@
     "nav_btn": "AR 미리보기",
     "modal_title": "AR 증강 현실 실시간 투영",
     "launch_now_btn": "🚀 지금 AR Quick Look 실행",
-    "qr_hover_hint": "별도 앱 설치 불필요 · 기본 Safari Quick Look & Google Scene Viewer 지원",
     "preparing_ar": "AR 모델 준비 중...",
     "unsupported_device": "AR 미리보기는 iPhone/iPad 앱(또는 ARCore 지원 Android 기기)에서 사용할 수 있습니다.",
-    "close": "닫기"
+    "ar_instructions": "위 버튼을 누른 뒤 평평한 바닥이나 책상을 향해 기기를 천천히 움직여 모델을 배치하세요."
   },
   "nav": {
     "language": "언어 (Language)",
@@ -595,15 +601,12 @@
     "stage_upload": "파일 전송 단계",
     "stage_processing": "지오메트리 복구 연산",
     "stage_retention": "데이터 보관 및 저장",
-    "stage_ar": "AR 모바일 중계 세션",
     "stage_upload_client": "네트워크 전송 제로 (브라우저 메모리 내에서만 처리)",
     "stage_upload_server": "HTTPS로 클라우드 노드에 업로드",
     "stage_proc_client": "기기에서 (브라우저 엔진 / Web Worker)",
     "stage_proc_server": "노드의 임시 작업 공간",
     "stage_ret_client": "프로젝트 또는 앱을 닫으면 삭제",
     "stage_ret_server": "1시간 이내 자동 삭제",
-    "stage_ar_client": "QR 코드 생성 시 로컬 세션 캐시, 2시간 만료 후 브라우저가 자동 해제",
-    "stage_ar_server": "안전한 Ephemeral 중계 저장소, 2시간 TTL 후 자동 영구 파기 (Zero-log)",
     "close": "방침 닫기",
     "public_policy_link": "전체 개인정보 처리방침 (웹)"
   },
@@ -737,5 +740,8 @@
     "secondary_convert_as_is": "복구 없이 변환 (베이직)",
     "status_trial_verify": "Pro 체험 일시 중지: 인터넷에 연결해 날짜를 확인하세요",
     "trial_verify_desc": "기기 날짜가 앱이 이전에 기록한 날짜보다 이르기 때문에 체험이 일시 중지되었습니다. 인터넷에 연결한 후 앱을 다시 여세요. 날짜와 시간을 자동으로 설정하는 것도 도움이 됩니다."
+  },
+  "common": {
+    "close": "닫기"
   }
 }

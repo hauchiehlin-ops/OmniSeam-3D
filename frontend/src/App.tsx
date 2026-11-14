@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
+import * as THREE from 'three';
 
 import { Navbar } from './components/Navbar';
 import { Dropzone } from './components/Dropzone';
@@ -22,68 +23,34 @@ import { ArPreviewModal } from './components/ArPreviewModal';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
 import { PaywallModal } from './components/PaywallModal';
-import {
-  PAYWALL_ENABLED,
-  ProFeature,
-  can,
-  enterScreenshotPaywallMode,
-  initEntitlements,
-  isCadFile,
-  requiredFeatureForConvert,
-  toBasicConfig,
-  useEntitlements,
-} from './platform/entitlements';
-import { IS_NATIVE, NATIVE_LOCAL_MAX_SIZE_BYTES, NATIVE_LOCAL_MAX_SIZE_MB, OPEN_FILE_EVENT, recordSuccessfulConversion, saveOrShareFile, saveOrShareUrl } from './platform/native';
-
-
-import * as THREE from 'three';
-import { 
-  ConversionConfig, 
-  DisplayMode, 
-  InspectResponse, 
-  TaskResponse 
-} from './types';
-import { apiClient, EngineMode, PUBLIC_DEMO_MAX_SIZE_BYTES, describeNodeError, UploadDeclinedError } from './api/client';
 import { UploadConsentModal } from './components/UploadConsentModal';
-import { APP_VERSION } from './version';
 import { LicensesModal } from './components/LicensesModal';
+
+import { DisplayMode, TaskResponse } from './types';
+import { apiClient } from './api/client';
+import { saveOrShareUrl } from './platform/native';
 import { loadRemoteConfig } from './platform/remote-config';
 import { ArManager } from './engine/ar-manager';
-import { ZipPackager, ZipEntry } from './engine/zip-packager';
-import { AdaptiveIntentEngine, AdaptiveIntentResult } from './engine/adaptive-intent';
 import { CoordinateSystemSelection, CoordinateSystemType } from './engine/coordinate-system-manager';
+import { usePaywall } from './hooks/usePaywall';
+import { useEngineMode } from './hooks/useEngineMode';
+import { useModelLoader } from './hooks/useModelLoader';
+import { useConversionSettings } from './hooks/useConversionSettings';
+import { useConversion } from './hooks/useConversion';
+import { useNodeErrorReporter } from './hooks/useNodeErrorReporter';
 
+type Vec3 = { x: number; y: number; z: number };
+const ZERO_ROTATION: Vec3 = { x: 0, y: 0, z: 0 };
 
-const DEFAULT_CONFIG: ConversionConfig = {
-  target_format: 'glb',
-  cad_linear_deflection: 0.005,
-  cad_angular_deflection: 0.1,
-  enable_sewing: true,
-  sewing_tolerance: 0.001,
-  auto_fill_holes: false,
-  fix_non_manifold: true,
-  unify_normals: true,
-  remove_degenerate: true,
-  weld_vertices: true,
-  compress_gltf: true,
-  rotation_x: 0,
-  rotation_y: 0,
-  rotation_z: 0,
-};
-
-const PROPRIETARY_CAD_EXTS = new Set([
-  'sldprt', 'sldasm', 'ipt', 'iam', 'ifc', '3dm', 'catpart', 'catproduct', 'dwg'
-]);
-
+/**
+ * App shell: wires the feature hooks (plan, model loading, settings,
+ * conversion) to the layout and owns the 3D viewport / modal UI state.
+ */
 export const App: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const reportNodeError = useNodeErrorReporter();
 
-  // Engine Mode: 'client' (100% In-Browser) or 'server' (FastAPI Backend)
-  const [engineMode, setEngineMode] = useState<EngineMode>(
-    apiClient.getStoredBackendUrl() ? 'server' : 'client'
-  );
-
-  // Modals
+  // ── Modals ────────────────────────────────────────────────────────────────
   const [showBackendModal, setShowBackendModal] = useState(false);
   const [showCadUnlockModal, setShowCadUnlockModal] = useState(false);
   const [lockedCadFile, setLockedCadFile] = useState<File | null>(null);
@@ -94,71 +61,9 @@ export const App: React.FC = () => {
   const [showLicensesModal, setShowLicensesModal] = useState(false);
   const [showArModal, setShowArModal] = useState(false);
   const [showWindTunnelModal, setShowWindTunnelModal] = useState(false);
-
-  // Basic / Pro plan (iOS In-App Purchase)
-  const entitlements = useEntitlements();
-  const [paywall, setPaywall] = useState<{
-    feature: ProFeature | null;
-    welcome?: boolean;
-    secondary?: { label: string; onClick: () => void } | null;
-  } | null>(null);
-
-  /** Returns true when the feature is available; otherwise opens the paywall. */
-  const requirePro = (
-    feature: ProFeature,
-    secondary?: { label: string; onClick: () => void } | null
-  ): boolean => {
-    if (can(feature)) return true;
-    setPaywall({ feature, secondary: secondary ?? null });
-    return false;
-  };
-
-  // File and Configuration State
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [config, setConfig] = useState<ConversionConfig>(DEFAULT_CONFIG);
-  const baseConfig = config;
-  const [adaptiveIntent, setAdaptiveIntent] = useState<AdaptiveIntentResult | null>(null);
-  const [isAutoAdaptiveActive, setIsAutoAdaptiveActive] = useState<boolean>(true);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
-  const [rotation, setRotation] = useState<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 });
-  const [transformToolActive, setTransformToolActive] = useState<boolean>(false);
-  const [showRotationGizmo, setShowRotationGizmo] = useState<boolean>(false);
-  const [coordSystemMode, setCoordSystemMode] = useState<CoordinateSystemSelection>('auto');
-  const [detectedCoordSystem, setDetectedCoordSystem] = useState<CoordinateSystemType | null>(null);
-
-  const handleRotationChange = (newRot: { x: number; y: number; z: number }) => {
-    setRotation(newRot);
-    setConfig((prev) => ({
-      ...prev,
-      rotation_x: newRot.x,
-      rotation_y: newRot.y,
-      rotation_z: newRot.z,
-    }));
-  };
-
-  const handleResetRotation = () => {
-    const zero = { x: 0, y: 0, z: 0 };
-    setRotation(zero);
-    setConfig((prev) => ({
-      ...prev,
-      rotation_x: 0,
-      rotation_y: 0,
-      rotation_z: 0,
-    }));
-  };
-
-  // Conversion Tasks & Inspection
-  const [tasks, setTasks] = useState<TaskResponse[]>([]);
-  const [activeTask, setActiveTask] = useState<TaskResponse | null>(null);
-  const [inspectData, setInspectData] = useState<InspectResponse | null>(null);
   const [showAuditModal, setShowAuditModal] = useState(false);
-  const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
-  const [currentModelMesh, setCurrentModelMesh] = useState<THREE.Object3D | null>(null);
 
-
-  // 3D Viewport Controls
+  // ── 3D viewport state ─────────────────────────────────────────────────────
   const [isSplitView, setIsSplitView] = useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>('shaded');
   const [sectionPlaneActive, setSectionPlaneActive] = useState(false);
@@ -167,17 +72,84 @@ export const App: React.FC = () => {
   const [measuredDistance, setMeasuredDistance] = useState<number | null>(null);
   const [measureP1, setMeasureP1] = useState<[number, number, number] | null>(null);
   const [measureP2, setMeasureP2] = useState<[number, number, number] | null>(null);
+  const [rotation, setRotation] = useState<Vec3>(ZERO_ROTATION);
+  const [transformToolActive, setTransformToolActive] = useState(false);
+  const [showRotationGizmo, setShowRotationGizmo] = useState(false);
+  const [coordSystemMode, setCoordSystemMode] = useState<CoordinateSystemSelection>('auto');
+  const [detectedCoordSystem, setDetectedCoordSystem] = useState<CoordinateSystemType | null>(null);
+  const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
+  const [currentModelMesh, setCurrentModelMesh] = useState<THREE.Object3D | null>(null);
 
-  const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /** Shows a readable message for a failed cloud request (silent if the user declined the upload). */
-  const reportNodeError = (err: unknown) => {
-    if (err instanceof UploadDeclinedError) return;
-    const { key, params } = describeNodeError(err);
-    if (key) window.alert(t(key, params));
+  /** Clears per-model view state (measurements, rotation, coordinate system). */
+  const resetViewForNewModel = () => {
+    setIsSplitView(false);
+    setMeasuredDistance(null);
+    setMeasureP1(null);
+    setMeasureP2(null);
+    setRotation(ZERO_ROTATION);
+    setCoordSystemMode('auto');
+    setDetectedCoordSystem(null);
   };
 
-  // Remote config (public node URL, min node version, optional notice)
+  const openCadUnlock = (file: File) => {
+    setLockedCadFile(file);
+    setShowCadUnlockModal(true);
+  };
+  const openPublicLimit = (file: File) => {
+    setPublicLimitFile(file);
+    setShowPublicLimitModal(true);
+  };
+
+  // ── Feature hooks ─────────────────────────────────────────────────────────
+  const { entitlements, paywall, requirePro, openPlan, closePaywall, showScreenshotPaywall } = usePaywall();
+  const [engineMode, setEngineMode] = useEngineMode();
+
+  // Late-bound so the loader can reset settings/tasks that are declared after it.
+  const onModelChangedRef = useRef<() => void>(() => {});
+  const {
+    selectedFile,
+    selectedFiles,
+    inspectData,
+    selectFile: handleFileSelect,
+    selectFiles: handleFilesSelect,
+    reinspect,
+    clearModel,
+  } = useModelLoader({
+    setEngineMode,
+    requirePro,
+    closePaywall,
+    onCadNeedsNode: openCadUnlock,
+    onPublicNodeLimit: openPublicLimit,
+    onModelChanged: () => onModelChangedRef.current(),
+  });
+
+  const settings = useConversionSettings(selectedFile, inspectData, setEngineMode);
+  const { config, adaptiveIntent, isAutoAdaptiveActive } = settings;
+
+  const conversion = useConversion({
+    selectedFile,
+    selectedFiles,
+    config,
+    engineMode,
+    requirePro,
+    closePaywall,
+    onCadNeedsNode: openCadUnlock,
+    onPublicNodeLimit: openPublicLimit,
+    onFinished: ({ showReport }) => {
+      setIsSplitView(true);
+      if (showReport) setShowAuditModal(true);
+    },
+  });
+  const { tasks, activeTask, isProcessing, isDownloadingZip } = conversion;
+
+  onModelChangedRef.current = () => {
+    settings.resetForNewModel();
+    conversion.setActiveTask(null);
+    resetViewForNewModel();
+  };
+
+  // ── Startup ───────────────────────────────────────────────────────────────
+  // Remote config: public node URL, minimum node version, optional notice.
   useEffect(() => {
     loadRemoteConfig().then((cfg) => {
       const lang = i18n.language;
@@ -194,473 +166,85 @@ export const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load StoreKit entitlements; show the plan chooser once on first launch (iOS).
-  useEffect(() => {
-    if (!PAYWALL_ENABLED) return;
-    initEntitlements().then(() => {
-      if (import.meta.env.VITE_SCREENSHOT_MODE === '1') return;
-      try {
-        if (localStorage.getItem('omniseam_plan_intro_seen')) return;
-        localStorage.setItem('omniseam_plan_intro_seen', '1');
-      } catch {
-        return;
-      }
-      if (!can('auto_repair')) setPaywall({ feature: null, welcome: true });
-    });
-  }, []);
-
-  // Sync initial engine mode
-  useEffect(() => {
-    apiClient.setEngineMode(engineMode);
-  }, [engineMode]);
-
   // Keep <html lang> in sync for VoiceOver pronunciation.
   useEffect(() => {
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
-  // AI Smart Adaptive Intent Synthesis
-  useEffect(() => {
-    if (!selectedFile) {
-      setAdaptiveIntent(null);
-      return;
-    }
-
-    const intentResult = AdaptiveIntentEngine.analyzeIntent(
-      selectedFile,
-      config.target_format,
-      config,
-      inspectData
-    );
-    setAdaptiveIntent(intentResult);
-
-    if (isAutoAdaptiveActive) {
-      setConfig(intentResult.adaptedConfig);
-      setEngineMode(intentResult.recommendedEngineMode);
-      apiClient.setEngineMode(intentResult.recommendedEngineMode);
-    }
-  }, [selectedFile, inspectData, config.target_format, isAutoAdaptiveActive]);
-
-  const handleConfigChange = (newConfig: ConversionConfig) => {
-    if (newConfig.target_format !== config.target_format) {
-      // User changed target format -> re-enable adaptive mode and adopt new format
-      setIsAutoAdaptiveActive(true);
-      setConfig(newConfig);
-    } else {
-      // User manually toggled expert checkboxes or strategies
-      setIsAutoAdaptiveActive(false);
-      setConfig(newConfig);
-    }
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleRotationChange = (rot: Vec3) => {
+    setRotation(rot);
+    settings.setRotation(rot);
   };
-
-  const handleResetToAdaptive = () => {
-    if (!selectedFile) return;
-    setIsAutoAdaptiveActive(true);
-    const intentResult = AdaptiveIntentEngine.analyzeIntent(
-      selectedFile,
-      config.target_format,
-      config,
-      inspectData
-    );
-    setAdaptiveIntent(intentResult);
-    setConfig(intentResult.adaptedConfig);
-    setEngineMode(intentResult.recommendedEngineMode);
-    apiClient.setEngineMode(intentResult.recommendedEngineMode);
-  };
+  const handleResetRotation = () => handleRotationChange(ZERO_ROTATION);
 
   const projectFileInputRef = useRef<HTMLInputElement>(null);
-
-  // Handle File Selection: Auto Engine Routing & Auto-Inspect
-  const handleFileSelect = async (file: File) => {
-    // iOS WebView memory guard: very large models crash on-device WebGL.
-    if (IS_NATIVE && file.size > NATIVE_LOCAL_MAX_SIZE_BYTES) {
-      window.alert(t('native.file_too_large', {
-        max: NATIVE_LOCAL_MAX_SIZE_MB,
-        size: (file.size / 1024 / 1024).toFixed(1),
-      }));
-      return;
-    }
-    // CAD / BIM import is a Pro feature (Plan A).
-    if (isCadFile(file.name) && !requirePro('cad_import')) return;
-    setSelectedFile(file);
-    setSelectedFiles([file]);
-    setIsAutoAdaptiveActive(true);
-    setIsSplitView(false);
-    setActiveTask(null);
-    setMeasuredDistance(null);
-    setMeasureP1(null);
-    setMeasureP2(null);
-    setRotation({ x: 0, y: 0, z: 0 });
-    setCoordSystemMode('auto');
-    setDetectedCoordSystem(null);
-
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
-
-    // Smart Auto Engine Mode Decision
-    if (PROPRIETARY_CAD_EXTS.has(ext)) {
-      setEngineMode('server');
-      apiClient.setEngineMode('server');
-      if (!apiClient.getStoredBackendUrl()) {
-        setLockedCadFile(file);
-        setShowCadUnlockModal(true);
-      }
-    } else if (['step', 'stp', 'iges', 'igs', 'brep', 'dxf'].includes(ext)) {
-      if (apiClient.getStoredBackendUrl()) {
-        setEngineMode('server');
-        apiClient.setEngineMode('server');
-      } else {
-        setEngineMode('client');
-        apiClient.setEngineMode('client');
-      }
-    } else {
-      // Standard Mesh (STL, OBJ, 3MF, PLY, OFF, GLB) -> Pure Client
-      setEngineMode('client');
-      apiClient.setEngineMode('client');
-    }
-
-    // Public demo node large file guardrail check
-    if (engineMode === 'server' && apiClient.isPublicDemoNode() && file.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
-      setPublicLimitFile(file);
-      setShowPublicLimitModal(true);
-    }
-
-    try {
-      const inspect = await apiClient.inspectModel(file, i18n.language);
-      setInspectData(inspect);
-    } catch (err) {
-      console.warn("Auto-inspect fallback:", err);
-    }
-  };
-
-  // Handle Multi-File Selection
-  const handleFilesSelect = async (files: File[]) => {
-    if (!files || files.length === 0) return;
-    if (files.length > 1 && !can('batch')) {
-      requirePro('batch', {
-        label: t('plan.secondary_first_file'),
-        onClick: () => {
-          setPaywall(null);
-          handleFileSelect(files[0]);
-        },
-      });
-      return;
-    }
-    setSelectedFiles(files);
-    handleFileSelect(files[0]);
-  };
-
-  // Project Lifecycle Handlers
-  const handleNewProject = () => {
-    projectFileInputRef.current?.click();
-  };
+  const handleNewProject = () => projectFileInputRef.current?.click();
 
   const handleCloseProject = () => {
-    if (selectedFile || selectedFiles.length > 0 || tasks.length > 0) {
-      if (window.confirm(t('project.close_confirm'))) {
-        setSelectedFile(null);
-        setSelectedFiles([]);
-        setTasks([]);
-        setActiveTask(null);
-        setInspectData(null);
-        setAdaptiveIntent(null);
-        setIsAutoAdaptiveActive(true);
-        setIsSplitView(false);
-        setMeasuredDistance(null);
-        setMeasureP1(null);
-        setMeasureP2(null);
-        setRotation({ x: 0, y: 0, z: 0 });
-        setTransformToolActive(false);
-        setShowRotationGizmo(false);
-        setCoordSystemMode('auto');
-        setDetectedCoordSystem(null);
-      }
-    }
+    if (!selectedFile && selectedFiles.length === 0 && tasks.length === 0) return;
+    if (!window.confirm(t('project.close_confirm'))) return;
+    clearModel();
+    conversion.clearTasks();
+    settings.resetForNewModel();
+    resetViewForNewModel();
+    setTransformToolActive(false);
+    setShowRotationGizmo(false);
   };
 
   const handleExportSnapshot = () => {
     const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
     try {
-      const dataUrl = canvas.toDataURL('image/png');
       const baseName = selectedFile ? selectedFile.name.replace(/\.[^/.]+$/, '') : 'model';
-      saveOrShareUrl(dataUrl, `OmniSeam_Snapshot_${baseName}_${Date.now()}.png`).catch((err) =>
+      saveOrShareUrl(canvas.toDataURL('image/png'), `OmniSeam_Snapshot_${baseName}_${Date.now()}.png`).catch((err) =>
         console.error('Snapshot save failed:', err)
       );
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { y: 0.8 },
-      });
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
     } catch (err) {
-      console.error("Snapshot error:", err);
+      console.error('Snapshot error:', err);
     }
   };
 
-  // Start Conversion Pipeline (Supports Single & Multi-File Batch Queue)
-  const handleStartConvert = async (configOverride?: ConversionConfig) => {
-    const filesToConvert = selectedFiles.length > 0 ? selectedFiles : (selectedFile ? [selectedFile] : []);
-    if (filesToConvert.length === 0) return;
-    const config = configOverride ?? baseConfig;
+  const handleStartConvert = conversion.startConvert;
+  const handleDownloadAllZip = conversion.downloadAllZip;
 
-    // Plan gate: Basic converts mesh formats as-is; repair, CAD, cloud and batch need Pro.
-    const needed = requiredFeatureForConvert(filesToConvert, config, engineMode);
-    if (needed && !can(needed)) {
-      const freeFallback = needed === 'auto_repair' || needed === 'draco';
-      requirePro(needed, freeFallback ? {
-        label: t('plan.secondary_convert_as_is'),
-        onClick: () => {
-          setPaywall(null);
-          handleStartConvert(toBasicConfig(config));
-        },
-      } : null);
-      return;
-    }
-
-    for (const file of filesToConvert) {
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      if (PROPRIETARY_CAD_EXTS.has(ext) && engineMode === 'client' && !apiClient.getStoredBackendUrl()) {
-        setLockedCadFile(file);
-        setShowCadUnlockModal(true);
-        return;
-      }
-      if (engineMode === 'server' && apiClient.isPublicDemoNode() && file.size > PUBLIC_DEMO_MAX_SIZE_BYTES) {
-        setPublicLimitFile(file);
-        setShowPublicLimitModal(true);
-        return;
-      }
-    }
-
-    setIsProcessing(true);
-
-    if (filesToConvert.length > 1) {
-      // Multi-file batch queue processing
-      try {
-        for (const file of filesToConvert) {
-          if (engineMode === 'client') {
-            const res = await apiClient.convertModel(
-              file,
-              config,
-              i18n.language,
-              (pTask) => {
-                setTasks((prev) => {
-                  const idx = prev.findIndex((t) => t.task_id === pTask.task_id);
-                  if (idx >= 0) {
-                    const next = [...prev];
-                    next[idx] = pTask;
-                    return next;
-                  }
-                  return [pTask, ...prev];
-                });
-              }
-            );
-            setActiveTask(res);
-          } else {
-            const initialTask = await apiClient.convertModel(file, config, i18n.language);
-            setTasks((prev) => [initialTask, ...prev]);
-            setActiveTask(initialTask);
-
-            let isDone = false;
-            while (!isDone) {
-              await new Promise((r) => setTimeout(r, 800));
-              const updated = await apiClient.getTaskStatus(initialTask.task_id);
-              setTasks((prev) => prev.map((t) => (t.task_id === updated.task_id ? updated : t)));
-              if (updated.status === 'completed' || updated.status === 'failed') {
-                isDone = true;
-                if (updated.status === 'completed') {
-                  setActiveTask(updated);
-                }
-              }
-            }
-          }
-        }
-        setIsProcessing(false);
-        setIsSplitView(true);
-        confetti({
-          particleCount: 100,
-          spread: 80,
-          origin: { y: 0.6 },
-        });
-      } catch (err) {
-        console.error("Batch conversion error:", err);
-        setIsProcessing(false);
-        reportNodeError(err);
-      }
-      return;
-    }
-
-    // Single File processing
-    const singleFile = filesToConvert[0];
+  const handleInspectOnly = async () => {
     try {
-      if (engineMode === 'client') {
-        const resultTask = await apiClient.convertModel(
-          singleFile,
-          config,
-          i18n.language,
-          (progressTask) => {
-            setActiveTask(progressTask);
-            setTasks((prev) => {
-              const existingIdx = prev.findIndex((t) => t.task_id === progressTask.task_id);
-              if (existingIdx >= 0) {
-                const next = [...prev];
-                next[existingIdx] = progressTask;
-                return next;
-              }
-              return [progressTask, ...prev];
-            });
-          }
-        );
-
-        setActiveTask(resultTask);
-        setIsProcessing(false);
-        setIsSplitView(true);
-        setShowAuditModal(true);
-        if (resultTask.status === 'completed') recordSuccessfulConversion(APP_VERSION);
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      } else {
-        const initialTask = await apiClient.convertModel(singleFile, config, i18n.language);
-        setTasks((prev) => [initialTask, ...prev]);
-        setActiveTask(initialTask);
-
-        if (activePollingRef.current) clearInterval(activePollingRef.current);
-        const pollInterval = setInterval(async () => {
-          try {
-            const updated = await apiClient.getTaskStatus(initialTask.task_id);
-            setActiveTask(updated);
-            setTasks((prev) => prev.map((t) => (t.task_id === updated.task_id ? updated : t)));
-
-            if (updated.status === 'completed' || updated.status === 'failed') {
-              clearInterval(pollInterval);
-              setIsProcessing(false);
-
-              if (updated.status === 'failed' && updated.error?.message) {
-                window.alert(t('node.failed', { message: updated.error.message }));
-              }
-              if (updated.status === 'completed') {
-                setIsSplitView(true);
-                setShowAuditModal(true);
-                recordSuccessfulConversion(APP_VERSION);
-                confetti({
-                  particleCount: 80,
-                  spread: 70,
-                  origin: { y: 0.6 },
-                });
-              }
-            }
-          } catch (pollErr) {
-            console.error("Polling error:", pollErr);
-            clearInterval(pollInterval);
-            setIsProcessing(false);
-            reportNodeError(pollErr);
-          }
-        }, 1000);
-        activePollingRef.current = pollInterval;
-      }
+      if (await reinspect()) setShowAuditModal(true);
     } catch (err) {
-      console.error("Conversion failed:", err);
-      setIsProcessing(false);
+      console.error('Inspect error:', err);
       reportNodeError(err);
     }
   };
 
-  // Batch Download All Converted Files as a ZIP Archive
-  const handleDownloadAllZip = async () => {
-    const completedTasks = tasks.filter((t) => t.status === 'completed');
-    if (completedTasks.length === 0) return;
-    if (!requirePro('batch')) return;
-
-    setIsDownloadingZip(true);
-    try {
-      const entries: ZipEntry[] = [];
-      for (const task of completedTasks) {
-        const baseName = task.filename.substring(0, task.filename.lastIndexOf('.')) || task.filename;
-        const entryFilename = `${baseName}_omniseam.${task.target_format}`;
-        const downloadUrl = apiClient.getDownloadUrl(task);
-
-        const resp = await fetch(downloadUrl);
-        const blob = await resp.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-
-        entries.push({
-          filename: entryFilename,
-          data: arrayBuffer,
-        });
-      }
-
-      const zipBlob = await ZipPackager.createZip(entries);
-      await saveOrShareFile(zipBlob, `OmniSeam3D_Batch_Export_${Date.now()}.zip`);
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.7 },
-      });
-    } catch (err) {
-      console.error("ZIP packaging error:", err);
-      reportNodeError(err);
-    } finally {
-      setIsDownloadingZip(false);
-    }
-  };
-
-  // Launch Mobile AR Quick Look / Google Scene Viewer
+  /** Opens the model in AR Quick Look (iOS) or Scene Viewer (Android). */
   const handleLaunchDirectAr = async () => {
     const previewUrl = activeTask?.status === 'completed'
-      ? (activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id))
+      ? activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id)
       : undefined;
-
-    if (currentModelMesh) {
-      await ArManager.launchAr(currentModelMesh, previewUrl, selectedFile?.name);
-    } else {
+    const object = currentModelMesh ?? (() => {
       const scene = new THREE.Scene();
-      const geom = new THREE.BoxGeometry(1, 1, 1);
-      const mat = new THREE.MeshStandardMaterial({ color: 0x6366f1 });
-      scene.add(new THREE.Mesh(geom, mat));
-      await ArManager.launchAr(scene, previewUrl, selectedFile?.name);
-    }
-  };
-
-  // Inspect Only
-  const handleInspectOnly = async () => {
-    if (!selectedFile) return;
-    try {
-      const res = await apiClient.inspectModel(selectedFile, i18n.language);
-      setInspectData(res);
-      setShowAuditModal(true);
-    } catch (err) {
-      console.error("Inspect error:", err);
-      reportNodeError(err);
-    }
+      scene.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x6366f1 })));
+      return scene;
+    })();
+    await ArManager.launchAr(object, previewUrl, selectedFile?.name);
   };
 
   const handleSelectPreviewTask = (task: TaskResponse) => {
-    setActiveTask(task);
+    conversion.setActiveTask(task);
     setIsSplitView(true);
   };
 
   const handleDeleteTask = (taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.task_id !== taskId));
-    if (activeTask?.task_id === taskId) {
-      setActiveTask(null);
-      setIsSplitView(false);
-    }
+    if (conversion.deleteTask(taskId)) setIsSplitView(false);
   };
 
   const handleClearAllTasks = () => {
-    if (window.confirm(t('tasks.clear_all_confirm'))) {
-      setTasks([]);
-      setActiveTask(null);
-      setIsSplitView(false);
-    }
+    if (!window.confirm(t('tasks.clear_all_confirm'))) return;
+    conversion.clearTasks();
+    setIsSplitView(false);
   };
-
-  useEffect(() => {
-    return () => {
-      if (activePollingRef.current) clearInterval(activePollingRef.current);
-    };
-  }, []);
 
   // App Store screenshot automation: only compiled in with VITE_SCREENSHOT_MODE=1
   // (scripts/app-store-screenshots.sh). Production builds drop this block.
@@ -668,18 +252,15 @@ export const App: React.FC = () => {
   screenshotApiRef.current = () => ({
     changeLanguage: (lang: string) => i18n.changeLanguage(lang),
     loadFile: (file: File) => handleFileSelect(file),
-    setConfig: (update) => setConfig(update),
-    disableAutoAdaptive: () => setIsAutoAdaptiveActive(false),
+    setConfig: (update) => settings.setConfig(update),
+    disableAutoAdaptive: () => settings.setIsAutoAdaptiveActive(false),
     startConvert: () => handleStartConvert(),
     closeAuditModal: () => setShowAuditModal(false),
     openArModal: () => setShowArModal(true),
     launchAr: () => handleLaunchDirectAr(),
     setDisplayMode: (mode) => setDisplayMode(mode),
     isModelLoaded: () => currentModelMesh !== null,
-    showPaywall: () => {
-      enterScreenshotPaywallMode();
-      setPaywall({ feature: null, welcome: true });
-    },
+    showPaywall: showScreenshotPaywall,
   });
   useEffect(() => {
     if (import.meta.env.VITE_SCREENSHOT_MODE === '1') {
@@ -687,21 +268,9 @@ export const App: React.FC = () => {
         m.runScreenshotScene(() => screenshotApiRef.current!())
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Files opened from the iOS Files app / Share Sheet ("Open in OmniSeam 3D")
-  const handleFileSelectRef = useRef(handleFileSelect);
-  handleFileSelectRef.current = handleFileSelect;
-  useEffect(() => {
-    const onOpenFile = (e: Event) => {
-      const file = (e as CustomEvent<File>).detail;
-      if (file) handleFileSelectRef.current(file);
-    };
-    window.addEventListener(OPEN_FILE_EVENT, onOpenFile);
-    return () => window.removeEventListener(OPEN_FILE_EVENT, onOpenFile);
-  }, []);
-
+  // ── Derived view data ─────────────────────────────────────────────────────
   const defectPoints = inspectData ? {
     holes: inspectData.defects.hole_boundary_points,
     nonManifold: inspectData.defects.non_manifold_points,
@@ -710,7 +279,6 @@ export const App: React.FC = () => {
   const repairedPreviewUrl = customPreviewUrl || (activeTask?.status === 'completed'
     ? activeTask.preview_url || apiClient.getPreviewUrl(activeTask.task_id)
     : null);
-
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-slate-100 selection:bg-brand-500 selection:text-white">
@@ -731,7 +299,7 @@ export const App: React.FC = () => {
         onOpenBackendSettings={() => setShowBackendModal(true)}
         onOpenManual={() => setShowManualModal(true)}
         onOpenPrivacy={() => setShowPrivacyModal(true)}
-        onOpenPlan={PAYWALL_ENABLED ? () => setPaywall({ feature: null }) : undefined}
+        onOpenPlan={openPlan}
         planTier={entitlements.tier}
       />
 
@@ -868,13 +436,13 @@ export const App: React.FC = () => {
 
             <TargetFormatCard
               targetFormat={config.target_format}
-              onChangeTargetFormat={(fmt) => handleConfigChange({ ...config, target_format: fmt })}
+              onChangeTargetFormat={(fmt) => settings.changeConfig({ ...config, target_format: fmt })}
               disabled={isProcessing}
             />
 
             <SettingsPanel
               config={config}
-              onChangeConfig={handleConfigChange}
+              onChangeConfig={settings.changeConfig}
               onStartConvert={() => handleStartConvert()}
               onInspectOnly={handleInspectOnly}
               disabled={!selectedFile && selectedFiles.length === 0}
@@ -882,12 +450,11 @@ export const App: React.FC = () => {
               engineMode={engineMode}
               adaptiveIntent={adaptiveIntent}
               isAutoAdaptiveActive={isAutoAdaptiveActive}
-              onResetToAdaptive={handleResetToAdaptive}
+              onResetToAdaptive={settings.resetToAdaptive}
               selectedFile={selectedFile}
               onChangeEngineMode={(m) => {
-                setIsAutoAdaptiveActive(false);
+                settings.setIsAutoAdaptiveActive(false);
                 setEngineMode(m);
-                apiClient.setEngineMode(m);
               }}
               onOpenBackendSettings={() => setShowBackendModal(true)}
               onRequirePro={(f) => requirePro(f)}
@@ -952,10 +519,7 @@ export const App: React.FC = () => {
       <BackendSettingsModal
         isOpen={showBackendModal}
         onClose={() => setShowBackendModal(false)}
-        onBackendConnected={() => {
-          setEngineMode('server');
-          apiClient.setEngineMode('server');
-        }}
+        onBackendConnected={() => setEngineMode('server')}
       />
 
       {/* Native CAD Unlock Modal */}
@@ -994,9 +558,8 @@ export const App: React.FC = () => {
         feature={paywall?.feature ?? null}
         welcome={paywall?.welcome}
         secondaryAction={paywall?.secondary}
-        onClose={() => setPaywall(null)}
+        onClose={closePaywall}
       />
     </div>
   );
 };
-
