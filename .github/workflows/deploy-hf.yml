@@ -95,20 +95,38 @@ jobs:
           PY
 
       - name: Wait for the new version to be live
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           OWNER="${HF_SPACE%%/*}"; NAME="${HF_SPACE##*/}"
           URL="https://${OWNER}-${NAME//_/-}.hf.space/api/v1/health"
           WANT="$(python -c "import json;print(json.load(open('package.json'))['version'])")"
-          echo "Waiting for $URL to report version $WANT (Space rebuild can take 10+ minutes)"
-          sleep 60
-          for i in $(seq 1 50); do
-            STAGE="$(curl -s --max-time 20 "https://huggingface.co/api/spaces/${HF_SPACE}/runtime" | python -c "import sys,json
+          stage() { curl -s --max-time 20 -H "Authorization: Bearer $HF_TOKEN" "https://huggingface.co/api/spaces/${HF_SPACE}/runtime" | python -c "import sys,json
           try: print(json.load(sys.stdin).get('stage',''))
-          except Exception: print('')")"
+          except Exception: print('')"; }
+          build_log() {
+            echo "----- last lines of the Space build log -----"
+            curl -s -N --max-time 30 -H "Authorization: Bearer $HF_TOKEN" "https://huggingface.co/api/spaces/${HF_SPACE}/logs/build" \
+              | sed -n 's/^data: //p' | python -c "import sys,json
+          for l in sys.stdin:
+              try: print(json.loads(l).get('data','').rstrip())
+              except Exception: pass" | tail -60
+          }
+          echo "Waiting for $URL to report version $WANT (Space rebuild can take 10+ minutes)"
+          # Give HF time to start the new build so a stale error from the previous build is not picked up.
+          sleep 120
+          ERRORS=0
+          for i in $(seq 1 50); do
+            STAGE="$(stage)"
             if [ "$STAGE" = "BUILD_ERROR" ] || [ "$STAGE" = "RUNTIME_ERROR" ] || [ "$STAGE" = "CONFIG_ERROR" ]; then
-              echo "::error::Space stage is $STAGE. Open https://huggingface.co/spaces/${HF_SPACE}?logs=build for details."
-              curl -s --max-time 20 "https://huggingface.co/api/spaces/${HF_SPACE}/runtime" | head -c 3000; echo
-              exit 1
+              ERRORS=$((ERRORS+1))
+              if [ "$ERRORS" -ge 2 ]; then
+                echo "::error::Space stage is $STAGE. See https://huggingface.co/spaces/${HF_SPACE}?logs=build"
+                build_log
+                exit 1
+              fi
+            else
+              ERRORS=0
             fi
             BODY="$(curl -s --max-time 30 "$URL" || true)"
             VER="$(echo "$BODY" | python -c "import sys,json
@@ -118,5 +136,6 @@ jobs:
             if [ "$VER" = "$WANT" ]; then echo "$BODY"; exit 0; fi
             sleep 30
           done
-          echo "::error::Space did not report version $WANT within ~26 minutes; check https://huggingface.co/spaces/${HF_SPACE}?logs=build"
+          echo "::error::Space did not report version $WANT within ~27 minutes"
+          build_log
           exit 1
