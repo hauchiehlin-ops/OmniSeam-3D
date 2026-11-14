@@ -27,6 +27,7 @@ import {
   PAYWALL_ENABLED,
   ProFeature,
   can,
+  enterScreenshotPaywallMode,
   initEntitlements,
   isCadFile,
   requiredFeatureForConvert,
@@ -714,6 +715,10 @@ export const App: React.FC = () => {
     launchAr: () => handleLaunchDirectAr(),
     setDisplayMode: (mode) => setDisplayMode(mode),
     isModelLoaded: () => currentModelMesh !== null,
+    showPaywall: () => {
+      enterScreenshotPaywallMode();
+      setPaywall({ feature: null, welcome: true });
+    },
   });
   useEffect(() => {
     if (import.meta.env.VITE_SCREENSHOT_MODE === '1') {
