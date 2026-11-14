@@ -9,6 +9,8 @@
     "release": "./scripts/bump_and_push.sh",
     "release:patch": "./scripts/bump_and_push.sh patch",
     "release:minor": "./scripts/bump_and_push.sh minor",
-    "release:major": "./scripts/bump_and_push.sh major"
+    "release:major": "./scripts/bump_and_push.sh major",
+    "release:apple": "./scripts/apple-release.sh",
+    "release:apple:check": "./scripts/apple-release.sh --check"
   }
 }
