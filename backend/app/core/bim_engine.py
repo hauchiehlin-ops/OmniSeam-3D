@@ -2,6 +2,7 @@ import os
 import subprocess
 import tempfile
 import trimesh
+from backend.app.utils.mesh_utils import ensure_trimesh
 import numpy as np
 from pathlib import Path
 from typing import Optional, List, Tuple
@@ -111,7 +112,7 @@ except Exception:
                         timeout=30
                     )
                     if fc_res.returncode == 0 and out_stl.exists():
-                        loaded_mesh = trimesh.load(str(out_stl))
+                        loaded_mesh = ensure_trimesh(trimesh.load(str(out_stl)), file_path.name)
                         if tmp_dir:
                             tmp_dir.cleanup()
                         return loaded_mesh

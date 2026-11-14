@@ -2,6 +2,7 @@ import os
 import subprocess
 import tempfile
 import trimesh
+from backend.app.utils.mesh_utils import ensure_trimesh
 import numpy as np
 from pathlib import Path
 from typing import Optional
@@ -109,7 +110,7 @@ except Exception:
 
                 res = subprocess.run(["freecadcmd", str(script_path)], timeout=30)
                 if res.returncode == 0 and out_stl.exists():
-                    return trimesh.load(str(out_stl))
+                    return ensure_trimesh(trimesh.load(str(out_stl)), file_path.name)
         except Exception:
             pass
         return None
