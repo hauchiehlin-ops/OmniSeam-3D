@@ -86,6 +86,17 @@ class CADEngine:
         except Exception:
             pass
 
+        # 4. Faceted STEP (bare POLY_LOOP shells without a product structure,
+        #    which OpenCASCADE refuses to transfer).
+        if ext in ("step", "stp"):
+            try:
+                from backend.app.core.faceted_step import load_faceted_step
+                faceted = load_faceted_step(file_path)
+                if faceted is not None:
+                    return faceted
+            except Exception:
+                pass
+
         raise ValueError(
             f"Unable to parse CAD file '{file_path.name}'. "
             f"Ensure OpenCASCADE (pythonocc), FreeCAD, or Gmsh is installed and file contains valid CAD geometry."
