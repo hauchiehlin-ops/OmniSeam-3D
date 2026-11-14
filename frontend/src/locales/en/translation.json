@@ -163,7 +163,9 @@
     "flip_ccw_90": "Rotate 90° CCW",
     "flip_cw_90": "Rotate 90° CW",
     "flip_180": "Flip 180°",
-    "close_panel": "Close Panel"
+    "close_panel": "Close Panel",
+    "show_gizmo": "Show 3D rotation rings",
+    "hide_gizmo": "Hide 3D rotation rings"
   },
   "coord": {
     "select_tooltip": "Coordinate System (Auto / Cartesian / Polar / Cylindrical / Spherical)",
@@ -226,7 +228,10 @@
     "zero_thickness_sol1": "1. Switch to Cloud Server: Switch to Cloud Server in the top-right corner (free 16GB RAM node). The backend invokes OpenCASCADE industrial CAD kernel to sew thin sheets directly into solid CAD models (STEP/IGES).",
     "zero_thickness_sol2": "2. Thicken Original CAD Model: In your original CAD software (SolidWorks, Rhino, Blender, etc.), apply a 'Thicken' feature to give the sheets physical wall thickness before uploading.",
     "suggest_fill_holes": "Recommend auto-fill boundary holes to construct a watertight solid",
-    "suggest_fix_non_manifold": "Recommend repairing non-manifold geometric defects"
+    "suggest_fix_non_manifold": "Recommend repairing non-manifold geometric defects",
+    "zero_thickness_alert_title": "Zero-thickness open surface (sheet) detected",
+    "zero_thickness_alert_desc": "The model has a large surface area but a volume of 0.00 mm³: it is made of a single layer of triangles with no thickness (for example a fan blade or thin shell). On-device processing can close small holes but cannot create wall thickness.",
+    "zero_thickness_solutions_title": "🛠️ How to fix it (2 options):"
   },
   "tasks": {
     "title": "Conversion Queue & History",
@@ -259,8 +264,7 @@
     "launch_now_btn": "🚀 Launch AR Quick Look Now",
     "ar_instructions": "After tapping, slowly pan camera across a flat surface (table or floor) to place the model in 1:1 scale.",
     "preparing_ar": "Preparing AR model...",
-    "unsupported_device": "AR preview needs the iPhone or iPad app (or an Android device with ARCore).",
-    "close": "Close"
+    "unsupported_device": "AR preview needs the iPhone or iPad app (or an Android device with ARCore)."
   },
   "nav": {
     "language": "Language",
@@ -597,15 +601,12 @@
     "stage_upload": "File Transfer",
     "stage_processing": "Geometric Healing",
     "stage_retention": "Storage & Retention",
-    "stage_ar_relay": "AR Mobile Relay Session",
     "stage_upload_client": "0% Network Transfer (In-Memory Only)",
     "stage_upload_server": "HTTPS upload to the cloud node",
     "stage_proc_client": "On your device (browser engine / Web Worker)",
     "stage_proc_server": "Temporary workspace on the node",
     "stage_ret_client": "Cleared when you close the project or app",
     "stage_ret_server": "Deleted automatically within 1 hour",
-    "stage_ar_client": "WebXR Direct In-Memory (0% Network)",
-    "stage_ar_server": "Ephemeral Encrypted Relay, 2h TTL Auto-Purge",
     "close": "Close Statement",
     "public_policy_link": "Full privacy policy (web)"
   },
@@ -739,5 +740,8 @@
     "secondary_convert_as_is": "Convert without repair (Basic)",
     "status_trial_verify": "Pro trial paused: connect to the internet to confirm the date",
     "trial_verify_desc": "Your device's date is earlier than a date this app has already seen, so the trial is paused. Connect to the internet once and reopen the app. Setting the correct date and time also helps."
+  },
+  "common": {
+    "close": "Close"
   }
 }

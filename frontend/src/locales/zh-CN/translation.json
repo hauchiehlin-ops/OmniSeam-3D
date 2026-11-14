@@ -125,7 +125,9 @@
     "quick_badge_cad": "工业 CAD",
     "quick_badge_color_struct": "彩色/结构",
     "quick_badge_web_ar": "网页/AR",
-    "quick_badge_mesh": "通用网格"
+    "quick_badge_mesh": "通用网格",
+    "cad_engine_tip": "设备端生成 AP214 B-Rep 网格实体；云端节点调用 OpenCASCADE 工业级曲面缝合",
+    "params_applicability_hint": "⚡ 本机离线 与 ☁️ 云端算力 双核心均支持此设置"
   },
   "viewer": {
     "split_view": "双视窗分屏对比",
@@ -161,7 +163,9 @@
     "flip_ccw_90": "逆时针旋转 90°",
     "flip_cw_90": "顺时针旋转 90°",
     "flip_180": "翻转 180°",
-    "close_panel": "关闭面板"
+    "close_panel": "关闭面板",
+    "show_gizmo": "显示 3D 旋转环",
+    "hide_gizmo": "隐藏 3D 旋转环"
   },
   "coord": {
     "select_tooltip": "空间坐标系（智慧推荐 / 笛卡尔 / 极坐标 / 圆柱 / 球坐标）",
@@ -224,7 +228,10 @@
     "zero_thickness_sol1": "1. 切换至云端服务器 (Cloud Server)：于右上角切换至【Cloud Server】（免费 16GB 节点），后端将自动调用 OpenCASCADE 工业几何内核，将薄片直接缝合转换为高质量 CAD 实体 (STEP/IGES) 导出。",
     "zero_thickness_sol2": "2. CAD 原模加厚：在原始建模软件（SolidWorks, Rhino, Blender 等）中为叶片执行“加厚 (Thicken)”给予实体壁厚后，再重新上传本站进行修复转档。",
     "suggest_fill_holes": "建议启用自动边界孔洞补平以构建封闭实体",
-    "suggest_fix_non_manifold": "建议修复非流形几何缺陷"
+    "suggest_fix_non_manifold": "建议修复非流形几何缺陷",
+    "zero_thickness_alert_title": "零厚度开放曲面（片体）几何诊断",
+    "zero_thickness_alert_desc": "模型表面积很大但体积为 0.00 mm³，表示此模型（如风扇叶片、薄壳片体）由单层无厚度的三角面构成。设备端处理可以缝合微小破孔，但无法自动生成实体壁厚。",
+    "zero_thickness_solutions_title": "🛠️ 解决方案（2 种途径）："
   },
   "tasks": {
     "title": "转换任务队列与历史",
@@ -255,10 +262,9 @@
     "nav_btn": "AR 实境投影",
     "modal_title": "AR 增强现实实时预览",
     "launch_now_btn": "🚀 即刻开启 AR Quick Look",
-    "qr_hover_hint": "无需安装额外 App · 支持原生 Safari Quick Look 与 Google Scene Viewer",
     "preparing_ar": "正在准备 AR 模型实体...",
     "unsupported_device": "AR 预览需要在 iPhone／iPad App 上使用（或支持 ARCore 的 Android 设备）。",
-    "close": "关闭"
+    "ar_instructions": "点击上方按钮后，请对准平坦的地面或桌面缓慢移动手机以放置模型。"
   },
   "nav": {
     "language": "界面语言",
@@ -595,15 +601,12 @@
     "stage_upload": "文件传输阶段",
     "stage_processing": "几何修复运算",
     "stage_retention": "数据存储与保留",
-    "stage_ar_relay": "AR 跨端扫码中继",
     "stage_upload_client": "0% 网络传输 (仅暂存于浏览器内存)",
     "stage_upload_server": "通过 HTTPS 上传至云端节点",
     "stage_proc_client": "在你的设备上（浏览器引擎 / Web Worker）",
     "stage_proc_server": "节点上的临时工作区",
     "stage_ret_client": "关闭项目或 App 时清除",
     "stage_ret_server": "1 小时内自动删除",
-    "stage_ar_client": "同端 WebXR 内存直传 (0% 网络)",
-    "stage_ar_server": "临时加密传输，2 小时 TTL 自动焚毁",
     "close": "关闭声明",
     "public_policy_link": "完整隐私政策（网页）"
   },
@@ -737,5 +740,8 @@
     "secondary_convert_as_is": "直接转换，不修复（基础版）",
     "status_trial_verify": "专业版试用暂停：请联网确认日期",
     "trial_verify_desc": "设备日期早于 App 之前记录过的日期，因此暂停试用。请联网后重新打开 App；将日期与时间设为自动也有帮助。"
+  },
+  "common": {
+    "close": "关闭"
   }
 }

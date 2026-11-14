@@ -171,11 +171,6 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                     <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_proc_server')}</td>
                   </tr>
                   <tr>
-                    <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_ar_relay')}</td>
-                    <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_ar_client')}</td>
-                    <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_ar_server')}</td>
-                  </tr>
-                  <tr>
                     <td className="px-3 py-2 text-white font-medium">{t('privacy.stage_retention')}</td>
                     <td className="px-3 py-2 text-emerald-400">{t('privacy.stage_ret_client')}</td>
                     <td className="px-3 py-2 text-indigo-300">{t('privacy.stage_ret_server')}</td>

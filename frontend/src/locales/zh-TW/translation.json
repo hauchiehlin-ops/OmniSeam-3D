@@ -163,7 +163,9 @@
     "flip_ccw_90": "逆時針旋轉 90°",
     "flip_cw_90": "順時針旋轉 90°",
     "flip_180": "翻轉 180°",
-    "close_panel": "關閉面板"
+    "close_panel": "關閉面板",
+    "show_gizmo": "顯示 3D 旋轉環",
+    "hide_gizmo": "隱藏 3D 旋轉環"
   },
   "coord": {
     "select_tooltip": "空間座標系（智慧推薦 / 笛卡爾 / 極座標 / 圓柱 / 球座標）",
@@ -222,7 +224,7 @@
     "status_closed": "模型拓撲完全水密封閉，無任何孔洞。",
     "status_open": "檢測到邊界破面孔洞或非流形缺陷。",
     "zero_thickness_alert_title": "零厚度開放曲面 (Zero-Thickness Sheet) 幾何診斷",
-    "zero_thickness_alert_desc": "模型表面積龐大但體積為 0.00 mm³，代表此模型（如風扇葉片、薄殼片體）是由單層無厚度的三角面構成。純前端模式受限於瀏覽器算力，僅能縫合微小破孔，無法自動憑空生成 3D 實體壁厚。",
+    "zero_thickness_alert_desc": "模型表面積龐大但體積為 0.00 mm³，代表此模型（如風扇葉片、薄殼片體）是由單層無厚度的三角面構成。裝置端處理可以縫合微小破孔，但無法自動生成實體壁厚。",
     "zero_thickness_solutions_title": "🛠️ 徹底解決方案（2 種途徑）：",
     "topology_clean_desc": "拓撲結構完美，無孔洞或非流形缺陷",
     "topology_defects_desc": "檢測到幾何結構瑕疵，可點擊自動修復",
@@ -262,8 +264,7 @@
     "launch_now_btn": "🚀 立即在空間中以 AR 投影",
     "ar_instructions": "點擊上方按鈕後，請對準平坦地面或桌面緩慢移動手機以進行空間放置。",
     "preparing_ar": "正在準備 AR 模型實體...",
-    "unsupported_device": "AR 預覽需要在 iPhone／iPad App 上使用（或支援 ARCore 的 Android 裝置）。",
-    "close": "關閉"
+    "unsupported_device": "AR 預覽需要在 iPhone／iPad App 上使用（或支援 ARCore 的 Android 裝置）。"
   },
   "nav": {
     "language": "語系",
@@ -600,15 +601,12 @@
     "stage_upload": "檔案讀取 / 傳輸",
     "stage_processing": "幾何運算與修復",
     "stage_retention": "檔案儲存與留存",
-    "stage_ar_relay": "AR 跨端掃碼中繼",
     "stage_upload_client": "0% 網路傳輸 (純本機記憶體)",
     "stage_upload_server": "透過 HTTPS 上傳至雲端節點",
     "stage_proc_client": "在你的裝置上（瀏覽器引擎 / Web Worker）",
     "stage_proc_server": "節點上的暫存工作區",
     "stage_ret_client": "關閉專案或 App 時清除",
     "stage_ret_server": "1 小時內自動刪除",
-    "stage_ar_client": "同端 WebXR 記憶體直傳 (0% 網路)",
-    "stage_ar_server": "臨時加密傳輸，2 小時 TTL 自動焚毀",
     "close": "關閉聲明",
     "public_policy_link": "完整隱私權政策（網頁）"
   },
@@ -742,5 +740,8 @@
     "secondary_convert_as_is": "直接轉檔，不修復（基礎版）",
     "status_trial_verify": "專業版試用暫停：請連上網路確認日期",
     "trial_verify_desc": "裝置日期早於 App 先前記錄過的日期，因此暫停試用。請連上網路後重新開啟 App；將日期與時間設為自動也有幫助。"
+  },
+  "common": {
+    "close": "關閉"
   }
 }
