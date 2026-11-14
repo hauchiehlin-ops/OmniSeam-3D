@@ -17,21 +17,20 @@ class Settings(BaseSettings):
     MAX_CONCURRENT_CONVERSIONS: int = int(os.getenv("MAX_CONCURRENT_CONVERSIONS", "2" if os.getenv("IS_PUBLIC_DEMO_NODE", "false").lower() in ["true", "1", "yes"] else "4"))
 
     
-    # CORS: explicit allow-list. The web app, the iOS app (Capacitor WebView
-    # origin) and local development. Extra origins: comma-separated env var.
+    # CORS: explicit allow-list. The app's Capacitor WebView origins (iOS:
+    # capacitor://localhost; Android: https://localhost) and the Vite dev
+    # server. Extra origins: comma-separated env var.
     ALLOWED_ORIGINS: List[str] = [
-        "https://omniseam-3d.vercel.app",
         "capacitor://localhost",
         "ionic://localhost",
+        "https://localhost",
         "http://localhost",
-        "http://localhost:3000",
         "http://localhost:5173",
-        "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
     ]
     EXTRA_ALLOWED_ORIGINS: str = os.getenv("EXTRA_ALLOWED_ORIGINS", "")
-    # Vercel preview deployments of the web app.
-    CORS_ORIGIN_REGEX: str = os.getenv("CORS_ORIGIN_REGEX", r"https://omniseam-3d(-[a-z0-9-]+)?\.vercel\.app")
+    # Optional regex for extra origins (e.g. preview deployments); empty = off.
+    CORS_ORIGIN_REGEX: str = os.getenv("CORS_ORIGIN_REGEX", "")
 
     # Abuse protection & data retention
     RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "20"))

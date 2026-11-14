@@ -1,9 +1,9 @@
 /**
- * Platform bridge between the web build and the Capacitor iOS shell.
+ * Platform bridge to the Capacitor native shell (iOS; Android-ready).
  *
- * Every iOS-only behaviour is gated behind `IS_NATIVE`, so the Vercel web
- * build keeps its original browser behaviour (anchor downloads, Safari AR
- * Quick Look, LAN QR codes, localhost nodes, 500 MB limits).
+ * The app ships only as a native (Capacitor) app. `IS_NATIVE` is false only
+ * on the Vite dev server in a desktop browser, where file saving falls back
+ * to a plain download so the UI can still be tested.
  */
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -90,9 +90,9 @@ async function writeToCache(blob: Blob, filename: string): Promise<string> {
 }
 
 /**
- * Saves a generated file. Web: classic anchor download. iOS: writes the file
- * to the app cache and opens the system Share Sheet ("Save to Files",
- * AirDrop, slicer apps, ...).
+ * Saves a generated file: writes it to the app cache and opens the system
+ * Share Sheet ("Save to Files", AirDrop, slicer apps, ...). On the dev
+ * server in a browser it falls back to a normal download.
  */
 export async function saveOrShareFile(blob: Blob, filename: string): Promise<void> {
   if (!IS_NATIVE) {

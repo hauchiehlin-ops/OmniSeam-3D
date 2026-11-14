@@ -3,23 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { 
   Cloud, 
   Zap, 
-  Server, 
   ExternalLink, 
   CheckCircle2, 
   XCircle, 
   Loader2, 
-  Copy, 
   Check, 
   Sparkles,
-  ArrowRight,
   ShieldCheck,
-  UserCheck,
   HelpCircle,
   X
 } from 'lucide-react';
 import { apiClient, ConnectionTestResult, normalizeBackendUrl, getDuplicateUrl, getPublicNodeUrl } from '../api/client';
 import { remoteConfig } from '../platform/remote-config';
-import { IS_NATIVE } from '../platform/native';
 
 interface BackendSettingsModalProps {
   isOpen: boolean;
@@ -34,11 +29,10 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   onBackendConnected,
 }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'hf' | 'local' | 'client'>('hf');
+  const [activeTab, setActiveTab] = useState<'hf' | 'client'>('hf');
   const [backendUrl, setBackendUrl] = useState('');
   const [testResult, setTestResult] = useState<ConnectionTestResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -100,12 +94,6 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
     handleTest(getPublicNodeUrl());
   };
 
-  const copyDockerCommand = () => {
-    navigator.clipboard.writeText('docker run -d -p 8000:8000 --name omniseam-backend ghcr.io/hauchiehlin-ops/omniseam-3d-backend:latest');
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div className="relative w-full max-w-3xl bg-dark-surface border border-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -148,17 +136,6 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
             <span>{t('backend_modal.tab_hf')}</span>
           </button>
-          {!IS_NATIVE && <button
-            onClick={() => setActiveTab('local')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
-              activeTab === 'local'
-                ? 'border-brand-400 text-brand-300 bg-brand-500/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Server className="w-3.5 h-3.5 text-brand-400" />
-            <span>{t('backend_modal.tab_local')}</span>
-          </button>}
           <button
             onClick={() => setActiveTab('client')}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
@@ -326,60 +303,6 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                         <span>{t('backend_modal.test_btn')}</span>
                       </>
                     )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'local' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-dark-panel border border-dark-border space-y-3">
-                <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <Server className="w-4 h-4 text-brand-400" />
-                  {t('backend_modal.local_title')}
-                </span>
-
-                <div className="relative group">
-                  <pre className="p-3 bg-dark-bg border border-dark-border rounded-lg text-[11px] font-mono text-brand-300 overflow-x-auto">
-                    docker run -d -p 8000:8000 hauchiehlin/omniseam-3d-backend:latest
-                  </pre>
-                  <button
-                    onClick={copyDockerCommand}
-                    className="absolute top-2 right-2 p-1.5 rounded-md bg-dark-surface border border-dark-border text-slate-300 hover:text-white transition-all text-xs flex items-center gap-1"
-                  >
-                    {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedCode ? t('backend_modal.copied') : t('backend_modal.copy')}</span>
-                  </button>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  {t('backend_modal.local_hint')}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300">
-                  {t('backend_modal.local_url_label')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="http://localhost:8000"
-                    value={backendUrl}
-                    onChange={(e) => setBackendUrl(e.target.value)}
-                    className="flex-1 bg-dark-panel border border-dark-border rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-brand-500 font-mono transition-all"
-                  />
-                  <button
-                    onClick={() => handleTest()}
-                    disabled={isTesting || !backendUrl.trim()}
-                    className="flex items-center gap-1.5 px-4 py-2.5 bg-dark-panel border border-brand-500/40 text-brand-300 hover:bg-brand-600/20 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
-                  >
-                    {isTesting ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Zap className="w-3.5 h-3.5 text-brand-400" />
-                    )}
-                    <span>{t('backend_modal.test_btn')}</span>
                   </button>
                 </div>
               </div>

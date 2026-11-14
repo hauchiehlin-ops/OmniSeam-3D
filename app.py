@@ -27,7 +27,7 @@ except Exception:
 with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     gr.Markdown("""
     # 💎 OmniSeam 3D - Dedicated Engine Node
-    This Hugging Face Space is a dedicated CAD & Mesh Repair translation node for [OmniSeam 3D Web App](https://omniseam-3d.vercel.app).
+    This Hugging Face Space is a dedicated CAD & Mesh Repair translation node for the [OmniSeam 3D](https://hauchiehlin-ops.github.io/OmniSeam-3D/) iPhone & iPad app.
     
     ### 📊 System Status
     - **Engine**: FastAPI + FreeCAD + OpenCASCADE + Trimesh + LibreDWG
@@ -36,8 +36,8 @@ with gr.Blocks(title="OmniSeam 3D Engine Node") as demo:
     
     ### 🔗 How to Connect to OmniSeam 3D
     1. Copy your Space URL: `https://<your-username>-<space-name>.hf.space`
-    2. Open [OmniSeam 3D Web App](https://omniseam-3d.vercel.app)
-    3. Click **Engine Node** in the top navigation bar, paste this URL, and click **⚡ Test & Connect**!
+    2. Open the OmniSeam 3D app on iPhone or iPad
+    3. Tap **Engine Node** in the top bar, paste this URL, tap **Test connection**, then **Save and use this node**.
     """)
 
     dummy_btn = gr.Button("GPU Warmup", visible=False)

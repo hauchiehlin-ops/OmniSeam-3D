@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Cpu
 } from 'lucide-react';
-import { ConversionConfig, TargetFormat } from '../types';
+import { ConversionConfig } from '../types';
 import { EngineMode, apiClient } from '../api/client';
 import { AdaptiveIntentResult } from '../engine/adaptive-intent';
 import { ProBadge } from './PaywallModal';
@@ -36,7 +36,6 @@ interface SettingsPanelProps {
   engineMode: EngineMode;
   onChangeEngineMode: (mode: EngineMode) => void;
   onOpenBackendSettings: () => void;
-  autoEngineNotice?: { mode: EngineMode; reason: string } | null;
   adaptiveIntent?: AdaptiveIntentResult | null;
   isAutoAdaptiveActive?: boolean;
   onResetToAdaptive?: () => void;
@@ -55,7 +54,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   engineMode,
   onChangeEngineMode,
   onOpenBackendSettings,
-  autoEngineNotice,
   adaptiveIntent,
   isAutoAdaptiveActive = true,
   onResetToAdaptive,

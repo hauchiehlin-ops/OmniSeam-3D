@@ -1,6 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Ruler, CornerDownRight, Box } from 'lucide-react';
+import { Ruler, Box } from 'lucide-react';
 import { BoundingBox } from '../types';
 
 interface MeasureToolProps {
@@ -16,8 +15,6 @@ export const MeasureTool: React.FC<MeasureToolProps> = ({
   point2,
   boundingBox
 }) => {
-  const { t } = useTranslation();
-
   return (
     <div className="p-4 bg-dark-surface border border-cyan-500/30 rounded-xl flex flex-col gap-3 shadow-lg shadow-cyan-950/20">
       <div className="flex items-center gap-2 text-cyan-400 font-semibold text-xs tracking-wider uppercase">

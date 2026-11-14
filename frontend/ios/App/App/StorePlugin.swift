@@ -29,7 +29,7 @@ public class StorePlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Host already contacted for remote config; its HTTPS `Date` header is the
     /// trusted clock used to stop trial extension by setting the device clock back.
-    private let timeURL = URL(string: "https://omniseam-3d.vercel.app/config.json")!
+    private let timeURL = URL(string: "https://hauchiehlin-ops.github.io/OmniSeam-3D/config.json")!
     private let keychainService = "io.github.hauchiehlinops.omniseam3d.clock"
 
     private var updatesTask: Task<Void, Never>?

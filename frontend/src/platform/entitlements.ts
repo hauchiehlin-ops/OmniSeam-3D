@@ -8,10 +8,9 @@
  * the trial transaction's purchase date; because the transaction lives on the
  * user's Apple ID, reinstalling the app does not restart it.
  *
- * Web build: every feature stays unlocked (the open-source web app is
- * unchanged). For local testing of the paywall in a browser, run the dev
- * server and set localStorage "omniseam_dev_store" = "1" — a fake store that
- * simulates purchases is used instead.
+ * Dev server in a browser: every feature is unlocked by default. To test the
+ * paywall, set localStorage "omniseam_dev_store" = "1" — a fake store that
+ * simulates purchases is used instead (dev builds only).
  */
 import { useEffect, useState } from 'react';
 import { registerPlugin, PluginListenerHandle } from '@capacitor/core';

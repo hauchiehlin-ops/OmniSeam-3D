@@ -18,11 +18,11 @@ This is a dedicated **OmniSeam 3D** conversion and auto-healing node running on 
 - **16 GB RAM + 2 vCPU** capability (via free Hugging Face Spaces)
 - Supports heavy CAD formats: SolidWorks (`.sldprt`, `.sldasm`), Inventor (`.ipt`), Rhino (`.3dm`), STEP, IGES, IFC
 - FreeCAD B-Rep sewing & tessellation
-- REST API for [OmniSeam 3D Web Application](https://omniseam-3d.vercel.app)
+- REST API for the [OmniSeam 3D](https://hauchiehlin-ops.github.io/OmniSeam-3D/) iPhone & iPad app
 
-### Connect to Web App
-In the [OmniSeam 3D Web App](https://omniseam-3d.vercel.app):
-1. Click the **Backend Node** badge in the top navigation bar.
+### Connect the app
+In the OmniSeam 3D app on iPhone or iPad:
+1. Tap the **Engine Node** badge in the top bar.
 2. Select **Hugging Face Spaces**.
 3. Paste your Space URL: `https://<your-username>-omniseam-engine.hf.space`.
-4. Click **⚡ Test & Connect**.
+4. Tap **Test connection**, then **Save and use this node**.

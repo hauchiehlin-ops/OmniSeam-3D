@@ -14,15 +14,16 @@ from backend.app.storage.file_manager import file_manager
 client = TestClient(app)
 
 
-def test_cors_allows_web_and_ios_origins():
-    for origin in ("https://omniseam-3d.vercel.app", "capacitor://localhost", "https://omniseam-3d-git-ios-abc.vercel.app"):
+def test_cors_allows_app_and_dev_origins():
+    for origin in ("capacitor://localhost", "https://localhost", "http://localhost:5173"):
         r = client.get("/api/v1/health", headers={"Origin": origin})
         assert r.headers.get("access-control-allow-origin") == origin, origin
 
 
 def test_cors_rejects_unknown_origin():
-    r = client.get("/api/v1/health", headers={"Origin": "https://evil.example.com"})
-    assert "access-control-allow-origin" not in r.headers
+    for origin in ("https://evil.example.com", "https://omniseam-3d.vercel.app"):
+        r = client.get("/api/v1/health", headers={"Origin": origin})
+        assert "access-control-allow-origin" not in r.headers, origin
 
 
 def test_rate_limit_sliding_window(monkeypatch):

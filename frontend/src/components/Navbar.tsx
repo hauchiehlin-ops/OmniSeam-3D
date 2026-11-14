@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Zap, Cloud, Settings, Server, Crown } from 'lucide-react';
+import { Zap, Cloud, Settings, Crown } from 'lucide-react';
 import type { Tier } from '../platform/entitlements';
 import { trialDaysLeft, getEntitlementState } from '../platform/entitlements';
 import { LanguageSwitcher } from './LanguageSwitcher';

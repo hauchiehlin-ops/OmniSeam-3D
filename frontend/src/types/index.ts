@@ -170,11 +170,3 @@ export interface FluidDomainResponse {
   created_at: string;
 }
 
-export interface ArSessionResponse {
-  session_id: string;
-  filename: string;
-  glb_url: string;
-  usdz_url?: string | null;
-  created_at: string;
-}
-

@@ -38,7 +38,7 @@
 - 交易綁在 Apple ID 上，刪除 App 重裝也不會重新開始；換一台裝置登入同一個 Apple ID 也一樣。
 - 試用不會續訂、不會扣款，到期後自動回到基礎版。購買專業版則永久有效。
 - **防止調時鐘延長試用**（`frontend/src/platform/trusted-clock.ts`），App 不會單獨相信裝置時鐘：
-  1. **伺服器時間**：每次啟動和回到前景時，讀取 `omniseam-3d.vercel.app` 的 HTTPS `Date` 標頭。這是 App 本來就會連線的主機，不新增第三方。
+  1. **伺服器時間**：每次啟動和回到前景時，讀取 GitHub Pages（`hauchiehlin-ops.github.io/OmniSeam-3D/config.json`）的 HTTPS `Date` 標頭。這是 App 本來就會連線的主機，不新增第三方。
   2. **最晚時間紀錄**：App 看過的最晚時間（伺服器時間、Apple 簽署的試用購買日、App 使用中經過的時間）存在 **Keychain**，刪除 App 重裝也不會清掉。
   3. **單調時鐘**：App 執行期間用 `performance.now()` 推進時間，不受使用中修改日期影響。
   - **離線時**：若裝置時間早於最晚紀錄超過 10 分鐘，試用會**暫停**，付費頁顯示「請連上網路確認日期」，連線後自動恢復。日期正常的離線使用者不受影響。
@@ -88,7 +88,7 @@ Apple 已在 2026-03-26 停止為內購產生「促銷代碼（Promo Codes）」
 | `frontend/src/components/PaywallModal.tsx` | 方案頁／付費頁、`ProBadge` |
 | `frontend/src/App.tsx` | 首次啟動顯示方案頁；各功能入口呼叫 `requirePro()` |
 
-- 網頁版（Vercel）不受影響，所有功能照舊開放。
+- 已不提供網頁版；在瀏覽器 dev server 上預設全部功能開放，方便開發測試。
 - 截圖模式（`VITE_SCREENSHOT_MODE=1`）一律視為專業版。
 
 ## 測試

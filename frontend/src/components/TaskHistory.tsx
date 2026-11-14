@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProBadge } from './PaywallModal';
-import { IS_NATIVE, saveOrShareUrl } from '../platform/native';
+import { saveOrShareUrl } from '../platform/native';
 import { 
   ListOrdered, 
   Download, 
@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Trash2,
   Package,
-  X
 } from 'lucide-react';
 import { TaskResponse } from '../types';
 import { apiClient } from '../api/client';
@@ -165,21 +164,17 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
                       <Eye className="w-4 h-4" />
                     </button>
 
-                    <a
-                      href={downloadHref}
-                      download={downloadFilename}
-                      onClick={(e) => {
-                        if (IS_NATIVE) {
-                          e.preventDefault();
-                          saveOrShareUrl(downloadHref, downloadFilename).catch((err) => console.error('Save failed:', err));
-                        }
+                    <button
+                      type="button"
+                      onClick={() => {
+                        saveOrShareUrl(downloadHref, downloadFilename).catch((err) => console.error('Save failed:', err));
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all"
                       title={t('tasks.download')}
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>{t('tasks.download')}</span>
-                    </a>
+                    </button>
                   </>
                 )}
 

@@ -2,12 +2,12 @@
  * Remote runtime configuration.
  *
  * The public node URL, the Hugging Face "duplicate" link and the minimum node
- * version are read from a small JSON file hosted with the web app
- * (https://omniseam-3d.vercel.app/config.json). If Hugging Face policies change,
+ * version are read from site/config.json, published on GitHub Pages
+ * (see links.ts). If Hugging Face policies change,
  * the iOS app can be pointed at a new node without a new App Store review.
  * Built-in defaults are used when offline or when the fetch fails.
  */
-import { IS_NATIVE } from './native';
+import { REMOTE_CONFIG_URL } from './links';
 
 export interface RemoteConfig {
   schemaVersion: number;
@@ -26,7 +26,6 @@ export const DEFAULT_REMOTE_CONFIG: RemoteConfig = {
   notice: null,
 };
 
-const REMOTE_CONFIG_URL = 'https://omniseam-3d.vercel.app/config.json';
 const CACHE_KEY = 'omniseam_remote_config';
 
 function readCache(): Partial<RemoteConfig> {
@@ -52,12 +51,10 @@ export const remoteConfig: RemoteConfig = { ...DEFAULT_REMOTE_CONFIG, ...sanitiz
 
 /** Fetches the latest config in the background; resolves to the merged config. */
 export async function loadRemoteConfig(): Promise<RemoteConfig> {
-  // Web: same-origin file. iOS app: the hosted copy on Vercel.
-  const url = IS_NATIVE ? REMOTE_CONFIG_URL : './config.json';
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
-    const resp = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    const resp = await fetch(REMOTE_CONFIG_URL, { cache: 'no-store', signal: controller.signal });
     clearTimeout(timer);
     if (resp.ok) {
       const clean = sanitize(await resp.json());

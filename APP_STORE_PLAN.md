@@ -1,5 +1,7 @@
 # OmniSeam 3D — Apple App Store 上架整改方案（全免費 HF 版）
 
+> ⚠️ 2026-11-14 更新：已取消網頁版部署，本文中關於 Vercel 網頁版、CORS 白名單保留 Vercel 網域、網頁版回歸測試等項目已不適用。公開頁面改由 GitHub Pages 提供，見 `docs/網站搬遷-GitHub-Pages.md`。
+
 > 評估日期：2026-11-14 · 評估對象：v4.3.0（React 18 + Vite + Three.js 前端／FastAPI + Gradio 後端部署於 Hugging Face Space）
 > 營運前提：**不租用任何付費主機**。公用示範節點與使用者自建節點全部使用 Hugging Face 免費 CPU Basic。
 

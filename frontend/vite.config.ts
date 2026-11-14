@@ -30,8 +30,8 @@ function stripAppleDouble(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Relative base so the same build works on Vercel (served at /) and inside
-  // the Capacitor iOS WebView (served from capacitor://localhost/).
+  // Relative asset paths: the build is served from capacitor://localhost/
+  // inside the native WebView.
   base: './',
   plugins: [react(), stripAppleDouble()],
   server: {

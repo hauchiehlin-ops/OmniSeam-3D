@@ -8,11 +8,9 @@ import {
   Cpu, 
   Terminal, 
   Printer, 
-  Flame, 
   CheckCircle2, 
   Copy, 
   Check, 
-  ExternalLink,
   Layers,
   HelpCircle,
   Target,
@@ -51,7 +49,7 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
   onClose,
   onOpenBackendSettings
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ManualTab>('quickstart');
   const [copiedCmd, setCopiedCmd] = useState(false);
 
@@ -223,7 +221,6 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                         { id: 'qa-case-1', labelKey: 'manual.qa_case1_toc', badgeKey: 'manual.qa_case1_badge' },
                         { id: 'qa-case-2', labelKey: 'manual.qa_case2_toc', badgeKey: 'manual.qa_case2_badge' },
                         { id: 'qa-case-3', labelKey: 'manual.qa_case3_toc', badgeKey: 'manual.qa_case3_badge' },
-                        { id: 'qa-case-4', labelKey: 'manual.qa_case4_toc', badgeKey: 'manual.qa_case4_badge' },
                         { id: 'qa-case-5', labelKey: 'manual.qa_case5_toc', badgeKey: 'manual.qa_case5_badge' },
                         { id: 'qa-case-6', labelKey: 'manual.qa_case6_toc', badgeKey: 'manual.qa_case6_badge' },
                         { id: 'qa-case-7', labelKey: 'manual.qa_case7_toc', badgeKey: 'manual.qa_case7_badge' },
@@ -390,53 +387,6 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({
                     </div>
                     <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
                       {t('manual.qa_case3_sol2')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CASE 4: index.html Download Anomaly */}
-              <div id="qa-case-4" className="p-4.5 rounded-2xl bg-dark-panel border border-sky-500/30 space-y-3.5 shadow-md scroll-mt-4">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">
-                    {t('manual.qa_case4_badge')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('qa-top')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="text-[11px] text-slate-400 hover:text-brand-300 transition-colors"
-                  >
-                    {t('manual.qa_back_to_top')}
-                  </button>
-                </div>
-                <h4 className="font-bold text-slate-100 text-sm sm:text-base leading-snug text-sky-200">
-                  {t('manual.qa_case4_title')}
-                </h4>
-
-                <div className="p-3.5 rounded-xl bg-dark-surface border border-dark-border space-y-2">
-                  <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-sky-400 shrink-0" />
-                    <span>{t('manual.qa_case4_why_title')}</span>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border/60">
-                    {t('manual.qa_case4_reason')}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-dark-surface border border-emerald-500/30 space-y-2">
-                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>{t('manual.qa_case4_solutions_title')}</span>
-                  </div>
-                  <div className="space-y-1.5 text-xs text-slate-200">
-                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
-                      {t('manual.qa_case4_sol1')}
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
-                      {t('manual.qa_case4_sol2')}
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-dark-panel/80 border border-dark-border">
-                      {t('manual.qa_case4_sol3')}
                     </div>
                   </div>
                 </div>

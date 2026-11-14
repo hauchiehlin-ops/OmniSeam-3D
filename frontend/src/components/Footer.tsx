@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Share } from '@capacitor/share';
 import { IS_NATIVE } from '../platform/native';
-import { WEB_APP_URL } from '../platform/links';
+import { SITE_URL } from '../platform/links';
 import { 
   BookOpen, 
   ShieldCheck, 
   Settings, 
-  Layers, 
-  ExternalLink,
-  Sparkles,
   Heart,
   Share2,
   Check,
@@ -40,43 +37,26 @@ export const Footer: React.FC<FooterProps> = ({
     'STL', 'OBJ', '3MF', 'GLTF / GLB', 'PLY', 'DXF', 'OFF'
   ];
 
+  /** Shares the public site (support, privacy, source code) via the system share sheet. */
   const handleShare = async () => {
-    // Determine clean official or current live URL
-    const cleanUrl = typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')
-      ? (window.location.origin.includes('localhost') ? 'https://omniseam-3d.vercel.app' : window.location.origin.replace(/\/+$/, ''))
-      : 'https://omniseam-3d.vercel.app';
-
-    // 1. Copy strictly the clean URL to clipboard so any direct paste into browser address bar works immediately
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(cleanUrl);
-        setCopiedShare(true);
-        setTimeout(() => setCopiedShare(false), 2500);
-      }
-    } catch {
-      // Fallback
-    }
-
-    // 2. iOS app: native share sheet. Web: Web Share API when available.
     if (IS_NATIVE) {
       try {
-        await Share.share({ title: 'OmniSeam 3D', url: WEB_APP_URL });
+        await Share.share({ title: 'OmniSeam 3D', url: SITE_URL });
       } catch {
-        // User dismissed share sheet
+        // User dismissed the share sheet
       }
       return;
     }
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'OmniSeam 3D',
-          url: cleanUrl,
-        });
-      } catch {
-        // User dismissed share dialog
-      }
+    // Dev server in a browser: copy the link instead.
+    try {
+      await navigator.clipboard?.writeText(SITE_URL);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2500);
+    } catch {
+      /* clipboard unavailable */
     }
   };
+
 
   return (
     <footer className="mt-12 border-t border-dark-border bg-dark-surface/90 backdrop-blur-md text-slate-400 text-xs">

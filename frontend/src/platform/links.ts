@@ -1,4 +1,9 @@
-/** Public pages hosted with the web app (also used as App Store Connect URLs). */
-export const WEB_APP_URL = 'https://omniseam-3d.vercel.app';
-export const PRIVACY_POLICY_URL = `${WEB_APP_URL}/privacy.html`;
-export const SUPPORT_URL = `${WEB_APP_URL}/support.html`;
+/**
+ * Public pages hosted on GitHub Pages from the repository's site/ folder
+ * (.github/workflows/pages.yml). Also entered in App Store Connect.
+ */
+export const SITE_URL = 'https://hauchiehlin-ops.github.io/OmniSeam-3D';
+export const PRIVACY_POLICY_URL = `${SITE_URL}/privacy.html`;
+export const SUPPORT_URL = `${SITE_URL}/support.html`;
+/** Remote runtime config (public node URL, announcements); see remote-config.ts. */
+export const REMOTE_CONFIG_URL = `${SITE_URL}/config.json`;
