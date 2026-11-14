@@ -627,6 +627,30 @@ export const App: React.FC = () => {
     };
   }, []);
 
+  // App Store screenshot automation: only compiled in with VITE_SCREENSHOT_MODE=1
+  // (scripts/app-store-screenshots.sh). Production builds drop this block.
+  const screenshotApiRef = useRef<() => import('./platform/screenshot-mode').ScreenshotApi>();
+  screenshotApiRef.current = () => ({
+    changeLanguage: (lang: string) => i18n.changeLanguage(lang),
+    loadFile: (file: File) => handleFileSelect(file),
+    setConfig: (update) => setConfig(update),
+    disableAutoAdaptive: () => setIsAutoAdaptiveActive(false),
+    startConvert: () => handleStartConvert(),
+    closeAuditModal: () => setShowAuditModal(false),
+    openArModal: () => setShowArModal(true),
+    launchAr: () => handleLaunchDirectAr(),
+    setDisplayMode: (mode) => setDisplayMode(mode),
+    isModelLoaded: () => currentModelMesh !== null,
+  });
+  useEffect(() => {
+    if (import.meta.env.VITE_SCREENSHOT_MODE === '1') {
+      import('./platform/screenshot-mode').then((m) =>
+        m.runScreenshotScene(() => screenshotApiRef.current!())
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Files opened from the iOS Files app / Share Sheet ("Open in OmniSeam 3D")
   const handleFileSelectRef = useRef(handleFileSelect);
   handleFileSelectRef.current = handleFileSelect;
@@ -751,7 +775,7 @@ export const App: React.FC = () => {
             )}
 
             {/* 3D Canvas Area */}
-            <div className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px] relative">
+            <div data-shot="viewer" className="w-full min-h-[380px] sm:min-h-[460px] lg:h-[520px] relative">
               {isSplitView && repairedPreviewUrl ? (
                 <SplitViewer3D
                   originalFile={selectedFile}
