@@ -48,11 +48,12 @@ test plate end-to-end with cascadio only.
 Set repository variable `REVIEW_NODE_URL` to also ping the review node.
 
 ## Reproducible builds
-- `requirements.txt` pins direct dependencies; `constraints.txt` locks the full tree for Python 3.11 / linux x86_64.
+- `requirements.txt` pins direct dependencies; `constraints.txt` locks the full tree for linux x86_64.
+- Both must install on **Python 3.10** (ZeroGPU Spaces are fixed to 3.10 and ignore `python_version`) and **3.11** (CPU Spaces, Docker). CI tests both.
 - Docker images use `python:3.11-slim-bookworm` and install with `-c constraints.txt`.
 - Regenerate the lock after changing `requirements.txt`:
   ```bash
-  pip install --dry-run --ignore-installed --python-version 3.11 --platform manylinux2014_x86_64 \
+  pip install --dry-run --ignore-installed --python-version 3.10 --platform manylinux2014_x86_64 \
     --platform manylinux_2_28_x86_64 --platform any --implementation cp --only-binary=:all: \
     --target /tmp/x --report /tmp/report.json -r requirements.txt
   ```

@@ -1,7 +1,7 @@
 name: Backend tests
 
-# Runs the backend suite on Python 3.11 (the version used by the Hugging Face
-# Space and Docker image) for every PR, so problems surface before merging.
+# Runs the backend suite on Python 3.10 (ZeroGPU Spaces) and 3.11 (CPU Spaces,
+# Docker) for every PR, so problems surface before merging.
 # Python 3.14 defers annotation evaluation, which hides errors such as a
 # missing `typing` import that crash 3.11 at import time.
 
@@ -12,6 +12,8 @@ on:
       - "backend/**"
       - "requirements.txt"
       - "constraints.txt"
+      - "packages.txt"
+      - "README.md"
       - ".github/workflows/backend-tests.yml"
   workflow_dispatch:
 
@@ -22,11 +24,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
       - name: Install pinned dependencies
         run: pip install -r backend/requirements.txt -c constraints.txt pyflakes==3.2.0
       - name: Undefined names (pyflakes)

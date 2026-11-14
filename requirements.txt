@@ -1,17 +1,19 @@
 # Pinned so that every "Duplicate this Space" build is reproducible.
-# Update deliberately, run the test suite, then bump NODE_VERSION.
+# Must stay installable on Python 3.10 (ZeroGPU Spaces are fixed to 3.10)
+# and 3.11 (CPU Spaces, Docker). CI tests both. Update deliberately, run the
+# test suite, regenerate constraints.txt (docs/hf-node.md), bump the version.
 fastapi==0.108.0
 starlette==0.32.0.post1
 uvicorn[standard]==0.50.1
 pydantic==2.14.3
-pydantic-settings==2.16.3
-python-multipart==0.0.33
+pydantic-settings==2.15.0
+python-multipart==0.0.32
 trimesh[easy]==5.2.1
 # OpenCASCADE-based STEP/IGES reader for trimesh (works without FreeCAD).
 cascadio==0.1.1
-numpy==2.4.6
-scipy==1.17.1
-networkx==3.6.1
+numpy==2.2.6
+scipy==1.15.3
+networkx==3.4.2
 pygltflib==1.16.5
 ezdxf==1.4.5
 aiofiles==23.2.1
