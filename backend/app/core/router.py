@@ -22,6 +22,7 @@ from backend.app.core.auditor import ModelAuditor
 from backend.app.core.optimizer import MeshOptimizer
 from backend.app.storage.file_manager import file_manager
 from backend.app.i18n import get_text
+from backend.app.utils.mesh_utils import ensure_trimesh
 
 
 class ConversionPipelineRouter:
@@ -31,6 +32,12 @@ class ConversionPipelineRouter:
     
     @classmethod
     def load_input_file(cls, file_path: Path, params: ConversionParams) -> trimesh.Trimesh:
+        # Every engine can end up returning a multi-body Scene (FreeCAD/Blender
+        # exports, assemblies); the pipeline needs exactly one Trimesh.
+        return ensure_trimesh(cls._load_any(file_path, params), file_path.name)
+
+    @classmethod
+    def _load_any(cls, file_path: Path, params: ConversionParams):
         ext = file_path.suffix.lower().lstrip(".")
         
         # 1. CAD

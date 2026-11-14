@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import tempfile
 import trimesh
+from backend.app.utils.mesh_utils import ensure_trimesh
 import numpy as np
 from datetime import datetime
 from pathlib import Path
@@ -79,13 +80,8 @@ class CADEngine:
                 converted = loaded.convert_units("millimeters")
                 if converted is not None:
                     loaded = converted
-            if isinstance(loaded, trimesh.Scene):
-                mesh = trimesh.util.concatenate(loaded.dump())
-            elif isinstance(loaded, trimesh.Trimesh):
-                mesh = loaded
-            else:
-                mesh = None
-            if mesh is not None and len(mesh.vertices) > 0 and len(mesh.faces) > 0:
+            mesh = ensure_trimesh(loaded, file_path.name)
+            if len(mesh.vertices) > 0 and len(mesh.faces) > 0:
                 return mesh
         except Exception:
             pass
@@ -138,7 +134,7 @@ except Exception as e:
                     timeout=30
                 )
                 if result.returncode == 0 and out_stl.exists():
-                    return trimesh.load(str(out_stl))
+                    return ensure_trimesh(trimesh.load(str(out_stl)), file_path.name)
         except Exception:
             pass
         return None
