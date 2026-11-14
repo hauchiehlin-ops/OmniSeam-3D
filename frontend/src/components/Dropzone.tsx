@@ -82,7 +82,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div data-shot="dropzone" className="flex flex-col gap-3">
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}

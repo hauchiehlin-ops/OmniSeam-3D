@@ -240,10 +240,23 @@ App Store Connect → **Business**（或 App 頁面提示）→ **Digital Servic
 | iPhone 6.9" | 1320 × 2868 | 3–10 張 |
 | iPad 13" | 2064 × 2752 | 3–10 張 |
 
-用模擬器截圖：
+正式截圖已備妥（無透明通道、尺寸正確），直接上傳：
+
+| 資料夾 | 用途 |
+|---|---|
+| `docs/app-store/screenshots/iphone-6.9in/en/` | 英文 · iPhone 6.9"（必填欄位，較小 iPhone 自動縮放） |
+| `docs/app-store/screenshots/iphone-6.9in/zh-TW/` | 繁中 · iPhone 6.9" |
+| `docs/app-store/screenshots/ipad-13in/en/` | 英文 · iPad 13" |
+| `docs/app-store/screenshots/ipad-13in/zh-TW/` | 繁中 · iPad 13" |
+
+依檔名順序上傳：01 破洞偵測 → 02 修復前後對比 → 03 體檢報告 → 04 偏差熱力圖 → 05 首頁與範例。
+其他語言沿用英文截圖即可，或重新產生：
+
 ```bash
-xcrun simctl io booted screenshot ~/Desktop/shot-$(date +%H%M%S).png
+LANGS="en zh-TW zh-CN ja ko th" ./scripts/app-store-screenshots.sh
 ```
+
+每次 UI 改版後重跑同一指令即可更新整組截圖（約 10 分鐘，不需手動操作）。
 
 4. **Build**：點 **＋**，選第 7 步上傳的 build。
 5. **General App Information**：Copyright 填 `© 2026 @B&B`；Routing App Coverage File 不用。

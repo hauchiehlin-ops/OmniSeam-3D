@@ -43,6 +43,8 @@ const REVIEW_AFTER_SUCCESSES = 3;
  */
 export function recordSuccessfulConversion(appVersion: string): void {
   if (!IS_NATIVE) return;
+  // Never show the rating prompt while capturing App Store screenshots.
+  if (import.meta.env.VITE_SCREENSHOT_MODE === '1') return;
   try {
     const count = (parseInt(localStorage.getItem(REVIEW_SUCCESS_KEY) || '0', 10) || 0) + 1;
     localStorage.setItem(REVIEW_SUCCESS_KEY, String(count));
