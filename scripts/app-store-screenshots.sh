@@ -3,7 +3,7 @@
 # OmniSeam 3D — App Store screenshots from the iOS Simulator
 #
 # Builds the app in screenshot mode (VITE_SCREENSHOT_MODE=1, never shipped),
-# installs it on an iPhone 6.9" and an iPad 13" simulator, drives each scene
+# installs it on an iPhone 6.3" and an iPad 13" simulator, drives each scene
 # through frontend/src/platform/screenshot-mode.ts, sets a clean status bar
 # (9:41, full battery) and saves alpha-free PNGs to:
 #   docs/app-store/screenshots/<device>/<lang>/<NN>-<scene>.png
@@ -11,7 +11,11 @@
 # Usage:  scripts/app-store-screenshots.sh
 # Env:    LANGS="en zh-TW"                 UI languages (en zh-TW zh-CN ja ko th)
 #         SCENES="holes repair report heatmap home"   (ar needs a real device)
-#         IPHONE="iPhone 17 Pro Max"  IPAD="iPad Pro 13-inch (M4)"
+#         IPHONE="iPhone 17 Pro"  IPAD="iPad Pro 13-inch (M4)"
+#         DEVICES="iphone ipad"                 capture only some devices
+#
+# App Store Connect sizes: the "iPhone with Dynamic Island (medium)" slot takes
+# 6.1"/6.3" shots (1179x2556 or 1206x2622): iPhone 17 Pro = 1206x2622.
 # =============================================================================
 set -euo pipefail
 
@@ -20,7 +24,9 @@ FRONTEND="$ROOT/frontend"
 OUT="$ROOT/docs/app-store/screenshots"
 LANGS="${LANGS:-en zh-TW}"
 SCENES="${SCENES:-holes repair report heatmap home}"
-IPHONE="${IPHONE:-iPhone 17 Pro Max}"
+IPHONE="${IPHONE:-iPhone 17 Pro}"
+IPHONE_LABEL="${IPHONE_LABEL:-iphone-6.3in}"
+DEVICES="${DEVICES:-iphone ipad}"
 IPAD="${IPAD:-iPad Pro 13-inch (M4)}"
 BUNDLE_ID="$(sed -n "s/.*appId: *'\([^']*\)'.*/\1/p" "$FRONTEND/capacitor.config.ts" | sed -n 1p)"
 DERIVED="$HOME/Library/Developer/Xcode/DerivedData/OmniSeam3D-Screenshots"
@@ -130,8 +136,8 @@ capture_device() {
   fi
 }
 
-capture_device "iphone-6.9in" "$IPHONE" 0
-capture_device "ipad-13in" "$IPAD" 1
+case " $DEVICES " in *" iphone "*) capture_device "$IPHONE_LABEL" "$IPHONE" 0 ;; esac
+case " $DEVICES " in *" ipad "*) capture_device "ipad-13in" "$IPAD" 1 ;; esac
 
 # ------------------------------------------------- restore normal web build --
 info "Restoring the normal (production) web build in the iOS project"

@@ -237,15 +237,16 @@ App Store Connect → **Business**（或 App 頁面提示）→ **Digital Servic
 
 | 裝置 | 尺寸（直式） | 數量 |
 |---|---|---|
-| iPhone 6.9" | 1320 × 2868 | 3–10 張 |
+| iPhone 中型（6.1"／6.3"） | 1206 × 2622 或 1179 × 2556 | 3–10 張 |
 | iPad 13" | 2064 × 2752 | 3–10 張 |
 
 正式截圖已備妥（無透明通道、尺寸正確），直接上傳：
 
 | 資料夾 | 用途 |
 |---|---|
-| `docs/app-store/screenshots/iphone-6.9in/en/` | 英文 · iPhone 6.9"（必填欄位，較小 iPhone 自動縮放） |
-| `docs/app-store/screenshots/iphone-6.9in/zh-TW/` | 繁中 · iPhone 6.9" |
+| `docs/app-store/screenshots/iphone-6.3in/en/` | 英文 · **配備「動態島」的 iPhone（中型顯示器）** 欄位（1206 × 2622） |
+| `docs/app-store/screenshots/iphone-6.3in/zh-TW/` | 繁中 · 同上 |
+| `docs/app-store/screenshots/iphone-6.9in/…` | 只有在 App Store Connect 出現 **6.9 吋** 欄位時才用（1320 × 2868）；放進中型欄位會顯示「檔案尺寸無效」 |
 | `docs/app-store/screenshots/ipad-13in/en/` | 英文 · iPad 13" |
 | `docs/app-store/screenshots/ipad-13in/zh-TW/` | 繁中 · iPad 13" |
 
