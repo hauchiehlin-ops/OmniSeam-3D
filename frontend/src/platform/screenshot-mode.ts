@@ -9,7 +9,7 @@
 import type { ConversionConfig, DisplayMode } from '../types';
 
 export interface ScreenshotScene {
-  /** home | holes | repair | report | heatmap | ar */
+  /** home | holes | repair | report | heatmap | ar | paywall */
   scene: string;
   /** UI language, e.g. "en" or "zh-TW" */
   lang?: string;
@@ -29,6 +29,8 @@ export interface ScreenshotApi {
   launchAr: () => Promise<void>;
   setDisplayMode: (mode: DisplayMode) => void;
   isModelLoaded: () => boolean;
+  /** Shows the plan screen (Basic view, sample prices) for the IAP review screenshot. */
+  showPaywall: () => void;
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -65,6 +67,10 @@ export async function runScreenshotScene(api: () => ScreenshotApi): Promise<void
 
   if (scene.lang) await api().changeLanguage(scene.lang);
   await wait(600);
+  if (scene.scene === 'paywall') {
+    api().showPaywall();
+    return;
+  }
   if (scene.scene === 'home') {
     bringIntoView('[data-shot="dropzone"]');
     return;

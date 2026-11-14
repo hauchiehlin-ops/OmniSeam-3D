@@ -78,7 +78,15 @@
 | 泰文 | OmniSeam 3D Pro | ซื้อครั้งเดียว: ซ่อมอัตโนมัติ CAD ส่งออกหลายไฟล์ |
 
 ### 2-5 審查資訊（Review Information）
-1. **截圖（Screenshot）**：上傳一張 App 內付費頁的畫面。取得方法：
+1. **截圖（Screenshot）**：上傳一張 App 內付費頁的畫面。**已經做好了，直接上傳即可**：
+   - `docs/app-store/screenshots/iap-review/en/01-paywall.png`：英文，建議用這張，審核人員看英文。
+   - `docs/app-store/screenshots/iap-review/zh-TW/01-paywall.png`：繁體中文。
+   - 規格：1206×2622 PNG，無透明通道。兩個商品都可以用同一張。
+   - 改了價格或付費頁之後，重新產生的指令：
+     `SCENES=paywall DEVICES=iphone LANGS="en zh-TW" IPHONE_LABEL=iap-review scripts/app-store-screenshots.sh`
+     圖中的價格固定是 US$29.99，只是示意；實際價格以 App Store Connect 的設定為準。
+
+   想自己手動截圖的話：
    - 在 Mac 打開 `frontend/ios/App/App.xcodeproj`，上方裝置選任一 iPhone 模擬器，按 ▶︎ 執行。
      - 共用 scheme 已指定 `OmniSeam.storekit`，所以價格會正常顯示。
    - 第一次開啟就會出現「選擇你的方案」畫面。也可以點右上角的皇冠按鈕打開。

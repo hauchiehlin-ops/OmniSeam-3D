@@ -188,8 +188,23 @@ function apply(list: Entitlement[], persist = true) {
   listeners.forEach((cb) => cb(state));
 }
 
+/** Screenshot builds only: show the plan screen as a Basic user would see it. */
+let screenshotPaywall = false;
+
 function store(): Omit<StorePluginApi, 'addListener'> {
-  return devStoreEnabled() ? DevStore : NativeStore;
+  return devStoreEnabled() || screenshotPaywall ? DevStore : NativeStore;
+}
+
+/**
+ * App Store screenshot automation (VITE_SCREENSHOT_MODE=1 builds only):
+ * switches to the Basic plan with the sample products so the plan screen
+ * can be captured for the In-App Purchase review screenshot.
+ */
+export function enterScreenshotPaywallMode(): void {
+  if (import.meta.env.VITE_SCREENSHOT_MODE !== '1') return;
+  screenshotPaywall = true;
+  state = { tier: 'basic', trialUsed: false, trialEndsAt: null, trialNeedsVerification: false, loaded: true };
+  listeners.forEach((cb) => cb(state));
 }
 
 let initPromise: Promise<void> | null = null;
