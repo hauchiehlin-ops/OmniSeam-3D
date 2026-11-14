@@ -16,7 +16,9 @@
 import { useEffect, useState } from 'react';
 import { registerPlugin, PluginListenerHandle } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+import { App as CapApp } from '@capacitor/app';
 import { IS_NATIVE } from './native';
+import { clockStatus, now as trustedNow, observeTrustedTime, persistHighWater, syncClock } from './trusted-clock';
 
 export const PRODUCT_PRO = 'io.github.hauchiehlinops.omniseam3d.pro';
 export const PRODUCT_TRIAL = 'io.github.hauchiehlinops.omniseam3d.trial7d';
@@ -49,6 +51,11 @@ export interface EntitlementState {
   trialUsed: boolean;
   /** Trial end (ms since epoch) when a trial was claimed. */
   trialEndsAt: number | null;
+  /**
+   * The device clock was set back while offline: the trial is paused until
+   * the app can reach the server once to confirm the date.
+   */
+  trialNeedsVerification: boolean;
   /** False until the first StoreKit read finished (cached state is shown meanwhile). */
   loaded: boolean;
 }
@@ -135,23 +142,33 @@ let state: EntitlementState = {
   tier: PAYWALL_ENABLED && !FORCE_PRO ? 'basic' : 'pro',
   trialUsed: false,
   trialEndsAt: null,
+  trialNeedsVerification: false,
   loaded: !PAYWALL_ENABLED || FORCE_PRO,
 };
 let lastEntitlements: Entitlement[] = [];
 const listeners = new Set<(s: EntitlementState) => void>();
 let expiryTimer: ReturnType<typeof setTimeout> | null = null;
 
-function computeState(list: Entitlement[], loaded: boolean): EntitlementState {
-  const now = Date.now();
+/**
+ * @param clockSynced false while only cached data is available at launch: a
+ *   trial is then not granted until the trusted clock has been checked.
+ */
+function computeState(list: Entitlement[], loaded: boolean, clockSynced = true): EntitlementState {
   const pro = list.some((e) => e.productId === PRODUCT_PRO);
   const trial = list.find((e) => e.productId === PRODUCT_TRIAL);
   const trialStart = trial ? trial.originalPurchaseDate ?? trial.purchaseDate : null;
   const trialEndsAt = trialStart !== null ? trialStart + TRIAL_MS : null;
-  const trialActive = trialEndsAt !== null && now < trialEndsAt && now >= (trialStart ?? 0) - 60_000;
+  // Apple signs the trial purchase date, so it is a trusted lower bound for "now".
+  if (trialStart !== null) observeTrustedTime(trialStart);
+  const now = trustedNow();
+  const rollback = clockStatus().rollback;
+  const withinTrial = trialEndsAt !== null && now < trialEndsAt;
+  const trialActive = withinTrial && !rollback && clockSynced;
   return {
     tier: pro ? 'pro' : trialActive ? 'trial' : 'basic',
     trialUsed: Boolean(trial),
     trialEndsAt,
+    trialNeedsVerification: !pro && withinTrial && rollback,
     loaded,
   };
 }
@@ -165,7 +182,7 @@ function apply(list: Entitlement[], persist = true) {
   // Drop back to Basic the moment the trial expires while the app is open.
   if (expiryTimer) clearTimeout(expiryTimer);
   if (state.tier === 'trial' && state.trialEndsAt) {
-    const ms = Math.min(state.trialEndsAt - Date.now() + 1000, 2 ** 31 - 1);
+    const ms = Math.min(state.trialEndsAt - trustedNow() + 1000, 2 ** 31 - 1);
     expiryTimer = setTimeout(() => apply(lastEntitlements, false), Math.max(ms, 1000));
   }
   listeners.forEach((cb) => cb(state));
@@ -187,7 +204,7 @@ export function initEntitlements(): Promise<void> {
       if (cached.value) {
         const list = JSON.parse(cached.value) as Entitlement[];
         lastEntitlements = list;
-        state = { ...computeState(list, false) };
+        state = { ...computeState(list, false, false) };
         listeners.forEach((cb) => cb(state));
       }
     } catch {
@@ -196,6 +213,8 @@ export function initEntitlements(): Promise<void> {
     if (IS_NATIVE) {
       NativeStore.addListener('entitlementsChanged', (p) => apply(p.entitlements || [])).catch(() => {});
     }
+    watchClock();
+    await syncClock();
     try {
       const res = await store().getEntitlements();
       apply(res.entitlements || []);
@@ -206,6 +225,30 @@ export function initEntitlements(): Promise<void> {
     }
   })();
   return initPromise;
+}
+
+/** Re-checks the clock and entitlements whenever the app returns to the foreground. */
+function watchClock() {
+  const refresh = async () => {
+    await syncClock();
+    try {
+      const res = await store().getEntitlements();
+      apply(res.entitlements || [], false);
+    } catch {
+      apply(lastEntitlements, false);
+    }
+  };
+  if (IS_NATIVE) {
+    CapApp.addListener('resume', refresh).catch(() => {});
+    CapApp.addListener('pause', persistHighWater).catch(() => {});
+  } else {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refresh();
+      else persistHighWater();
+    });
+  }
+  // Time spent in the app counts toward the high-water mark even if the app is killed.
+  setInterval(persistHighWater, 60_000);
 }
 
 export function getEntitlementState(): EntitlementState {
@@ -259,7 +302,7 @@ export async function restorePurchases(): Promise<EntitlementState> {
 /** Days left in the trial, rounded up (0 when not in trial). */
 export function trialDaysLeft(s: EntitlementState = state): number {
   if (s.tier !== 'trial' || !s.trialEndsAt) return 0;
-  return Math.max(0, Math.ceil((s.trialEndsAt - Date.now()) / (24 * 60 * 60 * 1000)));
+  return Math.max(0, Math.ceil((s.trialEndsAt - trustedNow()) / (24 * 60 * 60 * 1000)));
 }
 
 // ---------------------------------------------------------------------------

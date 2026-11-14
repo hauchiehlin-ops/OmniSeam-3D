@@ -780,6 +780,8 @@
     "chip_trial": "Trial · {{days}}d",
     "chip_upgrade": "Basic",
     "secondary_first_file": "Open only the first file",
-    "secondary_convert_as_is": "Convert without repair (Basic)"
+    "secondary_convert_as_is": "Convert without repair (Basic)",
+    "status_trial_verify": "Pro trial paused: connect to the internet to confirm the date",
+    "trial_verify_desc": "Your device's date is earlier than a date this app has already seen, so the trial is paused. Connect to the internet once and reopen the app. Setting the correct date and time also helps."
   }
 }

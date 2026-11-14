@@ -116,7 +116,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
     ? t('plan.status_pro')
     : inTrial
       ? t('plan.status_trial', { days: trialDaysLeft(ent) })
-      : ent.trialUsed
+      : ent.trialNeedsVerification
+        ? t('plan.status_trial_verify')
+        : ent.trialUsed
         ? t('plan.status_basic_trial_used')
         : t('plan.status_basic');
 
@@ -155,6 +157,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
 
         <div className="relative px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-4">
           {/* Why the paywall appeared */}
+          {ent.trialNeedsVerification && (
+            <div className="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30 text-xs text-sky-100 leading-relaxed">
+              {t('plan.trial_verify_desc')}
+            </div>
+          )}
           {feature && !isPaid && (
             <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs text-amber-100 leading-relaxed">
               {t(`plan.reason_${feature}`)}

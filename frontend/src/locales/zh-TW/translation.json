@@ -783,6 +783,8 @@
     "chip_trial": "試用・{{days}} 天",
     "chip_upgrade": "基礎版",
     "secondary_first_file": "只開啟第一個檔案",
-    "secondary_convert_as_is": "直接轉檔，不修復（基礎版）"
+    "secondary_convert_as_is": "直接轉檔，不修復（基礎版）",
+    "status_trial_verify": "專業版試用暫停：請連上網路確認日期",
+    "trial_verify_desc": "裝置日期早於 App 先前記錄過的日期，因此暫停試用。請連上網路後重新開啟 App；將日期與時間設為自動也有幫助。"
   }
 }

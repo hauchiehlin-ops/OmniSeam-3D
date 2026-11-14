@@ -1,6 +1,7 @@
 import Foundation
 import Capacitor
 import StoreKit
+import Security
 
 /// In-App Purchase bridge (StoreKit 2) for the Basic / Pro plans.
 ///
@@ -21,7 +22,15 @@ public class StorePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "purchase", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "restore", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getEntitlements", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getServerTime", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getSecureValue", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setSecureValue", returnType: CAPPluginReturnPromise),
     ]
+
+    /// Host already contacted for remote config; its HTTPS `Date` header is the
+    /// trusted clock used to stop trial extension by setting the device clock back.
+    private let timeURL = URL(string: "https://omniseam-3d.vercel.app/config.json")!
+    private let keychainService = "io.github.hauchiehlinops.omniseam3d.clock"
 
     private var updatesTask: Task<Void, Never>?
     private var products: [String: Product] = [:]
@@ -131,6 +140,75 @@ public class StorePlugin: CAPPlugin, CAPBridgedPlugin {
         Task {
             call.resolve(await entitlementsPayload())
         }
+    }
+
+    // MARK: - Trusted clock
+
+    /// Server time from the HTTPS `Date` header (ms since epoch), or null when offline.
+    @objc func getServerTime(_ call: CAPPluginCall) {
+        var request = URLRequest(url: timeURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 4)
+        request.httpMethod = "HEAD"
+        let started = Date()
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            guard error == nil,
+                  let http = response as? HTTPURLResponse,
+                  let header = http.value(forHTTPHeaderField: "Date"),
+                  let date = StorePlugin.httpDateFormatter.date(from: header) else {
+                call.resolve(["serverTime": NSNull()])
+                return
+            }
+            // The Date header has 1 s resolution; add half the round trip.
+            let rtt = Date().timeIntervalSince(started)
+            call.resolve(["serverTime": (date.timeIntervalSince1970 + rtt / 2) * 1000])
+        }.resume()
+    }
+
+    private static let httpDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = TimeZone(identifier: "GMT")
+        f.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        return f
+    }()
+
+    /// Keychain storage: survives app deletion and reinstall (unlike UserDefaults).
+    @objc func getSecureValue(_ call: CAPPluginCall) {
+        guard let key = call.getString("key") else { return call.reject("key is required") }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        if status == errSecSuccess, let data = item as? Data, let value = String(data: data, encoding: .utf8) {
+            call.resolve(["value": value])
+        } else {
+            call.resolve(["value": NSNull()])
+        }
+    }
+
+    @objc func setSecureValue(_ call: CAPPluginCall) {
+        guard let key = call.getString("key"), let value = call.getString("value") else {
+            return call.reject("key and value are required")
+        }
+        let base: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: key,
+        ]
+        let data = Data(value.utf8)
+        let update: [String: Any] = [kSecValueData as String: data]
+        var status = SecItemUpdate(base as CFDictionary, update as CFDictionary)
+        if status == errSecItemNotFound {
+            var add = base
+            add[kSecValueData as String] = data
+            add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+            status = SecItemAdd(add as CFDictionary, nil)
+        }
+        status == errSecSuccess ? call.resolve() : call.reject("Keychain error \(status)")
     }
 
     // MARK: - Helpers
