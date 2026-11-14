@@ -167,6 +167,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		A1000001000000000000S001 /* Strip AppleDouble Files */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);

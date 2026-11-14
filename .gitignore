@@ -35,3 +35,7 @@ frontend/ios/App/Pods/
 frontend/ios/App/output/
 frontend/ios/DerivedData/
 xcuserdata/
+
+# App Store Connect credentials (scripts/apple-release.sh)
+.asc.env
+*.p8
