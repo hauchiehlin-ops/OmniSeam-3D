@@ -184,14 +184,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       </div>
 
       {/* Bottom Row: Viewport Display Modes & Engineering Tools */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5 min-w-0">
         {/* Left: View Mode & Shading Switchers */}
-        <div className="flex items-center gap-1 bg-dark-panel p-1 rounded-xl border border-dark-border">
+        <div className="flex items-center gap-1 bg-dark-panel p-1 rounded-xl border border-dark-border max-w-full overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={onToggleSplitView}
             disabled={!hasRepairedModel}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               isSplitView
                 ? 'bg-brand-600 text-white shadow-sm'
                 : hasRepairedModel
@@ -204,12 +204,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <span>{isSplitView ? t('viewer.split_view') : t('viewer.single_view')}</span>
           </button>
 
-          <div className="h-4 w-px bg-dark-border mx-1" />
+          <div className="h-4 w-px shrink-0 bg-dark-border mx-1" />
 
           <button
             type="button"
             onClick={() => onChangeDisplayMode('shaded')}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               displayMode === 'shaded' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:text-white hover:bg-dark-hover'
             }`}
             title={t('viewer.mode_shaded')}
@@ -219,7 +219,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             type="button"
             onClick={() => onChangeDisplayMode('wireframe')}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               displayMode === 'wireframe' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:text-white hover:bg-dark-hover'
             }`}
             title={t('viewer.mode_wireframe')}
@@ -229,7 +229,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             type="button"
             onClick={() => onChangeDisplayMode('normals')}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               displayMode === 'normals' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:text-white hover:bg-dark-hover'
             }`}
             title={t('viewer.mode_normals')}
@@ -239,7 +239,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             type="button"
             onClick={() => onChangeDisplayMode('xray')}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               displayMode === 'xray' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:text-white hover:bg-dark-hover'
             }`}
             title={t('viewer.mode_xray')}
@@ -249,7 +249,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             type="button"
             onClick={() => onChangeDisplayMode('heatmap')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`shrink-0 whitespace-nowrap flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               displayMode === 'heatmap' ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm' : 'text-amber-300/90 hover:text-amber-200 hover:bg-dark-hover'
             }`}
             title={t('viewer.mode_heatmap')}
@@ -260,7 +260,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
 
         {/* Right: Section Plane, Measure Tool, Camera Reset */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Section plane toggle & slider */}
           <div className="flex items-center gap-2 bg-dark-panel px-2.5 py-1 rounded-xl border border-dark-border">
             <button
@@ -289,7 +289,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             type="button"
             onClick={onToggleMeasureTool}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+            className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
               measureToolActive
                 ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 shadow-sm'
                 : 'bg-dark-panel border-dark-border text-slate-300 hover:text-white hover:border-slate-500'
@@ -306,7 +306,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onClick={onToggleTransformTool}
               disabled={!hasLoadedModel}
               title={t('viewer.transform_tool_tip', '調整模型空間旋轉角度與姿態（可烘焙匯出）')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                 !hasLoadedModel
                   ? 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
                   : transformToolActive
@@ -330,7 +330,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               type="button"
               onClick={onOpenWindTunnel}
               disabled={!hasLoadedModel}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                 hasLoadedModel
                   ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 hover:text-cyan-200 active:scale-95 shadow-sm'
                   : 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'
@@ -349,7 +349,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               type="button"
               onClick={onOpenArPreview}
               disabled={!hasLoadedModel}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                 hasLoadedModel
                   ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400 active:scale-95 shadow-sm'
                   : 'bg-dark-panel border-dark-border text-slate-500 opacity-50 cursor-not-allowed'

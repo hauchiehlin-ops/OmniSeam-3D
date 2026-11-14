@@ -62,14 +62,15 @@ export const LanguageSwitcher: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-panel border border-dark-border text-xs font-medium text-slate-200 hover:text-white hover:border-brand-500 transition-all duration-200 shadow-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+        className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-dark-panel whitespace-nowrap border border-dark-border text-xs font-medium text-slate-200 hover:text-white hover:border-brand-500 transition-all duration-200 shadow-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
         title={t('nav.language')}
+        aria-label={t('nav.language')}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <Globe className="w-3.5 h-3.5 text-brand-400" />
+        <Globe className="hidden sm:block w-3.5 h-3.5 text-brand-400" />
         <span className="mr-0.5">{currentLang.flag}</span>
-        <span className="font-semibold">{currentLang.label}</span>
+        <span className="hidden sm:inline font-semibold">{currentLang.label}</span>
         <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

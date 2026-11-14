@@ -25,10 +25,10 @@ Character limits: Name 30 · Subtitle 30 · Promotional text 170 · Keywords 100
 
 ## English (U.S.) — primary
 
-**Name:** OmniSeam 3D
-**Subtitle:** Offline 3D model repair
+**Name:** OmniSeam 3D: STL Mesh Repair
+**Subtitle:** 3D Model Converter & Viewer
 **Promotional text:** Open, inspect, repair and convert 3D models right on your iPhone and iPad. No account, no upload — cloud processing for native CAD only when you choose it.
-**Keywords:** stl,obj,3mf,step,glb,usdz,mesh,repair,watertight,converter,cad,3d print,ar,viewer,slicer
+**Keywords:** obj,3mf,step,iges,glb,gltf,usdz,ply,cad,print,printer,slicer,fix,heal,watertight,hole,ar,file,scan
 
 **Description:**
 OmniSeam 3D inspects, repairs and converts 3D models directly on your device.
@@ -53,10 +53,10 @@ Includes three sample models so you can try everything without your own files. A
 
 ## 繁體中文（台灣）
 
-**名稱：** OmniSeam 3D
-**副標題：** 離線 3D 模型修復與轉檔
+**名稱：** OmniSeam 3D：STL 模型修復
+**副標題：** 3D 轉檔、檢視與列印破面修補
 **宣傳文字：** 直接在 iPhone 與 iPad 上開啟、檢查、修復與轉換 3D 模型。不需帳號、不需上傳；只有在你選擇時才使用雲端處理原生 CAD。
-**關鍵字：** stl,obj,3mf,step,glb,usdz,網格,修復,破面,水密,轉檔,3D列印,CAD,AR,檢視
+**關鍵字：** 3D列印,網格,水密,補洞,切片,轉換器,檢視器,CAD,工程,建模,實體,設計,零件,機構,OBJ,3MF,STEP,IGES,GLB,USDZ,AR,掃描,檔案
 
 **描述：**
 OmniSeam 3D 直接在你的裝置上檢查、修復與轉換 3D 模型。
@@ -81,10 +81,10 @@ OmniSeam 3D 直接在你的裝置上檢查、修復與轉換 3D 模型。
 
 ## 简体中文
 
-**名称：** OmniSeam 3D
-**副标题：** 离线 3D 模型修复与转档
+**名称：** OmniSeam 3D：STL 模型修复
+**副标题：** 3D 转换、查看与打印破面修补
 **推广文本：** 直接在 iPhone 与 iPad 上打开、检查、修复与转换 3D 模型。无需账号、无需上传；只有在你选择时才使用云端处理原生 CAD。
-**关键词：** stl,obj,3mf,step,glb,usdz,网格,修复,破面,水密,转换,3D打印,CAD,AR,查看
+**关键词：** 3D打印,网格,水密,补洞,切片,转换器,查看器,CAD,工程,建模,实体,设计,零件,机构,OBJ,3MF,STEP,IGES,GLB,USDZ,AR,扫描,文件
 
 **描述：** （翻译自繁體中文版本，结构相同）
 OmniSeam 3D 直接在你的设备上检查、修复与转换 3D 模型。
@@ -96,10 +96,10 @@ OmniSeam 3D 直接在你的设备上检查、修复与转换 3D 模型。
 
 ## 日本語
 
-**名前：** OmniSeam 3D
-**サブタイトル：** オフライン3Dモデル修復・変換
+**名前：** OmniSeam 3D：STL修復・変換
+**サブタイトル：** 3Dモデルビューア＆3Dプリント補修
 **プロモーションテキスト：** iPhone と iPad 上で 3D モデルを開いて検査・修復・変換。アカウント不要、アップロード不要。ネイティブ CAD のクラウド処理は選んだ時だけ。
-**キーワード：** stl,obj,3mf,step,glb,usdz,メッシュ,修復,穴埋め,変換,3Dプリント,CAD,AR,ビューア
+**キーワード：** メッシュ,穴埋め,修正,コンバーター,スライサー,造形,プリンター,CAD,設計,OBJ,3MF,STEP,IGES,GLB,USDZ,AR,スキャン,ファイル
 
 **説明：**
 OmniSeam 3D は端末上で 3D モデルを検査・修復・変換します。
@@ -111,10 +111,10 @@ OmniSeam 3D は端末上で 3D モデルを検査・修復・変換します。
 
 ## 한국어
 
-**이름:** OmniSeam 3D
-**부제:** 오프라인 3D 모델 복구·변환
+**이름:** OmniSeam 3D: STL 모델 복구
+**부제:** 3D 파일 변환·뷰어·3D 프린팅 수리
 **프로모션 텍스트:** iPhone과 iPad에서 3D 모델을 열고 검사·복구·변환하세요. 계정도 업로드도 필요 없습니다. 네이티브 CAD 클라우드 처리는 선택할 때만.
-**키워드:** stl,obj,3mf,step,glb,usdz,메시,복구,구멍,변환,3D프린팅,CAD,AR,뷰어
+**키워드:** 메시,구멍,수정,변환기,슬라이서,출력,프린터,CAD,설계,모델링,OBJ,3MF,STEP,IGES,GLB,USDZ,AR,스캔
 
 **설명:**
 OmniSeam 3D는 기기에서 직접 3D 모델을 검사·복구·변환합니다.
@@ -126,16 +126,51 @@ OmniSeam 3D는 기기에서 직접 3D 모델을 검사·복구·변환합니다.
 
 ## ไทย
 
-**ชื่อ:** OmniSeam 3D
-**คำบรรยายรอง:** ซ่อมและแปลงโมเดล 3D ออฟไลน์
+**ชื่อ:** OmniSeam 3D: ซ่อมไฟล์ STL
+**คำบรรยายรอง:** แปลงและดูโมเดล 3D พิมพ์ 3 มิติ
 **ข้อความโปรโมต:** เปิด ตรวจสอบ ซ่อม และแปลงโมเดล 3D บน iPhone และ iPad ได้ทันที ไม่ต้องมีบัญชี ไม่ต้องอัปโหลด ใช้คลาวด์กับไฟล์ CAD เมื่อคุณเลือกเท่านั้น
-**คำค้นหา:** stl,obj,3mf,step,glb,usdz,mesh,ซ่อม,แปลงไฟล์,พิมพ์3มิติ,CAD,AR,โมเดล3D
+**คำค้นหา:** obj,3mf,step,iges,glb,usdz,cad,mesh,ar,ตัวแปลง,สไลเซอร์,เครื่องพิมพ์,อุดรู,แก้ไข,ออกแบบ,สแกน
 
 **คำอธิบาย:**
 OmniSeam 3D ตรวจสอบ ซ่อม และแปลงโมเดล 3D บนอุปกรณ์ของคุณโดยตรง
 ประมวลผลบนอุปกรณ์ (ออฟไลน์): เปิด STL, OBJ, 3MF, PLY, OFF, GLB/glTF และ Faceted STEP จากแอปไฟล์หรือแผ่นแชร์ / รายงานสุขภาพโมเดล: รู ขอบ non-manifold หน้าเสื่อม ปริมาตร / ซ่อม: รวมจุดยอด แก้ normal อุดรู / แปลงรูปแบบแล้วบันทึกไปยังไฟล์ AirDrop หรือสไลเซอร์ / ระนาบตัด วัดระยะ wireframe X-ray / AR Quick Look
 โหนดคลาวด์ (ไม่บังคับ): ไฟล์ STEP/IGES แบบพาราเมตริกและ CAD/BIM ดั้งเดิม (รองรับไฟล์ SolidWorks, Inventor, Rhino, IFC, DWG) ต้องใช้โหนดประมวลผล ใช้โหนดสาธิตสาธารณะฟรี (ไม่เกิน 25 MB ลบภายใน 1 ชั่วโมง) หรือสร้างโหนดฟรีของคุณเองบน Hugging Face แอปจะขอความยินยอมก่อนอัปโหลดทุกครั้ง
 ความเป็นส่วนตัว: ไม่มีบัญชี โฆษณา การวิเคราะห์ หรือการติดตาม มีโมเดลตัวอย่าง 3 รายการ
+
+---
+
+## ASO strategy (App Store Optimization)
+
+Only three text fields are indexed for App Store search on iOS: **App Name (30)**, **Subtitle (30)** and **Keywords (100)**.
+The description and promotional text are **not** indexed (they matter for conversion, not ranking).
+
+Rules applied to every locale above:
+1. **Highest-value term in the name.** "STL" + "repair/修復" is the core search intent (3D printing users fixing broken meshes). Name keywords carry the most ranking weight.
+2. **Subtitle covers the second intent** (converter / viewer / 3D printing) with words *not* already in the name.
+3. **No duplicates across fields.** Apple combines words from name + subtitle + keywords (e.g. "stl" + "converter" → "stl converter"), so repeating a word wastes characters.
+4. **Keywords: comma-separated, no spaces, singular forms**, no brand/trademark names (SolidWorks, Fusion, Cura… are excluded — Guideline 2.3.7), no category names ("productivity") and no "app"/"free".
+5. **File-format tokens** (obj, 3mf, step, iges, glb, gltf, usdz, ply) capture high-intent searches such as "step to stl" and "3mf viewer".
+6. **CJK locales** use compound search terms people actually type (3D列印, 補洞, 3Dプリント, 3D 프린팅) and keep Latin format tokens, since users search both.
+
+| Locale | Name | Subtitle | Keywords |
+|---|---|---|---|
+| en-US | 28/30 | 27/30 | 98/100 |
+| zh-Hant | 20/30 | 15/30 | 82/100 |
+| zh-Hans | 20/30 | 15/30 | 82/100 |
+| ja | 20/30 | 18/30 | 80/100 |
+| ko | 22/30 | 21/30 | 68/100 |
+| th | 25/30 | 30/30 | 92/100 |
+
+### Beyond text
+- **First three screenshots decide conversion.** Put a short benefit caption at the top of each (same order in every locale):
+  1. en "Fix broken STL meshes" · 繁中「一鍵修復 STL 破面」· 简中「一键修复 STL 破面」· ja「STLの穴を自動修復」· ko「STL 구멍 자동 수리」· th「ซ่อมไฟล์ STL อัตโนมัติ」
+  2. en "Convert STEP, OBJ, 3MF, GLB" · 繁中「STEP、OBJ、3MF、GLB 互轉」· …
+  3. en "Works offline · no account" · 繁中「離線可用・免註冊」· …
+  4. en "See it in your room with AR" · 繁中「AR 放進真實空間」· …
+- **Ratings drive ranking.** The app asks for an App Store rating (Apple's system prompt, max 3×/year) after the 3rd successful conversion — never during a task or after an error.
+- **Promotional text** (170 chars, not indexed) can be changed anytime without review: use it for seasonal messages.
+- **Review the keywords monthly** in App Store Connect → Analytics (Sources → App Store Search); swap terms with no impressions for new ones in the next version.
+- Keep the web page title/description (SEO) aligned with the same core terms: "STL repair", "3D model converter", "watertight mesh".
 
 ---
 

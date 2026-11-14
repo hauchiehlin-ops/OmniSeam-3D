@@ -70,3 +70,7 @@ html.native-app canvas {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* Horizontal scrollers without a visible scrollbar (toolbar segments) */
+.no-scrollbar { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
