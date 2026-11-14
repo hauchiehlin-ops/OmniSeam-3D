@@ -37,7 +37,7 @@
 
 4. 付款後通常 24–48 小時內開通。開通後會收到「Welcome to the Apple Developer Program」郵件。
 
-> 本 App **免費、無內購**，所以**不需要**簽署付費 App 協議，也**不需要**填銀行與稅務資料。
+> 本 App 為**免費下載 + App 內購買（專業版買斷、7 天免費試用）**，所以**必須**簽署付費 App 協議（Paid Apps Agreement）並填好銀行與稅務資料，內購才能在審核與正式環境運作。設定步驟見 [`in-app-purchases.md`](./in-app-purchases.md)。
 
 ---
 
@@ -45,7 +45,7 @@
 
 1. 登入 https://appstoreconnect.apple.com → **Business**（商務）。
 2. 若有黃色橫幅要求接受新版 **Apple Developer Program License Agreement**，請先接受，否則無法上傳。
-3. Free Apps 協議會自動生效，不需額外操作。
+3. Free Apps 協議會自動生效；**另外要簽署 Paid Apps Agreement**（Business → Agreements），並完成 Bank Accounts 與 Tax Forms，狀態變成 Active 後內購才會生效。
 
 ---
 
@@ -180,7 +180,7 @@ App Store Connect → 你的 App → **General → App Information**：
 
 | 欄位 | 填入 |
 |---|---|
-| Price | **Free（USD 0）** |
+| Price | **Free（USD 0）**；收費透過 App 內購買，見 `in-app-purchases.md` |
 | Availability | 所有國家或地區，**但建議取消勾選「中國大陸」**：中國大陸上架需要 ICP 備案號，沒有備案會被擋 |
 | iPhone and iPad Apps on Apple Silicon Macs | **先不勾**；在 Apple silicon Mac 上實測後再開啟（Xcode 可選 *My Mac (Designed for iPad)* 測試） |
 | Apple Vision Pro | **先不勾**；尚未在 Vision Pro 上測試 |
@@ -211,7 +211,7 @@ App Store Connect → 你的 App → **General → App Information**：
 
 App Store Connect → **Business**（或 App 頁面提示）→ **Digital Services Act**：
 
-- **Not a trader（非交易商）**：個人非營利、免費 App 可選此項。
+- **Not a trader（非交易商）**：個人非營利、免費 App 可選此項。**加入付費內購後，通常應選 Trader**；請依你的實際情況判斷。
 - **Trader（交易商）**：以營業為目的時選此項，地址、電話、Email 會**公開顯示**在歐盟的 App Store 頁面。
 
 未完成此步驟，App 無法在歐盟國家上架。請依你的實際情況選擇。

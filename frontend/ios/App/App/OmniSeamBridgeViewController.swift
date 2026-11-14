@@ -7,6 +7,7 @@ class OmniSeamBridgeViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(QuickLookPlugin())
         bridge?.registerPluginInstance(AppReviewPlugin())
+        bridge?.registerPluginInstance(StorePlugin())
     }
 }
 

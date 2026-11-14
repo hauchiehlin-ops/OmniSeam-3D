@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { ProBadge } from './PaywallModal';
 import { 
   Columns, 
   Scissors, 
@@ -339,6 +340,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             >
               <Wind className="w-3.5 h-3.5 text-cyan-400" />
               <span className="hidden sm:inline">{t('wind_tunnel.nav_btn', '風洞流體域')}</span>
+              <ProBadge />
             </button>
           )}
 

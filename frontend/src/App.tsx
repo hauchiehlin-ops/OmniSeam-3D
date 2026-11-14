@@ -22,6 +22,17 @@ import { ArPreviewModal } from './components/ArPreviewModal';
 import { MobileArView } from './components/MobileArView';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
+import { PaywallModal } from './components/PaywallModal';
+import {
+  PAYWALL_ENABLED,
+  ProFeature,
+  can,
+  initEntitlements,
+  isCadFile,
+  requiredFeatureForConvert,
+  toBasicConfig,
+  useEntitlements,
+} from './platform/entitlements';
 import { IS_NATIVE, NATIVE_LOCAL_MAX_SIZE_BYTES, NATIVE_LOCAL_MAX_SIZE_MB, OPEN_FILE_EVENT, recordSuccessfulConversion, saveOrShareFile, saveOrShareUrl } from './platform/native';
 
 
@@ -85,10 +96,29 @@ export const App: React.FC = () => {
   const [showWindTunnelModal, setShowWindTunnelModal] = useState(false);
   const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
+  // Basic / Pro plan (iOS In-App Purchase)
+  const entitlements = useEntitlements();
+  const [paywall, setPaywall] = useState<{
+    feature: ProFeature | null;
+    welcome?: boolean;
+    secondary?: { label: string; onClick: () => void } | null;
+  } | null>(null);
+
+  /** Returns true when the feature is available; otherwise opens the paywall. */
+  const requirePro = (
+    feature: ProFeature,
+    secondary?: { label: string; onClick: () => void } | null
+  ): boolean => {
+    if (can(feature)) return true;
+    setPaywall({ feature, secondary: secondary ?? null });
+    return false;
+  };
+
   // File and Configuration State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [config, setConfig] = useState<ConversionConfig>(DEFAULT_CONFIG);
+  const baseConfig = config;
   const [adaptiveIntent, setAdaptiveIntent] = useState<AdaptiveIntentResult | null>(null);
   const [isAutoAdaptiveActive, setIsAutoAdaptiveActive] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -180,6 +210,21 @@ export const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Load StoreKit entitlements; show the plan chooser once on first launch (iOS).
+  useEffect(() => {
+    if (!PAYWALL_ENABLED) return;
+    initEntitlements().then(() => {
+      if (import.meta.env.VITE_SCREENSHOT_MODE === '1') return;
+      try {
+        if (localStorage.getItem('omniseam_plan_intro_seen')) return;
+        localStorage.setItem('omniseam_plan_intro_seen', '1');
+      } catch {
+        return;
+      }
+      if (!can('auto_repair')) setPaywall({ feature: null, welcome: true });
+    });
+  }, []);
+
   // Sync initial engine mode
   useEffect(() => {
     apiClient.setEngineMode(engineMode);
@@ -256,6 +301,8 @@ export const App: React.FC = () => {
       }));
       return;
     }
+    // CAD / BIM import is a Pro feature (Plan A).
+    if (isCadFile(file.name) && !requirePro('cad_import')) return;
     setSelectedFile(file);
     setSelectedFiles([file]);
     setIsAutoAdaptiveActive(true);
@@ -325,6 +372,16 @@ export const App: React.FC = () => {
   // Handle Multi-File Selection
   const handleFilesSelect = async (files: File[]) => {
     if (!files || files.length === 0) return;
+    if (files.length > 1 && !can('batch')) {
+      requirePro('batch', {
+        label: t('plan.secondary_first_file'),
+        onClick: () => {
+          setPaywall(null);
+          handleFileSelect(files[0]);
+        },
+      });
+      return;
+    }
     setSelectedFiles(files);
     handleFileSelect(files[0]);
   };
@@ -378,9 +435,24 @@ export const App: React.FC = () => {
   };
 
   // Start Conversion Pipeline (Supports Single & Multi-File Batch Queue)
-  const handleStartConvert = async () => {
+  const handleStartConvert = async (configOverride?: ConversionConfig) => {
     const filesToConvert = selectedFiles.length > 0 ? selectedFiles : (selectedFile ? [selectedFile] : []);
     if (filesToConvert.length === 0) return;
+    const config = configOverride ?? baseConfig;
+
+    // Plan gate: Basic converts mesh formats as-is; repair, CAD, cloud and batch need Pro.
+    const needed = requiredFeatureForConvert(filesToConvert, config, engineMode);
+    if (needed && !can(needed)) {
+      const freeFallback = needed === 'auto_repair' || needed === 'draco';
+      requirePro(needed, freeFallback ? {
+        label: t('plan.secondary_convert_as_is'),
+        onClick: () => {
+          setPaywall(null);
+          handleStartConvert(toBasicConfig(config));
+        },
+      } : null);
+      return;
+    }
 
     for (const file of filesToConvert) {
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
@@ -536,6 +608,7 @@ export const App: React.FC = () => {
   const handleDownloadAllZip = async () => {
     const completedTasks = tasks.filter((t) => t.status === 'completed');
     if (completedTasks.length === 0) return;
+    if (!requirePro('batch')) return;
 
     setIsDownloadingZip(true);
     try {
@@ -708,6 +781,8 @@ export const App: React.FC = () => {
         onOpenBackendSettings={() => setShowBackendModal(true)}
         onOpenManual={() => setShowManualModal(true)}
         onOpenPrivacy={() => setShowPrivacyModal(true)}
+        onOpenPlan={PAYWALL_ENABLED ? () => setPaywall({ feature: null }) : undefined}
+        planTier={entitlements.tier}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6">
@@ -752,7 +827,7 @@ export const App: React.FC = () => {
               onChangeExplodedOffset={setExplodedOffset}
               onResetCamera={() => {}}
               onOpenArPreview={() => setShowArModal(true)}
-              onOpenWindTunnel={() => setShowWindTunnelModal(true)}
+              onOpenWindTunnel={() => requirePro('wind_tunnel') && setShowWindTunnelModal(true)}
               hasRepairedModel={Boolean(repairedPreviewUrl)}
               transformToolActive={transformToolActive}
               onToggleTransformTool={() => setTransformToolActive(prev => !prev)}
@@ -852,7 +927,7 @@ export const App: React.FC = () => {
             <SettingsPanel
               config={config}
               onChangeConfig={handleConfigChange}
-              onStartConvert={handleStartConvert}
+              onStartConvert={() => handleStartConvert()}
               onInspectOnly={handleInspectOnly}
               disabled={!selectedFile && selectedFiles.length === 0}
               isProcessing={isProcessing}
@@ -868,6 +943,7 @@ export const App: React.FC = () => {
                 apiClient.setEngineMode(m);
               }}
               onOpenBackendSettings={() => setShowBackendModal(true)}
+              onRequirePro={(f) => requirePro(f)}
             />
 
 
@@ -965,8 +1041,18 @@ export const App: React.FC = () => {
           report={activeTask?.report}
           inspectData={inspectData}
           onClose={() => setShowAuditModal(false)}
+          onRequirePro={() => requirePro('report_export')}
         />
       )}
+
+      {/* Basic / Pro plan chooser & paywall */}
+      <PaywallModal
+        isOpen={paywall !== null}
+        feature={paywall?.feature ?? null}
+        welcome={paywall?.welcome}
+        secondaryAction={paywall?.secondary}
+        onClose={() => setPaywall(null)}
+      />
     </div>
   );
 };

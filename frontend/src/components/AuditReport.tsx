@@ -22,12 +22,15 @@ interface AuditReportProps {
   report?: HealthAuditReport | null;
   inspectData?: InspectResponse | null;
   onClose: () => void;
+  /** Returns false (and shows the paywall) when report export is not unlocked. */
+  onRequirePro?: () => boolean;
 }
 
 export const AuditReport: React.FC<AuditReportProps> = ({
   report,
   inspectData,
-  onClose
+  onClose,
+  onRequirePro,
 }) => {
   const { t, i18n } = useTranslation();
   const isZh = i18n.language.startsWith('zh');
@@ -45,12 +48,14 @@ export const AuditReport: React.FC<AuditReportProps> = ({
   const isSolidWithHoles = approxOpenVolume !== undefined && bboxVolume > 0 && approxOpenVolume > bboxVolume * 0.05;
 
   const handleExportJson = () => {
+    if (onRequirePro && !onRequirePro()) return;
     const dataToExport = report || inspectData;
     const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
     saveOrShareFile(blob, `audit_report_${Date.now()}.json`).catch((err) => console.error('Export JSON failed:', err));
   };
 
   const handlePrint = () => {
+    if (onRequirePro && !onRequirePro()) return;
     window.print();
   };
 

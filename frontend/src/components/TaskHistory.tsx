@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { ProBadge } from './PaywallModal';
 import { IS_NATIVE, saveOrShareUrl } from '../platform/native';
 import { 
   ListOrdered, 
@@ -67,6 +68,7 @@ export const TaskHistory: React.FC<TaskHistoryProps> = ({
               <span className="px-1 py-0.2 text-[9px] font-mono rounded bg-emerald-950/80 text-emerald-300">
                 ({completedTasks.length})
               </span>
+              <ProBadge />
             </button>
           )}
 
