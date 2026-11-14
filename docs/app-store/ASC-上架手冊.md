@@ -10,7 +10,7 @@
 | 項目 | 狀態 |
 |---|---|
 | iOS 專案可正式 Archive（Release） | ✅ `scripts/apple-release.sh --check` 通過 |
-| 隱私權政策／支援頁面上線 | ✅ https://omniseam-3d.vercel.app/privacy.html ・ /support.html |
+| 隱私權政策／支援頁面上線 | GitHub Pages：https://hauchiehlin-ops.github.io/OmniSeam-3D/privacy.html ・ /support.html（切換步驟見 `網站搬遷-GitHub-Pages.md`） |
 | 遠端設定 `config.json` 上線 | ✅ |
 | 雲端節點 v4.3.0、審核測試檔可轉換 | ✅ |
 | PrivacyInfo.xcprivacy、加密聲明、App Icon | ✅ 已在專案中 |
@@ -192,7 +192,7 @@ App Store Connect → 你的 App → **General → App Information**：
 
 ## 10. App 隱私（App Privacy）
 
-1. **Privacy Policy URL**：`https://omniseam-3d.vercel.app/privacy.html`
+1. **Privacy Policy URL**：`https://hauchiehlin-ops.github.io/OmniSeam-3D/privacy.html`
 2. **Get Started** → *Do you or your third-party partners collect data from this app?* → **Yes, we collect data from this app**。
 3. 只勾 **User Content → Other User Content**，其他全部不勾。
 4. Other User Content 的設定：
@@ -230,8 +230,8 @@ App Store Connect → **Business**（或 App 頁面提示）→ **Digital Servic
 | Promotional Text | 170 字 |
 | Description | 4000 字 |
 | Keywords | 100 字元，逗號分隔；**不可放 SolidWorks 等商標** |
-| Support URL | `https://omniseam-3d.vercel.app/support.html` |
-| Marketing URL | `https://omniseam-3d.vercel.app` |
+| Support URL | `https://hauchiehlin-ops.github.io/OmniSeam-3D/support.html` |
+| Marketing URL | `https://hauchiehlin-ops.github.io/OmniSeam-3D/`（選填） |
 
 3. **截圖**（每個語言；可先上傳英文，其他語言沿用）：
 

@@ -11,7 +11,9 @@
 - **名稱**：**OmniSeam 3D**（寰縫幾何 / 全維無縫 3D）
 - **授權**：100% 開源無授權費（FOSS）
 - **遠端倉庫**：`https://github.com/hauchiehlin-ops/OmniSeam-3D.git`
-- **線上前端部署**：`https://omniseam-3d.vercel.app`
+- **發布形式**：僅 iPhone／iPad App（Capacitor）。**2026-11-14 起取消網頁版部署**。
+- **公開頁面**：`site/`（隱私權政策、支援頁、遠端 `config.json`）→ GitHub Pages `https://hauchiehlin-ops.github.io/OmniSeam-3D/`；搬遷與 Vercel 下線步驟見 `docs/網站搬遷-GitHub-Pages.md`。
+- ~~線上前端部署：`https://omniseam-3d.vercel.app`~~（過渡期只提供靜態頁面，待新版 App 上架後關閉）
 
 ### 1.2 雙引擎架構設計 (Dual-Engine Architecture)
 為兼顧「**$0 雲端伺服器成本 + 100% 使用者隱私**」與「**重度專有 CAD 格式解析**」，本專案採取雙引擎設計：

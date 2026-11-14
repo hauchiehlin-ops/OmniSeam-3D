@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ConversionConfig, InspectResponse, TaskResponse, FluidDomainResponse, ArSessionResponse } from '../types';
+import { ConversionConfig, InspectResponse, TaskResponse, FluidDomainResponse } from '../types';
 import { ClientPipeline } from '../engine/client-pipeline';
 import { remoteConfig, isVersionAtLeast } from '../platform/remote-config';
 
@@ -368,53 +368,6 @@ export const apiClient = {
     }
   },
 
-  /**
-   * Creates a temporary AR streaming session on the backend.
-   */
-  async createArSession(
-    payload: { file?: File | Blob; filename?: string; taskId?: string }
-  ): Promise<ArSessionResponse> {
-    if (payload.file) await this.ensureUploadConsent();
-    const formData = new FormData();
-    if (payload.file) {
-      const name = payload.filename || (payload.file instanceof File ? payload.file.name : 'model.glb');
-      formData.append('file', payload.file, name);
-    }
-    if (payload.taskId) {
-      formData.append('task_id', payload.taskId);
-    }
-    if (payload.filename) {
-      formData.append('filename', payload.filename);
-    }
-
-    const response = await axios.post<ArSessionResponse>(
-      `${this.getApiBase()}/ar/session`,
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: UPLOAD_TIMEOUT_MS }
-    );
-
-    const result = response.data;
-    result.glb_url = this.absolutize(result.glb_url) as string;
-    result.usdz_url = this.absolutize(result.usdz_url ?? undefined);
-    return result;
-  },
-
-  /**
-   * Retrieves an existing AR session.
-   */
-  async getArSession(sessionId: string): Promise<ArSessionResponse> {
-    const response = await axios.get<ArSessionResponse>(
-      `${this.getApiBase()}/ar/${sessionId}`
-    );
-    const result = response.data;
-    result.glb_url = this.absolutize(result.glb_url) as string;
-    result.usdz_url = this.absolutize(result.usdz_url ?? undefined);
-    return result;
-  },
-
-  getArGlbUrl(sessionId: string): string {
-    return `${this.getNodeOrigin()}/api/v1/ar/${sessionId}/model.glb`;
-  }
 };
 
 

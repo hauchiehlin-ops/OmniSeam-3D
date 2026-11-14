@@ -10,10 +10,6 @@ import {
   X, 
   CheckCircle2, 
   Clock, 
-  Sparkles,
-  TrendingDown,
-  Layers,
-  Box,
   Wrench
 } from 'lucide-react';
 import { HealthAuditReport, InspectResponse } from '../types';

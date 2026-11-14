@@ -1,22 +1,16 @@
 import * as THREE from 'three';
 import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { IS_IOS_APP, presentUsdzQuickLook } from '../platform/native';
 
 export class ArManager {
   /**
-   * Detects client operating system / browser capabilities for AR.
+   * Which native AR viewer is available: AR Quick Look in the iOS app,
+   * Google Scene Viewer on Android, none elsewhere (e.g. the desktop dev server).
    */
   static getArPlatform(): 'ios' | 'android' | 'desktop' {
-    // Inside the iOS app (incl. iPad, whose WebView reports a desktop UA).
+    // The iPad WebView reports a desktop user agent, so check the app shell first.
     if (IS_IOS_APP) return 'ios';
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
-    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-      return 'ios';
-    }
-    if (/android/i.test(userAgent)) {
-      return 'android';
-    }
+    if (/android/i.test(navigator.userAgent || '')) return 'android';
     return 'desktop';
   }
 
@@ -83,52 +77,13 @@ export class ArManager {
   }
 
   /**
-   * Generates a binary GLB Blob from Three.js Object3D.
-   */
-  static async exportGlb(sceneOrMesh: THREE.Object3D): Promise<Blob> {
-    const prepared = this.prepareObjectForAr(sceneOrMesh);
-    return new Promise((resolve, reject) => {
-      const exporter = new GLTFExporter();
-      exporter.parse(
-        prepared,
-        (gltf) => {
-          const blob = new Blob([gltf as ArrayBuffer], { type: 'model/gltf-binary' });
-          resolve(blob);
-        },
-        (err) => reject(err),
-        { binary: true }
-      );
-    });
-  }
-
-  /**
-   * Directly triggers Apple AR Quick Look natively.
+   * Opens the model in Apple AR Quick Look through the native
+   * QLPreviewController plugin (WKWebView ignores `<a rel="ar">`).
    */
   static async launchIosAr(sceneOrMesh: THREE.Object3D): Promise<boolean> {
     try {
       const usdzBlob = await this.exportUsdz(sceneOrMesh);
-      if (IS_IOS_APP) {
-        // WKWebView ignores <a rel="ar">; use native QLPreviewController instead.
-        await presentUsdzQuickLook(usdzBlob, 'OmniSeam_AR.usdz');
-        return true;
-      }
-      const usdzUrl = URL.createObjectURL(usdzBlob);
-
-      const anchor = document.createElement('a');
-      anchor.setAttribute('rel', 'ar');
-      anchor.setAttribute('href', usdzUrl);
-      anchor.style.display = 'none';
-
-      // Temporary image required by iOS QuickLook to trigger native preview
-      const img = document.createElement('img');
-      anchor.appendChild(img);
-      document.body.appendChild(anchor);
-
-      anchor.click();
-      setTimeout(() => {
-        document.body.removeChild(anchor);
-        URL.revokeObjectURL(usdzUrl);
-      }, 5000);
+      await presentUsdzQuickLook(usdzBlob, 'OmniSeam_AR.usdz');
       return true;
     } catch (err) {
       console.error("Failed to launch iOS AR Quick Look:", err);

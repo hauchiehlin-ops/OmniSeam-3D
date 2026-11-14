@@ -9,7 +9,6 @@ import {
   PlusCircle,
   FolderX,
   Camera,
-  Layers,
   Box,
   CheckCircle2,
   AlertTriangle,
@@ -41,8 +40,6 @@ interface ToolbarProps {
   onChangeSectionOffset: (val: number) => void;
   measureToolActive: boolean;
   onToggleMeasureTool: () => void;
-  explodedOffset: number;
-  onChangeExplodedOffset: (val: number) => void;
   onResetCamera: () => void;
   onOpenArPreview?: () => void;
   onOpenWindTunnel?: () => void;
@@ -76,8 +73,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onChangeSectionOffset,
   measureToolActive,
   onToggleMeasureTool,
-  explodedOffset,
-  onChangeExplodedOffset,
   onResetCamera,
   onOpenArPreview,
   onOpenWindTunnel,

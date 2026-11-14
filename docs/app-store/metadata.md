@@ -15,9 +15,9 @@ Character limits: Name 30 · Subtitle 30 · Promotional text 170 · Keywords 100
 | Secondary category | Graphics & Design |
 | Age rating | 4+ (no objectionable content; unrestricted web access: **No**) |
 | Price | Free download · In-App Purchases: Pro one-time unlock + free 7-Day Pro Trial (see `in-app-purchases.md`) |
-| Privacy Policy URL | https://omniseam-3d.vercel.app/privacy.html |
-| Support URL | https://omniseam-3d.vercel.app/support.html |
-| Marketing URL | https://omniseam-3d.vercel.app |
+| Privacy Policy URL | https://hauchiehlin-ops.github.io/OmniSeam-3D/privacy.html |
+| Support URL | https://hauchiehlin-ops.github.io/OmniSeam-3D/support.html |
+| Marketing URL | https://hauchiehlin-ops.github.io/OmniSeam-3D/ |
 | Copyright | © 2026 @B&B |
 | Encryption | Uses only standard HTTPS → `ITSAppUsesNonExemptEncryption = NO` (already in Info.plist) |
 

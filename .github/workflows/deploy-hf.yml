@@ -1,7 +1,7 @@
 name: Deploy engine to Hugging Face Space
 
 # Pushes the backend to the public Hugging Face Space whenever `main` changes
-# (after a PR is merged), so Vercel (web) and the HF node stay in sync.
+# (after a PR is merged), so the app's cloud node always runs the latest backend.
 #
 # One-time setup (GitHub → Settings → Secrets and variables → Actions):
 #   Secret   HF_TOKEN   Hugging Face access token with *Write* permission

@@ -34,7 +34,7 @@ license: mit
 ## 🌟 Key Features
 
 * **Dual-Engine Architecture**:
-  * **⚡ 100% Pure Client-Side Local Engine**: Operates entirely in-browser with zero server cost, zero upload latency, and 100% data privacy.
+  * **⚡ 100% On-Device Local Engine**: Runs entirely on the iPhone or iPad with zero server cost, zero upload latency, and 100% data privacy.
   * **☁️ Cloud Backend Engine**: FastAPI + OCCT + FreeCAD Headless for heavy native CAD and BIM assemblies.
 * **Multi-Domain Format Matrix**:
   * **CAD / B-Rep**: STEP (`.step`, `.stp`), IGES (`.iges`, `.igs`), OpenCASCADE BREP (`.brep`).
@@ -51,7 +51,7 @@ license: mit
   * **glTF / Draco Quantization**: Reduces 3D asset file size by 70%+ for instant WebGL streaming.
 * **Dual-Language Support (i18n)**:
   * Full interface, tooltips, error codes, and audit reports in **English (Default)** and **繁體中文 (Traditional Chinese)**.
-* **Interactive 3D Web UI**:
+* **Interactive 3D viewer (iPhone & iPad app)**:
   * Dual-split Before/After comparison view with synchronized camera controls.
   * Real-time defect heatmaps (open holes & non-manifold edges highlighted in red).
   * Section plane clipping with interactive distance slider.
@@ -59,19 +59,26 @@ license: mit
 
 ---
 
-## 🚀 Quick Start with Docker Compose
+## 🏗️ Architecture & Deployment
+
+OmniSeam 3D ships as an **iPhone & iPad app** (no hosted web version):
+
+| Part | Where | Deployed by |
+|---|---|---|
+| App (React + Three.js in a Capacitor shell) | `frontend/` + `frontend/ios/` | `scripts/apple-release.sh` → App Store Connect |
+| Cloud engine node (FastAPI + FreeCAD/OCCT) | `backend/`, `app.py` | `.github/workflows/deploy-hf.yml` → Hugging Face Space |
+| Public pages: privacy policy, support, remote `config.json` | `site/` | `.github/workflows/pages.yml` → GitHub Pages (`https://hauchiehlin-ops.github.io/OmniSeam-3D/`) |
+
+The browser dev server (`npm run dev`) is only for development; on the web, file saving falls back to plain downloads and AR is unavailable.
+
+## 🚀 Run the engine node locally (Docker Compose)
 
 ```bash
-# Clone the repository
 git clone https://github.com/hauchiehlin-ops/OmniSeam-3D.git
 cd OmniSeam-3D
-
-# Start all services (Backend + Web UI)
-docker-compose up -d --build
+docker-compose up -d --build   # backend only
 ```
 
-Access the services:
-- **Web UI**: [http://localhost:3000](http://localhost:3000)
 - **API Swagger Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **API Alternative ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
@@ -79,13 +86,14 @@ Access the services:
 
 ## 🛠️ Local Development Setup
 
-### 1. Frontend (React 18 + Vite + TailwindCSS + Three.js)
+### 1. App (React 18 + Vite + TailwindCSS + Three.js, Capacitor iOS)
 
 ```bash
 cd frontend
 npm install
-npm run dev
-# Open http://localhost:5173
+npm run dev              # UI in a desktop browser at http://localhost:5173
+npm run ios:build:sim    # build + sync + compile for the iOS Simulator
+npm run ios:open         # open the Xcode project
 ```
 
 ### 2. Backend (FastAPI + Python 3.11+)

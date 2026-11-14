@@ -19,7 +19,6 @@ import { PublicLimitModal } from './components/PublicLimitModal';
 import { UserManualModal } from './components/UserManualModal';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { ArPreviewModal } from './components/ArPreviewModal';
-import { MobileArView } from './components/MobileArView';
 import { WindTunnelModal } from './components/WindTunnelModal';
 import { Footer } from './components/Footer';
 import { PaywallModal } from './components/PaywallModal';
@@ -95,7 +94,6 @@ export const App: React.FC = () => {
   const [showLicensesModal, setShowLicensesModal] = useState(false);
   const [showArModal, setShowArModal] = useState(false);
   const [showWindTunnelModal, setShowWindTunnelModal] = useState(false);
-  const [autoEngineNotice, setAutoEngineNotice] = useState<{ mode: EngineMode; reason: string } | null>(null);
 
   // Basic / Pro plan (iOS In-App Purchase)
   const entitlements = useEntitlements();
@@ -158,20 +156,6 @@ export const App: React.FC = () => {
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
   const [currentModelMesh, setCurrentModelMesh] = useState<THREE.Object3D | null>(null);
-  const [activeArSessionId, setActiveArSessionId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('ar_session');
-    }
-    return null;
-  });
-  const [activeArTaskId, setActiveArTaskId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('ar_task');
-    }
-    return null;
-  });
 
 
   // 3D Viewport Controls
@@ -183,7 +167,6 @@ export const App: React.FC = () => {
   const [measuredDistance, setMeasuredDistance] = useState<number | null>(null);
   const [measureP1, setMeasureP1] = useState<[number, number, number] | null>(null);
   const [measureP2, setMeasureP2] = useState<[number, number, number] | null>(null);
-  const [explodedOffset, setExplodedOffset] = useState(0);
 
   const activePollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -231,15 +214,10 @@ export const App: React.FC = () => {
     apiClient.setEngineMode(engineMode);
   }, [engineMode]);
 
-  // Dynamic SEO & Title Synchronization
+  // Keep <html lang> in sync for VoiceOver pronunciation.
   useEffect(() => {
     document.documentElement.lang = i18n.language;
-    document.title = `${t('app_title', 'OmniSeam 3D')} | ${t('app_subtitle', 'Universal 3D Model Converter')}`;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', t('tagline'));
-    }
-  }, [i18n.language, t]);
+  }, [i18n.language]);
 
   // AI Smart Adaptive Intent Synthesis
   useEffect(() => {
@@ -322,10 +300,6 @@ export const App: React.FC = () => {
     if (PROPRIETARY_CAD_EXTS.has(ext)) {
       setEngineMode('server');
       apiClient.setEngineMode('server');
-      setAutoEngineNotice({
-        mode: 'server',
-        reason: t('settings.auto_engine_cad_prop_reason', { ext })
-      });
       if (!apiClient.getStoredBackendUrl()) {
         setLockedCadFile(file);
         setShowCadUnlockModal(true);
@@ -334,26 +308,14 @@ export const App: React.FC = () => {
       if (apiClient.getStoredBackendUrl()) {
         setEngineMode('server');
         apiClient.setEngineMode('server');
-        setAutoEngineNotice({
-          mode: 'server',
-          reason: t('settings.auto_engine_cad_std_server_reason', { ext })
-        });
       } else {
         setEngineMode('client');
         apiClient.setEngineMode('client');
-        setAutoEngineNotice({
-          mode: 'client',
-          reason: t('settings.auto_engine_cad_std_client_reason', { ext })
-        });
       }
     } else {
       // Standard Mesh (STL, OBJ, 3MF, PLY, OFF, GLB) -> Pure Client
       setEngineMode('client');
       apiClient.setEngineMode('client');
-      setAutoEngineNotice({
-        mode: 'client',
-        reason: t('settings.auto_engine_mesh_reason', { ext })
-      });
     }
 
     // Public demo node large file guardrail check
@@ -406,7 +368,6 @@ export const App: React.FC = () => {
         setMeasuredDistance(null);
         setMeasureP1(null);
         setMeasureP2(null);
-        setAutoEngineNotice(null);
         setRotation({ x: 0, y: 0, z: 0 });
         setTransformToolActive(false);
         setShowRotationGizmo(false);
@@ -751,22 +712,6 @@ export const App: React.FC = () => {
     : null);
 
 
-  if (activeArSessionId || activeArTaskId) {
-    return (
-      <MobileArView
-        sessionId={activeArSessionId}
-        taskId={activeArTaskId}
-        onExit={() => {
-          setActiveArSessionId(null);
-          setActiveArTaskId(null);
-          if (typeof window !== 'undefined') {
-            window.history.replaceState({}, '', window.location.pathname);
-          }
-        }}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-slate-100 selection:bg-brand-500 selection:text-white">
       {/* Hidden file input for Project actions */}
@@ -828,8 +773,6 @@ export const App: React.FC = () => {
               onChangeSectionOffset={setSectionOffset}
               measureToolActive={measureToolActive}
               onToggleMeasureTool={() => setMeasureToolActive(!measureToolActive)}
-              explodedOffset={explodedOffset}
-              onChangeExplodedOffset={setExplodedOffset}
               onResetCamera={() => {}}
               onOpenArPreview={() => setShowArModal(true)}
               onOpenWindTunnel={() => requirePro('wind_tunnel') && setShowWindTunnelModal(true)}
@@ -937,7 +880,6 @@ export const App: React.FC = () => {
               disabled={!selectedFile && selectedFiles.length === 0}
               isProcessing={isProcessing}
               engineMode={engineMode}
-              autoEngineNotice={autoEngineNotice}
               adaptiveIntent={adaptiveIntent}
               isAutoAdaptiveActive={isAutoAdaptiveActive}
               onResetToAdaptive={handleResetToAdaptive}
@@ -991,12 +933,8 @@ export const App: React.FC = () => {
         isOpen={showArModal}
         onClose={() => setShowArModal(false)}
         modelName={selectedFile?.name}
-        currentModelMesh={currentModelMesh}
-        modelFile={selectedFile}
-        previewUrl={repairedPreviewUrl}
-        activeTaskId={activeTask?.task_id}
         onLaunchDirectAr={handleLaunchDirectAr}
-        isMobileDevice={ArManager.getArPlatform() !== 'desktop'}
+        isArSupported={ArManager.getArPlatform() !== 'desktop'}
       />
 
       {/* Wind Tunnel Fluid Domain Modal */}
@@ -1014,7 +952,7 @@ export const App: React.FC = () => {
       <BackendSettingsModal
         isOpen={showBackendModal}
         onClose={() => setShowBackendModal(false)}
-        onBackendConnected={(url) => {
+        onBackendConnected={() => {
           setEngineMode('server');
           apiClient.setEngineMode('server');
         }}

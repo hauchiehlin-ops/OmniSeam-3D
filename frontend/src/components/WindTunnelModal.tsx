@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IS_NATIVE, saveOrShareUrl } from '../platform/native';
+import { saveOrShareUrl } from '../platform/native';
 import { 
   Wind, 
-  Box, 
   Settings2, 
   Download, 
   Eye, 
@@ -296,20 +295,16 @@ export const WindTunnelModal: React.FC<WindTunnelModalProps> = ({
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 pt-1">
-                <a
-                  href={result.download_url}
-                  download={result.filename}
-                  onClick={(e) => {
-                    if (IS_NATIVE && result.download_url) {
-                      e.preventDefault();
-                      saveOrShareUrl(result.download_url, result.filename).catch((err) => console.error('Save failed:', err));
-                    }
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveOrShareUrl(result.download_url, result.filename).catch((err) => console.error('Save failed:', err));
                   }}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition-all shadow-md active:scale-95"
                 >
                   <Download className="w-4 h-4" />
                   <span>{t('wind_tunnel.download_btn', '下載流體域檔案')}</span>
-                </a>
+                </button>
 
                 {result.preview_url && onLoadPreviewUrl && (
                   <button

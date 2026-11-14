@@ -2,7 +2,7 @@
 Operational hardening shared by both entry points (app.py on Hugging Face,
 backend/app/main.py under Docker/uvicorn):
 
-* explicit CORS allow-list (web app, iOS app, local dev)
+* explicit CORS allow-list (iOS/Android app WebView, local dev)
 * per-IP rate limiting for upload endpoints
 * background sweeper deleting uploads/results older than FILE_TTL_MINUTES
 * soft per-task timeout (stuck tasks are reported as failed)
@@ -28,7 +28,6 @@ RATE_LIMITED_PREFIXES = (
     f"{settings.API_V1_STR}/convert",
     f"{settings.API_V1_STR}/inspect",
     f"{settings.API_V1_STR}/wind-tunnel",
-    f"{settings.API_V1_STR}/ar/session",
 )
 
 _hits: Dict[str, Deque[float]] = defaultdict(deque)
@@ -60,13 +59,11 @@ def is_rate_limited(ip: str, now: float | None = None) -> bool:
         return False
 
 
-def _remove_older_than(root: Path, max_age_seconds: float, now: float, skip: set[str] = frozenset()) -> int:
+def _remove_older_than(root: Path, max_age_seconds: float, now: float) -> int:
     removed = 0
     if not root.exists():
         return removed
     for item in root.iterdir():
-        if item.name in skip:
-            continue
         try:
             if now - item.stat().st_mtime > max_age_seconds:
                 if item.is_dir():
@@ -74,9 +71,7 @@ def _remove_older_than(root: Path, max_age_seconds: float, now: float, skip: set
                 else:
                     item.unlink(missing_ok=True)
                 removed += 1
-        except FileNotFoundError:
-            continue
-        except Exception:
+        except Exception:  # vanished or unreadable: skip
             continue
     return removed
 
@@ -88,14 +83,7 @@ def sweep_expired_files(now: float | None = None) -> int:
     now = time.time() if now is None else now
     ttl = settings.FILE_TTL_MINUTES * 60
     removed = _remove_older_than(Path(settings.UPLOAD_DIR), ttl, now)
-    # AR sessions keep their own (documented) 2-hour TTL, handled in api/v1/ar.py.
-    removed += _remove_older_than(Path(settings.PROCESSED_DIR), ttl, now, skip={"ar_sessions"})
-    try:
-        from backend.app.api.v1.ar import cleanup_expired_sessions
-
-        cleanup_expired_sessions()
-    except Exception:
-        pass
+    removed += _remove_older_than(Path(settings.PROCESSED_DIR), ttl, now)
     # Drop in-memory task records whose files are gone.
     for task_id in list(file_manager._tasks.keys()):
         if not file_manager.get_task_dir(task_id).exists():

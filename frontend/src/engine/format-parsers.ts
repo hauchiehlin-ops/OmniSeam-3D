@@ -136,7 +136,6 @@ export class FormatParsers {
 
     let vertexCount = 0;
     let faceCount = 0;
-    let headerEndOffset = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -145,7 +144,6 @@ export class FormatParsers {
       } else if (line.startsWith('element face')) {
         faceCount = parseInt(line.split(/\s+/)[2], 10);
       } else if (line === 'end_header') {
-        headerEndOffset = new TextEncoder().encode(lines.slice(0, i + 1).join('\n') + '\n').length;
         break;
       }
     }

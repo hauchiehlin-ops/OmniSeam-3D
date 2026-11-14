@@ -4,7 +4,6 @@ import {
   Zap, 
   Cloud, 
   FileCode, 
-  CheckCircle, 
   ArrowRight,
   X
 } from 'lucide-react';

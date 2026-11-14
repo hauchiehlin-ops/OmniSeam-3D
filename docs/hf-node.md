@@ -10,8 +10,9 @@ All cloud processing runs on Hugging Face **free CPU Basic** Spaces (2 vCPU · 1
 | User nodes | `https://<user>-<space>.hf.space` | Created by users via "Duplicate this Space" |
 
 The public node URL, duplicate link and minimum node version are served by
-`frontend/public/config.json` (deployed with the web app). The iOS app reads
-`https://omniseam-3d.vercel.app/config.json`, so they can change without an app update.
+`site/config.json`, published to GitHub Pages by `.github/workflows/pages.yml`.
+The app reads `https://hauchiehlin-ops.github.io/OmniSeam-3D/config.json`, so they
+can change without an app update.
 
 ## Hardening (backend/app/hardening.py)
 | Env var | Default | Meaning |
@@ -20,9 +21,9 @@ The public node URL, duplicate link and minimum node version are served by
 | `TASK_TIMEOUT_SECONDS` | 300 | Tasks running longer are reported as failed |
 | `RATE_LIMIT_PER_MINUTE` | 20 | Per-IP limit on upload endpoints (0 = off) |
 | `EXTRA_ALLOWED_ORIGINS` | – | Extra CORS origins, comma-separated |
-| `CORS_ORIGIN_REGEX` | Vercel previews | Regex of allowed origins |
+| `CORS_ORIGIN_REGEX` | empty (off) | Optional regex of extra allowed origins |
 
-CORS always allows `https://omniseam-3d.vercel.app` (web) and `capacitor://localhost` (iOS app).
+CORS always allows the app WebView origins (`capacitor://localhost` on iOS, `https://localhost` on Android) and the Vite dev server (`http://localhost:5173`). There is no hosted web app.
 
 ## Deploying to the Space
 Automatic: `.github/workflows/deploy-hf.yml` runs on every push to `main` that touches the backend

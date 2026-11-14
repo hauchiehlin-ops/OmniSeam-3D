@@ -11,7 +11,7 @@ license: mit
 
 # OmniSeam 3D — Engine Node
 
-Processing node for the [OmniSeam 3D](https://omniseam-3d.vercel.app) web app and iOS app.
+Processing node for the [OmniSeam 3D](https://hauchiehlin-ops.github.io/OmniSeam-3D/) iPhone & iPad app.
 
 1. Click **⋮ → Duplicate this Space** and keep **CPU Basic · Free** hardware.
 2. When the Space shows **Running**, copy its direct URL (`https://<user>-<space>.hf.space`).
